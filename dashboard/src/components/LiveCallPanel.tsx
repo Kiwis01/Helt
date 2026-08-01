@@ -39,17 +39,17 @@ import { formatSd, formatTime, labelOutcome } from '@/lib/format';
 
 /** Solo para el `title` y el lector de pantalla: en pantalla lo dice el punto. */
 const CONNECTION_LABEL: Record<ConnectionStatus, string> = {
-  disabled: 'modo respaldo · stream desactivado',
-  connecting: 'conectando con loop-voice',
-  open: 'stream conectado',
-  retrying: 'esperando a loop-voice',
+  disabled: 'fallback mode · stream disabled',
+  connecting: 'connecting to loop-voice',
+  open: 'stream connected',
+  retrying: 'waiting for loop-voice',
 };
 
 /** `EscalationAction` del contrato → la instrucción, en tres palabras. */
 const ACTION_LABEL: Record<string, string> = {
-  'advise-911': 'Llamar al 911 ahora',
-  'advise-988': 'Llamar al 988',
-  'connect-human': 'Conectar con un clínico',
+  'advise-911': 'Call 911 now',
+  'advise-988': 'Call 988 now',
+  'connect-human': 'Connect to a clinician',
 };
 
 /* ------------------------------------------------------------------ */
@@ -72,7 +72,7 @@ function EscalationBarrier({ rule, action, at }: { rule: string; action: string;
       <div className="flex items-center gap-2">
         <span aria-hidden className="dot dot-alert" />
         <span className="label" style={{ color: 'var(--danger)' }}>
-          Regla determinista
+          Deterministic rule
         </span>
         <span className="label ml-auto">{formatTime(at)}</span>
       </div>
@@ -191,7 +191,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
 
   return (
     <Card
-      title="Llamada en vivo"
+      title="Live call"
       index={2}
       // Reparto de alto de la columna derecha. La columna mide 564px a 1280x720
       // y las dos tarjetas juntas piden más, así que quién cede está decidido
@@ -214,9 +214,9 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
         replay ? (
           <>
             {/* Una llamada de ejemplo no se puede confundir nunca con una real. */}
-            <span className="pill pill-warn">Reproducción</span>
+            <span className="pill pill-warn">Replay</span>
             <button type="button" onClick={stopReplay} className="ghostbtn px-2.5 py-1.5">
-              Detener
+              Stop
             </button>
           </>
         ) : (
@@ -272,7 +272,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
           ) : (
             <>
               <div className="min-w-0 flex-1">
-                <p className="label">Frecuencia cardiaca</p>
+                <p className="label">Heart rate</p>
                 <p className="hero mt-1.5" style={{ color: heartTone }}>
                   {Math.round(vitals.heartRate)}
                   <small>{baseline.heartRate.unit}</small>
@@ -282,7 +282,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
                     {trendMark(vitals.heartRate, state.previousBiometrics?.heartRate)}
                   </span>
                   <span style={{ color: heartTone }}>{formatSd(heartSd)}</span>
-                  <span>basal {Math.round(baseline.heartRate.mean)}</span>
+                  <span>baseline {Math.round(baseline.heartRate.mean)}</span>
                 </p>
               </div>
 
@@ -308,7 +308,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
         className={`flex-1 space-y-2 overflow-y-auto ${escalated ? 'min-h-0' : 'min-h-[3.5rem]'}`}
       >
         {state.turns.length === 0 ? (
-          <EmptyState>{hasCall ? 'Llamada abierta, sin turnos' : 'Sin llamada activa'}</EmptyState>
+          <EmptyState>{hasCall ? 'Call open, no turns yet' : 'No active call'}</EmptyState>
         ) : (
           state.turns.map((turn, index) => {
             const key = `${turn.at}-${index}`;
@@ -336,7 +336,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
                   }`}
                   style={isAgent ? undefined : { color: 'var(--accent)' }}
                 >
-                  <span className="sr-only">{isAgent ? 'Loop: ' : 'Paciente: '}</span>
+                  <span className="sr-only">{isAgent ? 'Loop: ' : 'Patient: '}</span>
                   {turn.text}
                 </p>
               </div>
@@ -350,7 +350,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
       {showFoot ? (
         <div className={`flex shrink-0 items-baseline gap-2 ${FOOT}`}>
           {/* Durante un replay el estado del stream no viene a cuento: lo que
-              está pasando en pantalla no sale de él, y decir "esperando a
+              está pasando en pantalla no sale de él, y decir "waiting for
               loop-voice" mientras corre una llamada se contradice solo. */}
           <span className="truncate">
             {state.ended
@@ -361,7 +361,7 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
           </span>
           <span className="ml-auto shrink-0 truncate">
             {state.callId ?? config.voiceUrl.replace(/^https?:\/\//, '')}
-            {state.dropped > 0 ? ` · ${state.dropped} descartados` : ''}
+            {state.dropped > 0 ? ` · ${state.dropped} dropped` : ''}
           </span>
         </div>
       ) : null}

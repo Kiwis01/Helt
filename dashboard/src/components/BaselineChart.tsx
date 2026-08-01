@@ -37,6 +37,7 @@ import {
 import type { EpisodeListItem } from '@loop/shared/contracts';
 
 import { Card, EmptyState } from '@/components/Card';
+import { SegmentedControl } from '@/components/nav/SegmentedControl';
 import { DATA, FLOATING_SURFACE, STAT } from '@/components/tokens';
 import {
   formatDateShort,
@@ -195,8 +196,8 @@ function BaselineTooltip({ marks, series, metric, active, label, payload }: Base
             <span className="text-2xs text-ink-2">{labelOutcome(mark.episode.outcome)}</span>
           </p>
           <p className="mt-1 text-2xs text-ink-3">
-            pico {mark.episode.peakHeartRate} bpm
-            {mark.episode.minHrv !== null ? ` · HRV mín. ${mark.episode.minHrv} ms` : ''}
+            peak {mark.episode.peakHeartRate} bpm
+            {mark.episode.minHrv !== null ? ` · low HRV ${mark.episode.minHrv} ms` : ''}
           </p>
           {mark.episode.interventions.length > 0 ? (
             <p className="mt-0.5 text-2xs text-ink-3">
@@ -204,7 +205,7 @@ function BaselineTooltip({ marks, series, metric, active, label, payload }: Base
             </p>
           ) : null}
           {mark.episode.escalation.triggered ? (
-            <span className="pill pill-danger mt-2">escalado</span>
+            <span className="pill pill-danger mt-2">escalated</span>
           ) : null}
         </div>
       ) : null}
@@ -292,22 +293,27 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
   return (
     <Card
       title="Baseline"
-      subtitle="30 días"
+      subtitle="30 days"
       index={2}
       bodyClassName="flex min-h-0 gap-4 px-5 pb-4"
-      actions={BASELINE_METRICS.map((key) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => setMetric(key)}
-          aria-pressed={key === metric}
-          title={labelMetric(key)}
-          data-on={key === metric}
-          className="ghostbtn px-2.5 py-1"
-        >
-          {METRIC_SHORT[key] ?? key}
-        </button>
-      ))}
+      /* Mismo control segmentado que la barra de navegación: elegir una de
+         tres métricas es el mismo gesto que elegir uno de dos mundos, y darle
+         el mismo objeto es lo que hace que la interfaz se sienta de una pieza.
+         Antes eran tres botones fantasma sueltos y había que leer los tres
+         para saber cuál estaba activo. */
+      actions={
+        <SegmentedControl
+          dense
+          ariaLabel="Metric"
+          activeKey={metric}
+          onChange={(key) => setMetric(key as BaselineMetricKey)}
+          items={BASELINE_METRICS.map((key) => ({
+            key,
+            label: METRIC_SHORT[key] ?? key,
+            title: labelMetric(key),
+          }))}
+        />
+      }
     >
       {/* --- rail del número héroe ---
 
@@ -316,10 +322,10 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
           encima del gráfico. Así el héroe es siempre solo la cifra, mida lo que
           mida la unidad, y de paso la unidad deja de escribirse dos veces. */}
       <div className="flex w-[146px] shrink-0 flex-col">
-        {/* "media" y no "baseline": la tarjeta ya se llama Baseline y repetirlo
+        {/* "mean" y no "baseline": la tarjeta ya se llama Baseline y repetirlo
             aquí era decir dos veces lo mismo a dos tamaños distintos. Además es
             más exacto — lo que se pinta es `baseline.mean`. */}
-        <p className="label leading-none">media</p>
+        <p className="label leading-none">mean</p>
         <p className="hero mt-2">{active.baseline.mean.toFixed(digits)}</p>
         <p className="mt-2 text-2xs leading-tight text-ink-3">
           {active.unit} · ± {active.baseline.sd.toFixed(digits)}
@@ -333,7 +339,7 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
             dicen las marcas del gráfico y la cabecera del paciente. */}
         <div className="tile mt-auto flex shrink-0 flex-col px-3 py-2.5">
           <p className="label leading-none">
-            {metric === 'hrv' ? 'mínimo' : 'pico'} del periodo
+            period {metric === 'hrv' ? 'low' : 'peak'}
           </p>
           <p className={`mt-2 ${STAT} text-ink`}>
             {extreme === null ? '—' : extreme.v.toFixed(digits)}
@@ -347,7 +353,7 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
       {/* --- serie --- */}
       {active.points.length === 0 ? (
         <div className="min-h-0 min-w-0 flex-1">
-          <EmptyState>Sin observaciones en esta ventana</EmptyState>
+          <EmptyState>No observations in this window</EmptyState>
         </div>
       ) : (
         <div
@@ -355,7 +361,7 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
           /* La telemetría del submuestreo no es información clínica, pero
              ocultarla del todo sería mentir sobre lo que se está dibujando:
              vive en el title nativo, a un hover de distancia. */
-          title={`${active.sourcePoints.toLocaleString('es-ES')} observaciones · ${active.points.length} dibujadas (min/máx por tramo)`}
+          title={`${active.sourcePoints.toLocaleString('en-US')} observations · ${active.points.length} drawn (min/max per bucket)`}
         >
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={active.points} margin={{ top: 10, right: 6, bottom: 0, left: 0 }}>

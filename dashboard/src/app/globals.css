@@ -68,8 +68,16 @@
   --chart-band: rgba(127, 196, 238, 0.1);
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* La curva de las transiciones de iOS: sale rápido y frena largo. Es lo que
+     hace que un indicador que se desliza se sienta con masa en vez de
+     interpolado. Se reserva para movimiento espacial (el pastilla del control
+     segmentado); `--ease` sigue valiendo para opacidad y color. */
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
   --radius: 24px;
   --radius-sm: 16px;
+  /* Alto de la barra de navegación, en una variable porque la usan el chrome
+     y el cálculo de alto de las rejillas de cada vista. */
+  --nav-h: 52px;
 }
 
 @layer base {
@@ -357,6 +365,119 @@
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: var(--radius-sm);
+  }
+
+  /* ---------------- control segmentado (iOS) ----------------
+
+     Un solo riel con una pastilla que se desliza, no N botones sueltos. La
+     diferencia no es estética: con botones independientes el usuario ve N
+     controles y tiene que leerlos todos para saber cuál está activo; con un
+     riel ve UN control con una posición, y la pastilla en movimiento le dice
+     de dónde viene y a dónde va.
+
+     Columnas de igual ancho a propósito —como UISegmentedControl—: permite
+     que el indicador se posicione con un `translateX` de porcentaje entero,
+     sin medir el DOM, y por tanto sin parpadeo en el primer pintado ni
+     recálculo al redimensionar. */
+  .seg {
+    position: relative;
+    display: grid;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--hair);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+  }
+
+  .seg-indicator {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.11);
+    box-shadow: var(--spec), 0 2px 10px rgba(0, 0, 0, 0.35);
+    transition: transform 0.42s var(--spring);
+    pointer-events: none;
+  }
+
+  .seg-item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: color 0.25s var(--ease);
+  }
+
+  .seg-item:hover {
+    color: var(--ink-2);
+  }
+
+  .seg-item[data-on='true'] {
+    color: var(--ink);
+  }
+
+  /* ---------------- retroceso tipo iOS ----------------
+
+     Chevron + NOMBRE de la vista anterior, sin caja. Apple no rotula el
+     retroceso como "Atrás": rotula a dónde va, porque eso es lo que el
+     usuario necesita saber antes de pulsar. Va en color de acento —es la
+     única excepción a la regla de "nada de texto de color": aquí el color no
+     decora, señala que es lo único pulsable del renglón. */
+  .backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: -6px;
+    padding: 4px 6px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    transition: opacity 0.2s var(--ease), transform 0.25s var(--spring),
+      background 0.2s var(--ease);
+  }
+
+  .backlink:hover {
+    background: var(--accent-soft);
+  }
+
+  .backlink:active {
+    transform: scale(0.96);
+  }
+
+  .backlink svg {
+    /* Ópticamente el chevron pesa menos que la mayúscula que le sigue; -1px lo
+       asienta sobre la línea base del texto. */
+    margin-top: -1px;
+  }
+
+  /* Tecla de atajo dibujada como tecla física. Solo decorativa: el atajo lo
+     gestiona el manejador de teclado, esto únicamente lo anuncia. */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 5px;
+    border: 1px solid var(--hair);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink-3);
   }
 
   /* Punto de latido para estados vivos. */

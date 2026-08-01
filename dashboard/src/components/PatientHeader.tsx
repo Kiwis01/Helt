@@ -7,10 +7,10 @@ import { EMPTY, formatDate, formatRelativeDays } from '@/lib/format';
 
 /** El contrato deja `gender` como string libre; aquí solo se traduce. */
 const GENDER_LABELS: Record<string, string> = {
-  female: 'Mujer',
-  male: 'Hombre',
-  other: 'Otro',
-  unknown: 'No registrado',
+  female: 'Female',
+  male: 'Male',
+  other: 'Other',
+  unknown: 'Not recorded',
 };
 
 /**
@@ -45,7 +45,7 @@ function initialsOf(name: string): string {
  * `title`: siguen ahí para quien los busque, sin ocupar píxeles.
  *
  * Server Component a propósito: no tiene interacción, y así el texto relativo
- * ("ayer") se congela en el HTML y no se desincroniza al hidratar.
+ * ("yesterday") se congela en el HTML y no se desincroniza al hidratar.
  */
 export function PatientHeader({ summary }: { summary: PatientSummary }) {
   const now = Date.now();
@@ -60,7 +60,7 @@ export function PatientHeader({ summary }: { summary: PatientSummary }) {
   // Un episodio de hoy o de ayer sigue "caliente" para el clínico: se merece
   // el punto de alerta. Se compara contra la salida del propio formateador en
   // vez de repetir aquí la aritmética de días UTC que ya vive en lib/format.
-  const episodeIsRecent = lastEpisode === 'hoy' || lastEpisode === 'ayer';
+  const episodeIsRecent = lastEpisode === 'today' || lastEpisode === 'yesterday';
 
   return (
     <header
@@ -85,7 +85,7 @@ export function PatientHeader({ summary }: { summary: PatientSummary }) {
             {summary.displayName}
           </h1>
           <p className="mt-1.5 truncate text-2xs text-ink-3">
-            {summary.age} años · {GENDER_LABELS[summary.gender ?? ''] ?? summary.gender ?? EMPTY}
+            {summary.age} y.o. · {GENDER_LABELS[summary.gender ?? ''] ?? summary.gender ?? EMPTY}
           </p>
         </div>
       </div>
@@ -96,7 +96,7 @@ export function PatientHeader({ summary }: { summary: PatientSummary }) {
       <div className="min-w-0 flex-1 border-l border-hair pl-4">
         <p
           className={`${DATA} truncate font-semibold text-ink`}
-          title={condition ? `Desde ${formatDate(condition.onsetDate)}` : undefined}
+          title={condition ? `Since ${formatDate(condition.onsetDate)}` : undefined}
         >
           {condition?.display ?? EMPTY}
         </p>
@@ -104,7 +104,7 @@ export function PatientHeader({ summary }: { summary: PatientSummary }) {
           className="mt-1.5 truncate text-2xs text-ink-3"
           title={medication ? `RxNorm ${medication.rxnorm}` : undefined}
         >
-          {medication?.display ?? 'Sin medicación activa'}
+          {medication?.display ?? 'No active medications'}
         </p>
       </div>
 
@@ -114,21 +114,21 @@ export function PatientHeader({ summary }: { summary: PatientSummary }) {
       <div className="ml-auto flex shrink-0 items-center gap-4">
         <p
           className="truncate text-2xs text-ink-3"
-          title={`Care plan actualizado ${formatDate(summary.carePlanLastUpdated)}`}
+          title={`Care plan updated ${formatDate(summary.carePlanLastUpdated)}`}
         >
           Plan · {summary.carePlanAuthor}
         </p>
 
         <div className="tile flex items-center gap-4 px-4 py-2">
           <div>
-            <p className="label leading-none">Episodios · 30 días</p>
+            <p className="label leading-none">Episodes · 30 days</p>
             <p className={`mt-1.5 ${DATA} font-semibold text-ink`}>{summary.episodeCount}</p>
           </div>
 
           <span aria-hidden className="h-8 w-px shrink-0 bg-hair" />
 
           <div>
-            <p className="label leading-none">Último</p>
+            <p className="label leading-none">Last</p>
             <div className="mt-1.5 flex items-center gap-1.5">
               {episodeIsRecent ? <span aria-hidden className="dot dot-alert" /> : null}
               <span

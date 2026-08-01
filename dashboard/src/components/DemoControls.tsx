@@ -16,8 +16,8 @@ interface Feedback {
 }
 
 const SPIKES: readonly { id: DemoProfile; label: string }[] = [
-  { id: 'panic', label: 'Pánico' },
-  { id: 'cardiac-redflag', label: 'Red-flag cardiaca' },
+  { id: 'panic', label: 'Panic' },
+  { id: 'cardiac-redflag', label: 'Cardiac red-flag' },
 ];
 
 /** El mensaje se va solo: un aviso pegado en pantalla ensucia el siguiente plano. */
@@ -107,7 +107,7 @@ export function DemoControls() {
         data-on={pending === 'reset'}
         className="ghostbtn"
       >
-        Reiniciar
+        Reset
       </button>
 
       {/* Posición absoluta: el aviso no debe empujar la barra superior ni

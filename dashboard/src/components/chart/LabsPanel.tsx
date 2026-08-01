@@ -21,10 +21,14 @@ export function LabsPanel({ metrics, index }: { metrics: readonly ChartMetric[];
   const withData = metrics.filter((m) => m.latest !== null);
 
   return (
-    <Card title="Laboratorios y signos vitales" subtitle={`${withData.length} magnitudes`} index={index}>
+    <Card
+      title="Labs & vitals"
+      subtitle={`${withData.length} measure${withData.length === 1 ? '' : 's'}`}
+      index={index}
+    >
       {withData.length === 0 ? (
         <MissingData>
-          Medplum no tiene ninguna Observation para este paciente.
+          Medplum has no Observation for this patient.
         </MissingData>
       ) : (
         <ul className="flex flex-col divide-y divide-[var(--hair)]">
@@ -79,15 +83,21 @@ function MetricRow({ metric }: { metric: ChartMetric }) {
 
 function describeRange(metric: ChartMetric): string {
   const range = metric.referenceRange;
-  if (!range) return `${metric.points.length} registros · sin rango de referencia`;
+  // Concordancia de plural: en español "1 registros" pasaba desapercibido, en
+  // ingles "1 readings" no.
+  const n = metric.points.length;
+  if (!range) return `${n} reading${n === 1 ? '' : 's'} · no reference range`;
 
-  const unit = metric.unit ? ` ${metric.unit}` : '';
+  // El español escribe "7 %" con espacio; el ingles escribe "7%" pegado. El
+  // resto de unidades (mmHg, /min) si lo llevan. Misma convencion que ya usan
+  // los `source` de reference-ranges.ts.
+  const unit = metric.unit ? (metric.unit === '%' ? metric.unit : ` ${metric.unit}`) : '';
   if (range.high !== null && range.low !== null) {
-    return `Referencia ${range.low}–${range.high}${unit}`;
+    return `Reference ${range.low}–${range.high}${unit}`;
   }
-  if (range.high !== null) return `Referencia <${range.high}${unit}`;
-  if (range.low !== null) return `Referencia ≥${range.low}${unit}`;
-  return 'Sin rango de referencia';
+  if (range.high !== null) return `Reference <${range.high}${unit}`;
+  if (range.low !== null) return `Reference ≥${range.low}${unit}`;
+  return 'No reference range';
 }
 
 /* ================================================================== */
@@ -114,7 +124,7 @@ function Sparkline({
 }) {
   if (points.length < 2) {
     return (
-      <span className="w-24 shrink-0 text-center text-2xs text-ink-3" title="Un solo registro">
+      <span className="w-24 shrink-0 text-center text-2xs text-ink-3" title="Only one reading">
         —
       </span>
     );

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 
 import { Avatar, FlagRow } from '@/components/chart/primitives';
 import { describeGender, formatAge, formatDateTime, formatRelativeDays } from '@/lib/chart/format';
@@ -32,23 +31,19 @@ export function PatientBanner({
 }) {
   return (
     <header className="glass sticky top-0 z-20 flex flex-col gap-3 rounded-card px-5 py-4">
+      {/* El retroceso vivía aquí como botón enmarcado. Se movió fuera del
+          banner, encima, como `BackLink`: dos afordances de volver en la misma
+          pantalla obligan al usuario a decidir cuál usar, y la decisión no
+          tiene respuesta porque hacen lo mismo. Se queda la de fuera porque
+          pertenece a la navegación, no a la identidad del paciente. */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-        <Link
-          href="/"
-          className="ghostbtn shrink-0"
-          aria-label="Volver a la agenda"
-          title="Volver a la agenda"
-        >
-          ← Agenda
-        </Link>
-
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={patient.displayName} />
           <div className="min-w-0">
             <h1 className="truncate text-xl font-semibold leading-tight">{patient.displayName}</h1>
             <p className="truncate text-2xs text-ink-3">
               {formatAge(patient.age)} · {describeGender(patient.gender)}
-              {patient.birthDate ? ` · nac. ${patient.birthDate}` : ''}
+              {patient.birthDate ? ` · DOB ${patient.birthDate}` : ''}
               {patient.mrn ? ` · ${patient.mrn}` : ''}
             </p>
           </div>
@@ -56,21 +51,21 @@ export function PatientBanner({
 
         {/* Alergias: el dato que se consulta antes de recetar. */}
         <div className="min-w-0">
-          <p className="label">Alergias</p>
+          <p className="label">Allergies</p>
           {allergyLabels.length > 0 ? (
             <p className="truncate text-xs font-semibold text-danger">
               {allergyLabels.join(' · ')}
             </p>
           ) : (
-            // "Sin registrar" NO es "sin alergias conocidas", y la diferencia
+            // "Not recorded" NO es "sin alergias conocidas", y la diferencia
             // importa justo en el momento de recetar. Se dice tal cual.
-            <p className="truncate text-xs text-warn">Sin registrar</p>
+            <p className="truncate text-xs text-warn">Not recorded</p>
           )}
         </div>
 
         {appointment ? (
           <div className="ml-auto shrink-0 text-right">
-            <p className="label">Próxima cita</p>
+            <p className="label">Next appointment</p>
             <p className="text-xs font-semibold text-ink-2">
               {formatDateTime(appointment.start)}
               <span className="ml-1.5 font-normal text-ink-3">

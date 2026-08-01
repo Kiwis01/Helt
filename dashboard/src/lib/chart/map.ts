@@ -139,7 +139,7 @@ export function mapPatient(resource: Patient, now: Date): ChartPatient {
     id: resource.id ?? '',
     // Un Patient sin nombre existe de verdad en este proyecto. Se etiqueta como
     // lo que es en vez de dejar la fila en blanco.
-    displayName: humanName(resource.name) ?? 'Paciente sin nombre',
+    displayName: humanName(resource.name) ?? 'Unnamed patient',
     age: ageFromBirthDate(resource.birthDate, now),
     birthDate: resource.birthDate ?? null,
     gender:
@@ -174,7 +174,7 @@ export function mapCondition(resource: Condition): ChartCondition {
 
   return {
     id: resource.id ?? '',
-    display: conceptText(resource.code, 'Diagnóstico sin descripción'),
+    display: conceptText(resource.code, 'Unnamed diagnosis'),
     code: icd10 ?? anyCoding?.code ?? null,
     codeSystem: icd10 ? 'ICD-10-CM' : (anyCoding?.system ?? null),
     onsetDate: resource.onsetDateTime ?? resource.onsetPeriod?.start ?? null,
@@ -201,7 +201,7 @@ export function mapAllergy(resource: AllergyIntolerance): ChartAllergy {
 
   return {
     id: resource.id ?? '',
-    display: conceptText(resource.code, 'Alérgeno sin descripción'),
+    display: conceptText(resource.code, 'Unnamed allergen'),
     code: codeFromSystem(resource.code, 'rxnorm') ?? firstCoding(resource.code)?.code ?? null,
     reactions,
     criticality:
@@ -233,7 +233,8 @@ const MEDICATION_STATUSES = new Set<MedicationStatus>([
 ]);
 
 /** Detecta una pauta a demanda por el texto, cuando falta `asNeededBoolean`. */
-const AS_NEEDED_PATTERN = /\b(solo si|si hay|a demanda|rescate|prn|as needed|en caso de)\b/i;
+const AS_NEEDED_PATTERN =
+  /\b(solo si|si hay|a demanda|rescate|prn|as needed|en caso de|only if|if needed|rescue)\b/i;
 
 export function mapMedication(resource: MedicationRequest): ChartMedication {
   const concept = resource.medicationCodeableConcept;
@@ -243,7 +244,7 @@ export function mapMedication(resource: MedicationRequest): ChartMedication {
 
   return {
     id: resource.id ?? '',
-    display: conceptText(concept, referenceName(resource.medicationReference) ?? 'Medicamento'),
+    display: conceptText(concept, referenceName(resource.medicationReference) ?? 'Medication'),
     rxnorm: codeFromSystem(concept, 'rxnorm'),
     rxnormDisplay: displayFromSystem(concept, 'rxnorm'),
     status:
@@ -252,7 +253,7 @@ export function mapMedication(resource: MedicationRequest): ChartMedication {
         : 'unknown',
     dosage,
     authoredOn: resource.authoredOn ?? null,
-    // `null` en TODO el dataset real. La UI lo muestra como "sin prescriptor"
+    // `null` en TODO el dataset real. La UI lo muestra como "no prescriber"
     // porque una receta sin firma es un hallazgo, no un campo vacío cualquiera.
     prescriber: referenceName(resource.requester),
     statusReason: resource.statusReason ? conceptText(resource.statusReason, '') || null : null,
@@ -296,7 +297,7 @@ function flattenObservation(resource: Observation): RawPoint[] {
     const loinc = codeFromSystem(resource.code, 'loinc');
     points.push({
       loinc,
-      label: labelFor(loinc, conceptText(resource.code, 'Resultado')),
+      label: labelFor(loinc, conceptText(resource.code, 'Result')),
       unit: resource.valueQuantity?.unit ?? '',
       at,
       value: rootValue,
@@ -312,7 +313,7 @@ function flattenObservation(resource: Observation): RawPoint[] {
       loinc,
       // Los componentes de un panel suelen venir SIN display: la etiqueta sale
       // de la tabla local por código LOINC, no del recurso.
-      label: labelFor(loinc, conceptText(component.code, 'Componente')),
+      label: labelFor(loinc, conceptText(component.code, 'Component')),
       unit: component.valueQuantity?.unit ?? '',
       at,
       value,
@@ -399,7 +400,7 @@ export function mapNote(resource: DocumentReference): ChartNote {
 
   return {
     id: resource.id ?? '',
-    title: resource.description?.trim() || conceptText(resource.type, 'Documento'),
+    title: resource.description?.trim() || conceptText(resource.type, 'Document'),
     category: conceptText(resource.type, '') || null,
     date: resource.date ?? null,
     author: resource.author?.map((a) => referenceName(a)).find(Boolean) ?? null,
@@ -413,7 +414,7 @@ export function mapNote(resource: DocumentReference): ChartNote {
 export function mapOrder(resource: ServiceRequest): ChartOrder {
   return {
     id: resource.id ?? '',
-    display: conceptText(resource.code, 'Orden sin descripción'),
+    display: conceptText(resource.code, 'Unnamed order'),
     code: firstCoding(resource.code)?.code ?? null,
     category: resource.category?.[0] ? conceptText(resource.category[0], '') || null : null,
     status: resource.status ?? null,

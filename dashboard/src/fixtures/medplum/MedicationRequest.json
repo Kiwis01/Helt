@@ -11,7 +11,7 @@
           "display": "metformin hydrochloride 500 MG"
         }
       ],
-      "text": "Metformina 500 mg"
+      "text": "Metformin 500 mg"
     },
     "subject": {
       "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
@@ -19,7 +19,7 @@
     "authoredOn": "2026-07-28",
     "dosageInstruction": [
       {
-        "text": "1 tableta con el desayuno y 1 tableta con la cena — dosis aumentada de 1x/día el 28-jul-2026",
+        "text": "1 tablet with breakfast and 1 with dinner — dose increased from 1x/day on Jul 28, 2026",
         "timing": {
           "repeat": {
             "frequency": 2,
@@ -67,7 +67,7 @@
     "authoredOn": "2026-07-09",
     "dosageInstruction": [
       {
-        "text": "1 tableta diaria en la mañana",
+        "text": "1 tablet daily in the morning",
         "timing": {
           "repeat": {
             "frequency": 1,
@@ -106,7 +106,7 @@
           "display": "losartan 50 MG"
         }
       ],
-      "text": "Losartán 50 mg"
+      "text": "Losartan 50 mg"
     },
     "subject": {
       "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
@@ -114,7 +114,7 @@
     "authoredOn": "2026-07-25",
     "dosageInstruction": [
       {
-        "text": "1 tableta en la mañana y 1 en la noche — dosis dividida desde el 25-jul-2026",
+        "text": "1 tablet morning and 1 at night — dose split since Jul 25, 2026",
         "timing": {
           "repeat": {
             "frequency": 2,
@@ -154,7 +154,7 @@
           "display": "atorvastatin 20 MG"
         }
       ],
-      "text": "Atorvastatina 20 mg"
+      "text": "Atorvastatin 20 mg"
     },
     "subject": {
       "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
@@ -162,7 +162,7 @@
     "authoredOn": "2026-06-24",
     "dosageInstruction": [
       {
-        "text": "1 tableta en la noche",
+        "text": "1 tablet at night",
         "timing": {
           "repeat": {
             "frequency": 1,
@@ -201,7 +201,7 @@
           "display": "budesonide / formoterol inhaler"
         }
       ],
-      "text": "Budesonida/Formoterol inhalador"
+      "text": "Budesonide/Formoterol inhaler"
     },
     "subject": {
       "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
@@ -209,7 +209,7 @@
     "authoredOn": "2026-06-15",
     "dosageInstruction": [
       {
-        "text": "2 inhalaciones en la mañana y 2 en la noche, TODOS los días aunque se sienta bien",
+        "text": "2 puffs morning and 2 at night, EVERY day even if feeling well",
         "timing": {
           "repeat": {
             "frequency": 2,
@@ -249,7 +249,7 @@
           "display": "albuterol"
         }
       ],
-      "text": "Salbutamol (rescate)"
+      "text": "Albuterol (rescue)"
     },
     "subject": {
       "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
@@ -257,7 +257,7 @@
     "authoredOn": "2026-06-15",
     "dosageInstruction": [
       {
-        "text": "2 inhalaciones SOLO si hay falta de aire (rescate)"
+        "text": "2 puffs ONLY if short of breath (rescue)"
       }
     ],
     "id": "dcb02b7b-156e-44a0-a6a6-ee50517cacd0",

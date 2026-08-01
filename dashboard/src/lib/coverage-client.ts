@@ -30,21 +30,21 @@ const CHECK_PATH = '/api/v1/coverage/check';
 export const DASHBOARD_SERVICE_TYPE = 'telehealth-mental-health';
 export const DASHBOARD_CPT_CODE = CPT.psychotherapy45;
 
-/** Texto en español para el pie de la tarjeta. */
+/** Texto en inglés para el pie de la tarjeta. */
 export function describeCoverageReason(reason: FallbackReason): string {
   switch (reason) {
     case 'fixtures-mode':
-      return 'modo respaldo activo';
+      return 'fallback mode active';
     case 'timeout':
-      return `loop-coverage no respondió en ${TIMEOUTS_MS.coverageCheck} ms`;
+      return `loop-coverage did not respond in ${TIMEOUTS_MS.coverageCheck} ms`;
     case 'network':
-      return 'loop-coverage no está disponible';
+      return 'loop-coverage is unavailable';
     case 'http-error':
-      return 'loop-coverage devolvió un error';
+      return 'loop-coverage returned an error';
     case 'invalid-schema':
-      return 'la respuesta no cumple el Contrato 3';
+      return 'the response does not meet Contract 3';
     default:
-      return 'respuesta en vivo';
+      return 'live response';
   }
 }
 
@@ -83,14 +83,14 @@ export async function checkCoverage(
     try {
       body = await response.json();
     } catch {
-      return fallback('invalid-schema', 'la respuesta no es JSON');
+      return fallback('invalid-schema', 'the response is not JSON');
     }
 
     const parsed = CoverageCheckResponse.safeParse(body);
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
-      const where = issue?.path.join('.') || 'raíz';
-      return fallback('invalid-schema', `${where}: ${issue?.message ?? 'forma inesperada'}`);
+      const where = issue?.path.join('.') || 'root';
+      return fallback('invalid-schema', `${where}: ${issue?.message ?? 'unexpected shape'}`);
     }
 
     return { data: parsed.data, source: 'live', reason: null, detail: null };

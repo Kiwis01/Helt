@@ -22,20 +22,20 @@ const USD = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 });
 
-const DATE = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
+const DATE = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
   month: 'short',
   year: 'numeric',
   timeZone: 'UTC',
 });
 
-const DATE_SHORT = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
+const DATE_SHORT = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
   month: 'short',
   timeZone: 'UTC',
 });
 
-const TIME = new Intl.DateTimeFormat('es-ES', {
+const TIME = new Intl.DateTimeFormat('en-US', {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false,
@@ -67,7 +67,7 @@ export function formatCents(cents: number | null | undefined): string {
 
 export function formatPercent(value: number | null | undefined, digits = 0): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return EMPTY;
-  return `${value.toFixed(digits)} %`;
+  return `${value.toFixed(digits)}%`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -84,13 +84,13 @@ export function formatDuration(minutes: number | null | undefined): string {
   return m === 0 ? `${h} h` : `${h} h ${m} min`;
 }
 
-/** "31 jul 2026". Acepta tanto `2026-07-31` como un ISO completo. */
+/** "Jul 31, 2026". Acepta tanto `2026-07-31` como un ISO completo. */
 export function formatDate(iso: string | null | undefined): string {
   const d = parseDate(iso);
   return d ? DATE.format(d) : EMPTY;
 }
 
-/** "31 jul". Para ejes de gráficos y listas densas. */
+/** "Jul 31". Para ejes de gráficos y listas densas. */
 export function formatDateShort(iso: string | null | undefined): string {
   const d = parseDate(iso);
   return d ? DATE_SHORT.format(d) : EMPTY;
@@ -102,7 +102,7 @@ export function formatTime(iso: string | null | undefined): string {
   return d ? TIME.format(d) : EMPTY;
 }
 
-/** "31 jul 2026 · 20:05". */
+/** "Jul 31, 2026 · 20:05". */
 export function formatDateTime(iso: string | null | undefined): string {
   const d = parseDate(iso);
   return d ? `${DATE.format(d)} · ${TIME.format(d)}` : EMPTY;
@@ -115,11 +115,11 @@ export function formatDateTime(iso: string | null | undefined): string {
 const utcDay = (ms: number): number => Math.floor(ms / MS_PER_DAY);
 
 /**
- * "hoy" · "ayer" · "hace 3 días".
+ * "today" · "yesterday" · "3 days ago".
  *
  * Cuenta días de CALENDARIO, no bloques de 24 h: un episodio de anoche a las
- * 22:05 visto esta mañana es "ayer", aunque hayan pasado 10 horas. Es como lo
- * lee un clínico, y evita que la fecha de al lado ("31 jul") contradiga al
+ * 22:05 visto esta mañana es "yesterday", aunque hayan pasado 10 horas. Es como
+ * lo lee un clínico, y evita que la fecha de al lado ("Jul 31") contradiga al
  * texto relativo.
  *
  * `now` es un parámetro y no `Date.now()` escondido dentro para que quien lo
@@ -131,10 +131,11 @@ export function formatRelativeDays(iso: string | null | undefined, now: number):
   const d = parseDate(iso);
   if (!d) return EMPTY;
   const days = utcDay(now) - utcDay(d.getTime());
-  if (days < 0) return 'programado';
-  if (days === 0) return 'hoy';
-  if (days === 1) return 'ayer';
-  return `hace ${days} días`;
+  if (days < 0) return 'scheduled';
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  // `days` es siempre ≥ 2 aquí, así que el plural nunca puede salir mal.
+  return `${days} days ago`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -186,12 +187,12 @@ export function formatSeverity(value: number | null | undefined): string {
 /* Etiquetas de dominio                                                */
 /* ------------------------------------------------------------------ */
 
-/** Nombres de métrica en español para ejes y selectores. */
+/** Nombres de métrica en inglés para ejes y selectores. */
 export const METRIC_LABELS: Record<string, string> = {
-  heartRate: 'Frecuencia cardiaca',
-  hrv: 'Variabilidad (HRV)',
-  respiratoryRate: 'Frecuencia respiratoria',
-  sleepHours: 'Sueño',
+  heartRate: 'Heart rate',
+  hrv: 'Variability (HRV)',
+  respiratoryRate: 'Respiratory rate',
+  sleepHours: 'Sleep',
 };
 
 /** Abreviaturas para chips y leyendas donde no cabe el nombre completo. */
@@ -199,16 +200,16 @@ export const METRIC_SHORT: Record<string, string> = {
   heartRate: 'HR',
   hrv: 'HRV',
   respiratoryRate: 'RR',
-  sleepHours: 'Sueño',
+  sleepHours: 'Sleep',
 };
 
 /** `EpisodeResolution` → texto legible. */
 export const OUTCOME_LABELS: Record<string, string> = {
-  'self-resolved': 'Resuelto solo',
-  'resolved-with-intervention': 'Resuelto con intervención',
-  'escalated-emergency': 'Escalado a emergencias',
-  'escalated-human': 'Escalado a humano',
-  abandoned: 'Abandonado',
+  'self-resolved': 'Self-resolved',
+  'resolved-with-intervention': 'Resolved with intervention',
+  'escalated-emergency': 'Escalated to emergency',
+  'escalated-human': 'Escalated to human',
+  abandoned: 'Abandoned',
 };
 
 export function labelOutcome(outcome: string): string {

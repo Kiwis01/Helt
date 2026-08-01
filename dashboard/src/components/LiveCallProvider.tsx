@@ -241,7 +241,7 @@ export function LiveCallProvider({ children }: { children: ReactNode }) {
         // Lewis levanta loop-voice— el navegador reintenta cada pocos
         // milisegundos, y ese bucle satura el hilo principal: la página se
         // queda pintada pero deja de responder a los clics. Cerrando el stream
-        // y reprogramando con espera creciente, "esperando a loop-voice" es un
+        // y reprogramando con espera creciente, "waiting for loop-voice" es un
         // estado barato en vez de una fuga.
         current.close();
         if (disposed) return;

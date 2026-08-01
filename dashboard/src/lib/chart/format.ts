@@ -45,18 +45,18 @@ function wallClock(iso: string): Date | null {
 }
 
 const FORMATTERS = {
-  date: new Intl.DateTimeFormat('es-MX', {
+  date: new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
     timeZone: 'UTC',
   }),
-  dateShort: new Intl.DateTimeFormat('es-MX', {
+  dateShort: new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     month: 'short',
     timeZone: 'UTC',
   }),
-  dateTime: new Intl.DateTimeFormat('es-MX', {
+  dateTime: new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -64,7 +64,7 @@ const FORMATTERS = {
     hour12: false,
     timeZone: 'UTC',
   }),
-  time: new Intl.DateTimeFormat('es-MX', {
+  time: new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
@@ -78,17 +78,17 @@ function format(iso: string | null | undefined, key: keyof typeof FORMATTERS): s
   return date ? FORMATTERS[key].format(date) : EMPTY;
 }
 
-/** "21 jul 2026" */
+/** "Jul 21, 2026" */
 export function formatDate(iso: string | null | undefined): string {
   return format(iso, 'date');
 }
 
-/** "21 jul" */
+/** "Jul 21" */
 export function formatDateShort(iso: string | null | undefined): string {
   return format(iso, 'dateShort');
 }
 
-/** "7 ago, 10:30" — en la hora de la clínica, no en UTC. */
+/** "Aug 7, 10:30" — en la hora de la clínica, no en UTC. */
 export function formatDateTime(iso: string | null | undefined): string {
   return format(iso, 'dateTime');
 }
@@ -102,7 +102,7 @@ const DAY_MS = 86_400_000;
 
 /**
  * Distancia en días respecto a `now`, en lenguaje natural.
- * Sirve tanto para el pasado ("hace 4 días") como para el futuro ("en 6 días"),
+ * Sirve tanto para el pasado ("4 days ago") como para el futuro ("in 6 days"),
  * porque la agenda mezcla citas cumplidas y pendientes.
  */
 export function formatRelativeDays(iso: string | null | undefined, now: number): string {
@@ -111,26 +111,28 @@ export function formatRelativeDays(iso: string | null | undefined, now: number):
   if (Number.isNaN(parsed)) return EMPTY;
 
   const days = Math.round((parsed - now) / DAY_MS);
-  if (days === 0) return 'hoy';
-  if (days === 1) return 'mañana';
-  if (days === -1) return 'ayer';
-  return days > 0 ? `en ${days} días` : `hace ${Math.abs(days)} días`;
+  if (days === 0) return 'today';
+  if (days === 1) return 'tomorrow';
+  if (days === -1) return 'yesterday';
+  // ±1 ya salió por arriba, así que `days` es siempre ≥ 2 en valor absoluto y
+  // el plural nunca puede quedar como "in 1 days".
+  return days > 0 ? `in ${days} days` : `${Math.abs(days)} days ago`;
 }
 
 /** Años cumplidos como texto, o el motivo de que falte. */
 export function formatAge(age: number | null): string {
-  return age === null ? 'Edad no registrada' : `${age} años`;
+  return age === null ? 'Age not recorded' : `${age} y.o.`;
 }
 
 export function describeGender(gender: string | null): string {
   switch (gender) {
     case 'female':
-      return 'Mujer';
+      return 'Female';
     case 'male':
-      return 'Hombre';
+      return 'Male';
     case 'other':
-      return 'Otro';
+      return 'Other';
     default:
-      return 'Sexo no registrado';
+      return 'Sex not recorded';
   }
 }

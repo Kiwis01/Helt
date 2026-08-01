@@ -10,19 +10,19 @@
           "display": "Comprehensive metabolic panel"
         }
       ],
-      "text": "Química sanguínea"
+      "text": "Blood chemistry"
     },
     "subject": {
       "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
     },
     "date": "2026-07-21T09:00:00-07:00",
-    "description": "Química sanguínea de 6 elementos — Laboratorio Central",
+    "description": "6-item blood chemistry — Central Lab",
     "content": [
       {
         "attachment": {
           "contentType": "application/pdf",
           "url": "/api/files/quimica.pdf",
-          "title": "Química sanguínea 21-jul-2026"
+          "title": "Blood chemistry Jul 21, 2026"
         }
       }
     ],

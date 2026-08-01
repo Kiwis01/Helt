@@ -59,3 +59,7 @@ desktop.ini
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Volcado de recursos de Medplum (datos de proyecto, no codigo)
+dashboard/.medplum-backup/
+dashboard/scripts/medplum-strings.json

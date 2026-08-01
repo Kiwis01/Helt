@@ -59,21 +59,21 @@ export interface DataResult<T> {
   detail: string | null;
 }
 
-/** Texto en español para el badge de origen y los mensajes inline. */
+/** Texto en inglés para el badge de origen y los mensajes inline. */
 export function describeReason(reason: FallbackReason): string {
   switch (reason) {
     case 'fixtures-mode':
-      return 'modo respaldo activo';
+      return 'fallback mode active';
     case 'timeout':
-      return `loop-core no respondió en ${TIMEOUTS_MS.contextFetch} ms`;
+      return `loop-core did not respond in ${TIMEOUTS_MS.contextFetch} ms`;
     case 'network':
-      return 'loop-core no está disponible';
+      return 'loop-core is unavailable';
     case 'http-error':
-      return 'loop-core devolvió un error';
+      return 'loop-core returned an error';
     case 'invalid-schema':
-      return 'la respuesta no cumple el contrato';
+      return 'the response does not meet the contract';
     default:
-      return 'datos en vivo';
+      return 'live data';
   }
 }
 
@@ -145,14 +145,14 @@ async function request<T>(
     try {
       body = await response.json();
     } catch {
-      return fallback(fixtureData, 'invalid-schema', 'la respuesta no es JSON');
+      return fallback(fixtureData, 'invalid-schema', 'the response is not JSON');
     }
 
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
-      const where = issue?.path.join('.') || 'raíz';
-      return fallback(fixtureData, 'invalid-schema', `${where}: ${issue?.message ?? 'forma inesperada'}`);
+      const where = issue?.path.join('.') || 'root';
+      return fallback(fixtureData, 'invalid-schema', `${where}: ${issue?.message ?? 'unexpected shape'}`);
     }
 
     return { data: parsed.data, source: 'live', reason: null, detail: null };
@@ -228,7 +228,7 @@ function unavailableSpike(profile: DemoProfile): DemoSpikeResponse {
     ok: false,
     profile,
     appliedAt: new Date().toISOString(),
-    message: 'No se aplicó ningún cambio en el paciente.',
+    message: 'No change was applied to the patient.',
   };
 }
 
@@ -236,7 +236,7 @@ function unavailableReset(): DemoResetResponse {
   return {
     ok: false,
     resetAt: new Date().toISOString(),
-    message: 'No se reinició el estado del demo.',
+    message: 'The demo state was not reset.',
   };
 }
 
