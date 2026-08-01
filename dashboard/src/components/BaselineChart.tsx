@@ -302,10 +302,29 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
   const bandLow = active.baseline.mean - active.baseline.sd;
   const bandHigh = active.baseline.mean + active.baseline.sd;
 
+  /**
+   * La ventana REAL de la serie, no una etiqueta fija.
+   *
+   * Antes ponía "30 days" siempre, y con el fixture colaba porque sus puntos
+   * llegaban literalmente hasta hoy. Con las observaciones de Medplum ya no:
+   * las de este paciente terminan el 25 de julio, así que "30 days" invitaba a
+   * leer la última lectura como la de esta mañana y a extrañarse de ver junio
+   * en el eje. Un rango que se lee de un vistazo —"Jun 27 – Jul 25"— dice a la
+   * vez cuánto abarca y, sobre todo, hasta cuándo llega.
+   */
+  const windowLabel = useMemo(() => {
+    const { points } = active;
+    if (points.length === 0) return 'no readings';
+
+    const from = formatDateShort(new Date(points[0].t).toISOString());
+    const to = formatDateShort(new Date(points[points.length - 1].t).toISOString());
+    return from === to ? from : `${from} – ${to}`;
+  }, [active]);
+
   return (
     <Card
       title="Baseline"
-      subtitle="30 days"
+      subtitle={windowLabel}
       index={2}
       bodyClassName="flex min-h-0 gap-4 px-5 pb-4"
       /* Mismo control segmentado que la barra de navegación: elegir una de
