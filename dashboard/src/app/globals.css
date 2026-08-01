@@ -19,9 +19,12 @@
 :root {
   color-scheme: dark;
 
-  /* Casi negro con tinte azul. Nunca #000: los proyectores lo rinden
-     como gris sucio y la aurora pierde su base. */
-  --bg: #070c11;
+  /* Tinta HELT (#0B2B31) oscurecida. El tinte es verde-azulado, de la marca,
+     no el azul-violeta de antes. Nunca #000: los proyectores lo rinden como
+     gris sucio, y el contraste extremo cansa en una pantalla que alguien mira
+     con el pulso a 120. */
+  --bg: #061a1e;
+  --ink-base: #0b2b31;
 
   /* --- vidrio tipo iOS --- */
   --glass: rgba(255, 255, 255, 0.055);
@@ -40,32 +43,59 @@
   --ink-2: rgba(255, 255, 255, 0.62);
   --ink-3: rgba(255, 255, 255, 0.38);
 
-  /* --- un solo acento --- */
-  --accent: #7fc4ee;
-  --accent-soft: rgba(127, 196, 238, 0.14);
-  --accent-line: rgba(127, 196, 238, 0.32);
+  /* --- un solo acento: el teal de HELT ---
+     La marca trae Aqua #2DE2E6, Teal #12B5C9 y Deep teal #0A8FA6. El aqua puro
+     es el del icono —un cuadrado de 60 px que tiene que destacar en la pantalla
+     de inicio— y es demasiado eléctrico para superficies grandes o para tres
+     series a la vez. Aquí se usa el teal medio, que es el mismo color de marca
+     con la croma bajada lo justo para poder mirarlo un rato. */
+  --accent: #2a97a5;
+  --accent-soft: rgba(42, 151, 165, 0.14);
+  --accent-line: rgba(42, 151, 165, 0.32);
+  /* El aqua puro se reserva para el logotipo y para un solo realce por
+     pantalla. Si aparece en dos sitios a la vez, sobra en uno. */
+  --brand-aqua: #2de2e6;
+  --brand-teal: #12b5c9;
+  --brand-deep: #0a8fa6;
 
-  /* --- estado semántico --- */
-  --ok: #82d6ab;
-  --ok-soft: rgba(130, 214, 171, 0.14);
-  --ok-line: rgba(130, 214, 171, 0.35);
-  --danger: #f0a094;
-  --danger-soft: rgba(232, 134, 124, 0.12);
-  --danger-line: rgba(232, 134, 124, 0.34);
-  --warn: #f0c07a;
-  --warn-soft: rgba(240, 192, 122, 0.12);
-  --warn-line: rgba(240, 192, 122, 0.34);
+  /* --- estado semántico ---
+     `--ok` se aleja del teal a propósito, hacia el verde: si "todo bien" y "el
+     color corporativo" se parecen, un panel en verde deja de comunicar nada.
+     El rojo es el único color saturado de la interfaz — es el badge de
+     escalación, el único momento que DEBE alarmar. Todo lo demás cede
+     protagonismo para que ese rojo siga siendo lo más fuerte de la pantalla. */
+  --ok: #55b98c;
+  --ok-soft: rgba(85, 185, 140, 0.13);
+  --ok-line: rgba(85, 185, 140, 0.3);
+  --danger: #f5867a;
+  --danger-soft: rgba(245, 134, 122, 0.13);
+  --danger-line: rgba(245, 134, 122, 0.36);
+  --warn: #e8bc72;
+  --warn-soft: rgba(232, 188, 114, 0.12);
+  --warn-line: rgba(232, 188, 114, 0.32);
 
   /* Alias de compatibilidad: los charts ya escriben var(--line). */
   --line: var(--hair);
 
-  /* --- series de gráficos (válidas en atributos SVG) --- */
-  --chart-hr: #7fc4ee;
-  --chart-hrv: #a0b2e8;
-  --chart-rr: #f0c07a;
-  --chart-episode: #e8867c;
-  --chart-grid: rgba(255, 255, 255, 0.055);
-  --chart-band: rgba(127, 196, 238, 0.1);
+  /* --- series de gráficos (válidas en atributos SVG) ---
+     Tres tonos SEPARADOS EN EL CÍRCULO CROMÁTICO (teal ~190°, periwinkle ~250°,
+     arena ~40°), no tres intensidades del mismo. Separarlas por tono es lo que
+     las hace distinguibles también sin visión cromática completa; separarlas
+     por brillo habría obligado a subir la saturación de todas, que es
+     justamente lo que no queremos.
+
+     La principal (HR) es el teal de marca: es la serie que se enseña por
+     defecto y la que más superficie ocupa. */
+  /* La línea de HR cubre casi todo el ancho de la tarjeta y se mira fijo: es la
+     superficie de color más grande de la pantalla. Va varios escalones por
+     debajo del teal de marca —la croma bajada, no el brillo— porque a plena
+     saturación esa serie sola convierte el panel en un neón. */
+  --chart-hr: #4aa8b4;
+  --chart-hrv: #9585c4;
+  --chart-rr: #c9974f;
+  --chart-episode: #e07a6f;
+  --chart-grid: rgba(255, 255, 255, 0.045);
+  --chart-band: rgba(74, 168, 180, 0.1);
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* La curva de las transiciones de iOS: sale rápido y frena largo. Es lo que
@@ -152,12 +182,15 @@
     filter: blur(90px);
   }
 
+  /* Teal de marca a muy baja opacidad. Bajada respecto al azul anterior
+     (0.17 -> 0.10): la aurora es atmósfera, no un elemento. Si se nota que
+     está, está de más. */
   .aurora::before {
     width: 62vw;
     height: 62vw;
     left: -12vw;
     bottom: -34vw;
-    background: radial-gradient(circle, rgba(127, 196, 238, 0.17), transparent 68%);
+    background: radial-gradient(circle, rgba(18, 181, 201, 0.1), transparent 68%);
   }
 
   .aurora::after {
@@ -165,7 +198,7 @@
     height: 54vw;
     right: -14vw;
     bottom: -30vw;
-    background: radial-gradient(circle, rgba(160, 178, 232, 0.13), transparent 68%);
+    background: radial-gradient(circle, rgba(10, 143, 166, 0.09), transparent 68%);
   }
 
   /* ---------------- superficie de vidrio ---------------- */

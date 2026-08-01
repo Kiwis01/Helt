@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="HELT mark">
+  <g fill="#0B2B31">
+    <rect x="150" y="188" width="34" height="136" rx="17"/>
+    <rect x="328" y="188" width="34" height="136" rx="17"/>
+  </g>
+  <path d="M150 256 H206 L232 256 L256 150 L280 356 L306 256 H362"
+        fill="none" stroke="#0B2B31" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

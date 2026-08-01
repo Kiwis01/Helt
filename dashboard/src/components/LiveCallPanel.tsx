@@ -24,6 +24,14 @@
  * Sin llamada, el panel enseña una línea y dos botones. Ni un párrafo: loop-voice
  * todavía no existe y este hueco está en pantalla desde el primer segundo del
  * pitch, así que tiene que verse deliberado, no a medio construir.
+ *
+ * EL ALTO ES DEL TRANSCRIPT. Durante los 60 segundos de llamada en vivo la
+ * conversación es lo único que el público lee, así que es el único hijo elástico
+ * del panel y todos los demás son `shrink-0` con la altura mínima que su
+ * contenido permite. La tarjeta de cobertura, que es su vecina en la columna, se
+ * colapsa a su encabezado mientras no haya respuesta de Stedi por la misma
+ * razón: a 1280x720 la columna mide 567px y lo que no gasta uno se lo queda el
+ * otro.
  */
 
 import { useEffect, useRef } from 'react';
@@ -168,9 +176,17 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
 
   // Auto-scroll al final. Depende del número de turnos y no del array para no
   // reprogramarse en cada tick de biometría.
+  //
+  // Desplazamiento suave y no un salto: el turno que entra tiene que verse
+  // LLEGAR. Con `scrollTop = scrollHeight` la burbuja nueva ya estaba colocada
+  // cuando el ojo la encontraba, y el panel parecía una lista que se repinta en
+  // vez de una conversación que avanza. Quien pide menos movimiento se lo salta
+  // —el mismo trato que `prefers-reduced-motion` recibe en globals.css—.
   useEffect(() => {
     const element = scroller.current;
-    if (element) element.scrollTop = element.scrollHeight;
+    if (!element) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    element.scrollTo({ top: element.scrollHeight, behavior: reduced ? 'auto' : 'smooth' });
   }, [state.turns.length]);
 
   const vitals = state.biometrics;
@@ -193,22 +209,17 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
     <Card
       title="Live call"
       index={2}
-      // Reparto de alto de la columna derecha. La columna mide 564px a 1280x720
-      // y las dos tarjetas juntas piden más, así que quién cede está decidido
-      // aquí y no lo improvisa el navegador:
+      // Reparto de alto de la columna derecha, en una sola regla.
       //
-      // - `flex-[1_0_0%]`: este panel crece hasta llenar lo que la cobertura no
-      //   use, pero NUNCA encoge. Antes era `flex-auto` con suelo de 16rem, y
-      //   con el transcript lleno su base de contenido llegaba a 388px dejando
-      //   158px a una cobertura que pedía 256: el héroe del copago salía
-      //   partido por la mitad.
-      // - Los dos suelos son medidos, no redondeados a ojo. 17rem = 272px es lo
-      //   que ocupan cabecera + biometría + una burbuja + pie. 19rem = 304px
-      //   añade la barrera de escalación, que es `shrink-0` y no admite quedarse
-      //   a medias. Por debajo de eso el contenido se saldría de la tarjeta.
-      // - `!` porque `Card` trae `min-h-0` en su clase base y las dos reglas
-      //   pesan lo mismo; el orden en la hoja no es algo que se deba suponer.
-      className={`flex-[1_0_0%] ${escalated ? '!min-h-[19rem]' : '!min-h-[17rem]'}`}
+      // Este panel se queda TODO lo que la cobertura no use, y la cobertura ya
+      // no se lo puede comer: colapsa a su encabezado mientras no hay respuesta
+      // y tiene techo cuando la hay. Con eso el suelo del panel deja de ser una
+      // negociación —eran dos `!min-h` medidos a mano, uno por estado— y pasa a
+      // ser aritmética: 567px de columna menos el techo de la cobertura.
+      //
+      // El `min-h-0` que `Card` trae en su clase base es justo lo que hace falta
+      // aquí, así que ya no hay que sobreescribirlo con `!`.
+      className="flex-1"
       bodyClassName="flex min-h-0 flex-col gap-2.5 px-5 pb-4"
       actions={
         replay ? (
@@ -250,9 +261,13 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
         />
       ) : null}
 
+      {/* Biometría. En modo normal sigue siendo el héroe del panel, pero ocupa
+          una fila y no tres: la distancia al baseline se fue a la MISMA línea
+          que la etiqueta —es el pie de foto de la cifra, no un dato aparte— y
+          eso devuelve ~24px al transcript sin tocar el tamaño del número. */}
       {vitals ? (
         <div
-          className={`tile flex shrink-0 gap-4 px-4 ${escalated ? 'items-baseline py-2' : 'items-end py-3'}`}
+          className={`tile flex shrink-0 gap-4 px-4 ${escalated ? 'items-baseline py-2' : 'items-end py-2.5'}`}
         >
           {escalated ? (
             // Con una regla disparada la biometría se encoge a una sola fila:
@@ -272,17 +287,26 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
           ) : (
             <>
               <div className="min-w-0 flex-1">
-                <p className="label">Heart rate</p>
+                {/* Etiqueta y contexto en el mismo renglón: "Heart rate" dice
+                    qué es y "+2.4σ · baseline 72" dice si es mucho, y las dos
+                    cosas se leen antes de bajar a la cifra. Apiladas costaban
+                    una tercera línea para no añadir ni un dato. */}
+                <p className="label flex items-baseline gap-2 truncate">
+                  <span className="shrink-0">Heart rate</span>
+                  <span className="truncate font-normal" style={{ color: heartTone }}>
+                    <span aria-hidden>
+                      {trendMark(vitals.heartRate, state.previousBiometrics?.heartRate)}{' '}
+                    </span>
+                    {formatSd(heartSd)}
+                    <span className="text-ink-3">
+                      {' '}
+                      · baseline {Math.round(baseline.heartRate.mean)}
+                    </span>
+                  </span>
+                </p>
                 <p className="hero mt-1.5" style={{ color: heartTone }}>
                   {Math.round(vitals.heartRate)}
                   <small>{baseline.heartRate.unit}</small>
-                </p>
-                <p className="mt-1.5 flex items-baseline gap-1.5 text-2xs text-ink-3">
-                  <span aria-hidden style={{ color: heartTone }}>
-                    {trendMark(vitals.heartRate, state.previousBiometrics?.heartRate)}
-                  </span>
-                  <span style={{ color: heartTone }}>{formatSd(heartSd)}</span>
-                  <span>baseline {Math.round(baseline.heartRate.mean)}</span>
                 </p>
               </div>
 
@@ -299,14 +323,17 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
         </div>
       ) : null}
 
-      {/* Transcript. Es el único hijo elástico del panel, y su suelo desaparece
-          cuando hay una regla disparada: con la barrera en pantalla lo que hay
-          que leer es el ID, no la conversación, y reservarle 3.5rem al
-          transcript era empujar a la cobertura hasta recortarle la cita. */}
-      <div
-        ref={scroller}
-        className={`flex-1 space-y-2 overflow-y-auto ${escalated ? 'min-h-0' : 'min-h-[3.5rem]'}`}
-      >
+      {/*
+        Transcript. ÚNICO hijo elástico del panel — todo lo que sobra acaba
+        aquí— y sin suelo propio: el suelo se lo garantiza la aritmética de la
+        columna (ver el `className` de la Card), no un `min-h` que podría
+        empujar al pie fuera de la tarjeta cuando la barrera de escalación
+        aparece.
+
+        `pr-1` para que la barra de scroll de 6px no se coma el borde derecho de
+        las burbujas del agente.
+      */}
+      <div ref={scroller} className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
         {state.turns.length === 0 ? (
           <EmptyState>{hasCall ? 'Call open, no turns yet' : 'No active call'}</EmptyState>
         ) : (
@@ -324,17 +351,39 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
               );
             }
 
-            // Sin etiquetas de hablante: el acento es el paciente y el blanco
-            // apagado es el agente. Poner "PACIENTE:" encima sería decir dos
-            // veces lo mismo, y en mayúsculas.
+            /*
+              Sin etiquetas de hablante: quién habla lo dicen el lado, la esquina
+              mordida y el fondo. Poner "PACIENTE:" encima sería decir dos veces
+              lo mismo, y en mayúsculas.
+
+              La diferencia se llevó del TEXTO al FONDO. El paciente se pintaba
+              en teal sólido sobre la misma tesela gris que el agente: media
+              columna de texto de color, que en una pantalla que se mira con el
+              pulso a 120 es exactamente el tipo de saturación que hay que
+              guardar para el badge de escalación. Ahora el paciente es una
+              burbuja teñida —fondo `--accent-soft`, filete `--accent-line`— con
+              el texto en blanco pleno, y el agente sigue siendo tesela plana con
+              texto un peldaño más bajo. Se distinguen mejor que antes y el
+              único color saturado de la pantalla sigue siendo el rojo de la
+              regla.
+            */
             const isAgent = turn.speaker === 'agent';
             return (
               <div key={key} className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}>
                 <p
-                  className={`tile max-w-[88%] px-3 py-2 ${DATA} leading-[1.5] ${
-                    isAgent ? 'rounded-br-[6px] text-ink-2' : 'rounded-bl-[6px]'
+                  className={`max-w-[88%] px-3 py-2 ${DATA} leading-[1.5] ${
+                    isAgent
+                      ? 'tile rounded-br-[6px] text-ink-2'
+                      : 'rounded-tile rounded-bl-[6px] border text-ink'
                   }`}
-                  style={isAgent ? undefined : { color: 'var(--accent)' }}
+                  // El agente reusa `.tile`, que ya es el relleno plano estándar
+                  // del sistema; el paciente es el único que necesita valores
+                  // propios, y son tokens de acento, no colores sueltos.
+                  style={
+                    isAgent
+                      ? undefined
+                      : { background: 'var(--accent-soft)', borderColor: 'var(--accent-line)' }
+                  }
                 >
                   <span className="sr-only">{isAgent ? 'Loop: ' : 'Patient: '}</span>
                   {turn.text}

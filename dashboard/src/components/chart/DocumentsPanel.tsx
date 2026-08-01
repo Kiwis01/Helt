@@ -38,7 +38,9 @@ export function DocumentsPanel({
       subtitle={`${documentCount} document${documentCount === 1 ? '' : 's'}`}
       index={index}
     >
-      <div className="flex flex-col gap-4">
+      {/* Alto acotado y scroll propio, igual que los otros tres paneles del
+          expediente: ninguno puede decidir el alto de la página. */}
+      <div className="flex max-h-[19rem] flex-col gap-3 overflow-y-auto">
         <section>
           <h3 className="label pb-1">Notes &amp; documents</h3>
           {notes.length === 0 ? (

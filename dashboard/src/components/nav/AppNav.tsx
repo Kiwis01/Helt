@@ -32,6 +32,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
+import HeltMark from '@/components/brand/HeltMark';
+
 /** ¿Se está escribiendo? Entonces las teclas sueltas no son atajos. */
 function isTyping(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
@@ -98,9 +100,10 @@ export function AppNav({ actions }: AppNavProps) {
       <Link
         href="/"
         title="Home"
-        className="shrink-0 text-[15px] font-semibold tracking-[0.2em] text-ink transition-opacity hover:opacity-70"
+        className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-70"
       >
-        LOOP
+        <HeltMark size={24} />
+        <span className="text-[15px] font-semibold tracking-[0.18em] text-ink">HELT</span>
       </Link>
 
       {actions ? <div className="ml-auto flex shrink-0 items-center gap-3">{actions}</div> : null}

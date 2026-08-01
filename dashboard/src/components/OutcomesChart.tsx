@@ -15,6 +15,15 @@
  * 3. **El color lo decide el dato.** Verde si bate al umbral, ámbar si no. Con
  *    estos fixtures salen las dos verdes; el día que una no funcione se verá.
  *
+ * EL UMBRAL NO ES UNA ALARMA. Su lecho y su línea discontinua se pintaban en
+ * rojo —`--danger-soft` bajo cada pista y `--danger` cruzando el panel—, y eso
+ * es más superficie roja que la que ocupa el badge de escalación al otro lado
+ * de la pantalla. En un producto para gente con ataques de pánico el rojo es un
+ * recurso de un solo uso y ya está gastado en la regla determinista; aquí el
+ * umbral es una REFERENCIA, así que va en la escalera de blancos. El verde y el
+ * ámbar de las barras siguen siendo los únicos colores del panel, y cada uno
+ * significa una sola cosa.
+ *
  * Se dibuja con cajas y no con Recharts a propósito: son dos barras y un
  * umbral, y en HTML se controlan la tipografía, el radio y el orden de lectura
  * mucho mejor que con `LabelList` —que además solo se pinta cuando termina la
@@ -231,7 +240,7 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
         >
           <div
             className="absolute inset-y-0 border-l border-dashed"
-            style={{ left: `${thresholdPct}%`, borderColor: 'var(--danger)', opacity: 0.55 }}
+            style={{ left: `${thresholdPct}%`, borderColor: 'var(--ink-2)' }}
           />
         </div>
 
@@ -261,11 +270,15 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
                 {/* La pista termina EN el umbral: el lecho es lo que dura el
                     episodio sin hacer nada, el relleno es lo que duró de
                     verdad, y el hueco que queda es el tiempo ahorrado. Esa
-                    resta es todo el argumento y no hace falta escribirla. */}
+                    resta es todo el argumento y no hace falta escribirla.
+
+                    Lecho neutro: es el CANAL por el que corre la barra, no un
+                    valor con signo. Pintado en rojo hacía que cada fila
+                    arrastrase una mancha de alarma detrás del dato bueno. */}
                 <div
                   aria-hidden
                   className="absolute inset-y-0 left-0 rounded-full"
-                  style={{ width: `${thresholdPct}%`, background: 'var(--danger-soft)' }}
+                  style={{ width: `${thresholdPct}%`, background: 'var(--glass)' }}
                 />
                 <div
                   className="absolute inset-y-0 left-0 rounded-full"
