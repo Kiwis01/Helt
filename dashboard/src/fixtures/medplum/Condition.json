@@ -1,0 +1,167 @@
+[
+  {
+    "resourceType": "Condition",
+    "clinicalStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "active"
+        }
+      ]
+    },
+    "code": {
+      "coding": [
+        {
+          "system": "http://id.who.int/icd/release/11/mms",
+          "code": "5A11",
+          "display": "Type 2 diabetes mellitus"
+        },
+        {
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "code": "E11.9",
+          "display": "Type 2 diabetes mellitus without complications"
+        }
+      ],
+      "text": "Type 2 diabetes"
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "id": "106db9b2-9d20-4fe2-a639-25b1fcb8d464",
+    "meta": {
+      "versionId": "1f0514b6-add2-403d-ab49-ac5a3cb066c7",
+      "lastUpdated": "2026-07-31T02:41:35.423Z"
+    }
+  },
+  {
+    "resourceType": "Condition",
+    "clinicalStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "active"
+        }
+      ]
+    },
+    "code": {
+      "coding": [
+        {
+          "system": "http://id.who.int/icd/release/11/mms",
+          "code": "BA00",
+          "display": "Essential hypertension"
+        },
+        {
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "code": "I10",
+          "display": "Essential (primary) hypertension"
+        }
+      ],
+      "text": "Hypertension"
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "id": "d9db8625-e220-4e88-80a5-dbf9aa4b6ffb",
+    "meta": {
+      "versionId": "80625ddf-17a5-4517-ab91-7c166d027767",
+      "lastUpdated": "2026-07-31T02:41:35.594Z"
+    }
+  },
+  {
+    "resourceType": "Condition",
+    "clinicalStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "active"
+        }
+      ]
+    },
+    "code": {
+      "coding": [
+        {
+          "system": "http://id.who.int/icd/release/11/mms",
+          "code": "BA00",
+          "display": "Essential hypertension"
+        },
+        {
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "code": "I10",
+          "display": "Essential (primary) hypertension"
+        }
+      ],
+      "text": "Hypertension"
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "id": "02fa67e3-ced5-45e6-add6-622ef54238ea",
+    "meta": {
+      "versionId": "e7eb414f-d6a7-44fb-abfa-adf7228af36d",
+      "lastUpdated": "2026-07-31T02:51:07.555Z"
+    }
+  },
+  {
+    "resourceType": "Condition",
+    "clinicalStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "active"
+        }
+      ]
+    },
+    "code": {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "code": "E78.0",
+          "display": "Pure hypercholesterolemia"
+        }
+      ],
+      "text": "High cholesterol"
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "id": "538cfc18-cb7d-4571-8135-c76c5c32eb07",
+    "meta": {
+      "versionId": "14206cd4-31a4-44ad-8021-d75c65b08da4",
+      "lastUpdated": "2026-07-31T02:51:07.576Z"
+    }
+  },
+  {
+    "resourceType": "Condition",
+    "clinicalStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "active"
+        }
+      ]
+    },
+    "code": {
+      "coding": [
+        {
+          "system": "http://id.who.int/icd/release/11/mms",
+          "code": "CA23",
+          "display": "Asthma"
+        },
+        {
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "code": "J45.909",
+          "display": "Unspecified asthma"
+        }
+      ],
+      "text": "Asthma"
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "id": "7019aa15-f0ec-4779-a518-0a00ec7a73a7",
+    "meta": {
+      "versionId": "4f89f472-9834-47c4-85d5-dd460ad2ed4f",
+      "lastUpdated": "2026-07-31T02:51:07.762Z"
+    }
+  }
+]

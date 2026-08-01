@@ -1,0 +1,626 @@
+[
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "4548-4",
+          "display": "Hemoglobin A1c"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2025-10-12",
+    "valueQuantity": {
+      "value": 6.9,
+      "unit": "%"
+    },
+    "id": "c6e88417-0d0f-46a9-8df5-3f2508c9cd98",
+    "meta": {
+      "versionId": "945344be-1c50-4632-b846-07991c927819",
+      "lastUpdated": "2026-07-31T02:41:33.494Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "8867-4",
+          "display": "Heart rate"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-07-21",
+    "valueQuantity": {
+      "value": 76,
+      "unit": "/min"
+    },
+    "id": "8f8fb2ff-c44f-4ce1-b520-97e17b69db7c",
+    "meta": {
+      "versionId": "a6539d73-fbd8-4ad3-900c-a84ce66ea49d",
+      "lastUpdated": "2026-07-31T02:41:34.666Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "4548-4",
+          "display": "Hemoglobin A1c"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-04-20",
+    "valueQuantity": {
+      "value": 7.9,
+      "unit": "%"
+    },
+    "id": "e75573ba-bd83-45f5-8cf8-eb654da312b6",
+    "meta": {
+      "versionId": "50e6ed35-dbcf-49d7-8290-5dbfc09a2abf",
+      "lastUpdated": "2026-07-31T02:41:33.798Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "Blood pressure panel"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-07-21",
+    "component": [
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 124,
+          "unit": "mmHg"
+        }
+      },
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 80,
+          "unit": "mmHg"
+        }
+      }
+    ],
+    "id": "9be5fd24-460c-4161-9738-c0dba1691124",
+    "meta": {
+      "versionId": "a1f99412-1712-4bc3-adfa-f4129a588bf0",
+      "lastUpdated": "2026-07-31T02:41:34.537Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "4548-4",
+          "display": "Hemoglobin A1c"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-07-21",
+    "valueQuantity": {
+      "value": 8.4,
+      "unit": "%"
+    },
+    "id": "e47a2fd1-f1fe-4e36-aee4-0553e2277036",
+    "meta": {
+      "versionId": "764e59c6-4dcb-4883-bb5d-81a66be1c978",
+      "lastUpdated": "2026-07-31T02:41:33.956Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "Blood pressure panel"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-04-20",
+    "component": [
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 127,
+          "unit": "mmHg"
+        }
+      },
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 82,
+          "unit": "mmHg"
+        }
+      }
+    ],
+    "id": "515410ee-0262-490c-a90b-004986530b99",
+    "meta": {
+      "versionId": "62a160ff-691a-49cd-9cd9-b3ab22f38770",
+      "lastUpdated": "2026-07-31T02:41:34.398Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "4548-4",
+          "display": "Hemoglobin A1c"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-01-15",
+    "valueQuantity": {
+      "value": 7.4,
+      "unit": "%"
+    },
+    "id": "35d2480c-9425-401e-8945-5a39d060da1c",
+    "meta": {
+      "versionId": "ddcda315-0401-4f12-b2cc-7220b2a3c50d",
+      "lastUpdated": "2026-07-31T02:41:33.657Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "Blood pressure panel"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2025-10-12",
+    "component": [
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 132,
+          "unit": "mmHg"
+        }
+      },
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 84,
+          "unit": "mmHg"
+        }
+      }
+    ],
+    "id": "22e88514-bdb5-4cf7-b19d-973009f0c03a",
+    "meta": {
+      "versionId": "b2ed1441-6298-4d98-b66a-7db3c95d5b36",
+      "lastUpdated": "2026-07-31T02:41:34.089Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "Blood pressure panel"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-01-15",
+    "component": [
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 130,
+          "unit": "mmHg"
+        }
+      },
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 85,
+          "unit": "mmHg"
+        }
+      }
+    ],
+    "id": "4a00a2cb-b43c-4a89-9161-554fd5535514",
+    "meta": {
+      "versionId": "3d4df577-1dae-4137-86be-73d49ff31871",
+      "lastUpdated": "2026-07-31T02:41:34.236Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "29463-7",
+          "display": "Body weight"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "effectiveDateTime": "2026-07-21",
+    "valueQuantity": {
+      "value": 71.2,
+      "unit": "kg"
+    },
+    "id": "b922f496-2d81-4df0-9fbc-0b354c8175e2",
+    "meta": {
+      "versionId": "e54d53e7-be95-4bb2-baca-ca9377eaf813",
+      "lastUpdated": "2026-07-31T02:41:34.798Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "2089-1",
+          "display": "LDL Cholesterol"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "effectiveDateTime": "2025-11-10",
+    "valueQuantity": {
+      "value": 165,
+      "unit": "mg/dL"
+    },
+    "id": "6e481972-7129-4b86-bdd9-93ad3ded6f47",
+    "meta": {
+      "versionId": "1d3f53ea-c0ac-4f16-9dc5-d0327fd17977",
+      "lastUpdated": "2026-07-31T02:51:07.631Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "2089-1",
+          "display": "LDL Cholesterol"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "effectiveDateTime": "2026-02-18",
+    "valueQuantity": {
+      "value": 148,
+      "unit": "mg/dL"
+    },
+    "id": "b01e3556-ad34-49e3-ae58-390dab771023",
+    "meta": {
+      "versionId": "ffee85cb-3eed-4c7f-8e1c-2f6de7c5f0a4",
+      "lastUpdated": "2026-07-31T02:51:07.659Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "2089-1",
+          "display": "LDL Cholesterol"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "effectiveDateTime": "2026-05-20",
+    "valueQuantity": {
+      "value": 129,
+      "unit": "mg/dL"
+    },
+    "id": "3c58051c-5fd2-4f31-99c3-4ac74311c08b",
+    "meta": {
+      "versionId": "74cb08a5-3c78-4d4b-8af3-d9b65148148b",
+      "lastUpdated": "2026-07-31T02:51:07.676Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "2089-1",
+          "display": "LDL Cholesterol"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "effectiveDateTime": "2026-07-22",
+    "valueQuantity": {
+      "value": 112,
+      "unit": "mg/dL"
+    },
+    "id": "216bc6e1-905f-454f-907c-a31c97b69528",
+    "meta": {
+      "versionId": "9ed3f550-1952-47d9-bf66-5dd301e428b2",
+      "lastUpdated": "2026-07-31T02:51:07.691Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "Blood pressure panel"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "effectiveDateTime": "2026-07-22",
+    "component": [
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 138,
+          "unit": "mmHg"
+        }
+      },
+      {
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 88,
+          "unit": "mmHg"
+        }
+      }
+    ],
+    "id": "3eff0700-f7d3-44b9-93d8-d78acb4774f7",
+    "meta": {
+      "versionId": "9b1280fd-14d7-4b2d-bccb-9281daf70ff4",
+      "lastUpdated": "2026-07-31T02:51:07.707Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "20150-9",
+          "display": "FEV1"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "effectiveDateTime": "2026-01-20",
+    "valueQuantity": {
+      "value": 68,
+      "unit": "%"
+    },
+    "id": "42599a52-9f65-4463-b862-f119d07e7d5a",
+    "meta": {
+      "versionId": "9d1c7fb9-d3ef-41f4-8bde-76bd5cec5266",
+      "lastUpdated": "2026-07-31T02:51:07.813Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "20150-9",
+          "display": "FEV1"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "effectiveDateTime": "2026-04-15",
+    "valueQuantity": {
+      "value": 74,
+      "unit": "%"
+    },
+    "id": "654ba3ab-5c6b-438e-978a-717948d34801",
+    "meta": {
+      "versionId": "746ac2ed-e30d-4273-8402-fbe4a2598334",
+      "lastUpdated": "2026-07-31T02:51:07.851Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "20150-9",
+          "display": "FEV1"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "effectiveDateTime": "2026-06-15",
+    "valueQuantity": {
+      "value": 79,
+      "unit": "%"
+    },
+    "id": "d228b9f9-9ea3-4cb7-aa34-b8316867957f",
+    "meta": {
+      "versionId": "978f41f5-8629-45e8-8656-4fb71af06990",
+      "lastUpdated": "2026-07-31T02:51:07.867Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "20150-9",
+          "display": "FEV1"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "effectiveDateTime": "2026-07-24",
+    "valueQuantity": {
+      "value": 82,
+      "unit": "%"
+    },
+    "id": "1f7c3ef9-3e68-43e5-91dd-813fb0a6719c",
+    "meta": {
+      "versionId": "8674a9a2-4c96-4f4f-8a49-4f9196eb41e7",
+      "lastUpdated": "2026-07-31T02:51:07.882Z"
+    }
+  }
+]

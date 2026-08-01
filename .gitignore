@@ -1,1 +1,69 @@
+# --- Secretos -----------------------------------------------------------------
+# El .env de la raiz tiene credenciales reales. NUNCA se commitea.
 .env
+.env.*
+!.env.example
+ops/.env
+**/.env
+!ops/.env.example
+
+# La app de iOS lee su key de Deepgram de un Secrets.xcconfig que, segun
+# ios/README.md, va en la RAIZ del repo — fuera del alcance de ios/.gitignore.
+Secrets.xcconfig
+**/Secrets.xcconfig
+
+# --- Dependencias -------------------------------------------------------------
+node_modules/
+.npm/
+.pnpm-store/
+
+# --- Builds -------------------------------------------------------------------
+dist/
+build/
+out/
+.next/
+# El dashboard compila en dev a `.next-dev` para no pisar el `.next` de
+# producción (ver `distDir` en dashboard/next.config.ts).
+.next-dev/
+*.tsbuildinfo
+
+# --- Reportes de test ---------------------------------------------------------
+# OJO: `coverage/` a secas NO se ignora — es la carpeta del servicio de Stedi
+# (loop-coverage, :3003). Solo se ignoran los reportes de cobertura de vitest.
+voice/coverage/
+core/coverage/
+dashboard/coverage/
+coverage/coverage/
+.nyc_output/
+*.lcov
+
+# --- Capturas de Stedi --------------------------------------------------------
+# Respuestas 271 crudas capturadas de Stedi. Datos de sandbox, pero no hay
+# razón para versionarlas — salvo el fixture de respaldo, que sí va en el repo.
+coverage/captures/*.json
+!coverage/captures/.gitkeep
+
+# --- Logs y temporales --------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-error.log*
+.cache/
+.tmp/
+tmp/
+
+# --- Audio de respaldo del demo (pesa y no aporta al repo) --------------------
+voice/recordings/
+*.wav.bak
+
+# --- Sistema operativo / editores ---------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Volcado de recursos de Medplum (datos de proyecto, no codigo)
+dashboard/.medplum-backup/
+dashboard/scripts/medplum-strings.json
+HELT-logo-kit.zip

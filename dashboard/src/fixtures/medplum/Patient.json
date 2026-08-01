@@ -1,0 +1,125 @@
+[
+  {
+    "resourceType": "Patient",
+    "active": false,
+    "id": "8085ac88-0854-438d-a991-c2e8fae1e95a",
+    "meta": {
+      "versionId": "55e112ac-b3b5-43ee-9b06-0d27da8d7b49",
+      "lastUpdated": "2026-07-31T08:36:36.251Z"
+    }
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "system": "https://teachback.demo/id",
+        "value": "teachback-sofia"
+      }
+    ],
+    "name": [
+      {
+        "given": [
+          "Sophia"
+        ],
+        "family": "Reynolds",
+        "text": "Sophia Reynolds"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1962-03-14",
+    "communication": [
+      {
+        "language": {
+          "coding": [
+            {
+              "system": "urn:ietf:bcp:47",
+              "code": "es-MX"
+            }
+          ]
+        },
+        "preferred": true
+      }
+    ],
+    "id": "0699daac-e93c-42dc-8ff7-0657e120e634",
+    "meta": {
+      "versionId": "6f0079d2-274d-4fbe-83b1-ffbba34e04a1",
+      "lastUpdated": "2026-07-31T02:37:44.748Z"
+    }
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "system": "https://teachback.demo/id",
+        "value": "teachback-marco"
+      }
+    ],
+    "name": [
+      {
+        "given": [
+          "Michael"
+        ],
+        "family": "Harrison",
+        "text": "Michael Harrison"
+      }
+    ],
+    "gender": "male",
+    "birthDate": "1968-05-20",
+    "communication": [
+      {
+        "language": {
+          "coding": [
+            {
+              "system": "urn:ietf:bcp:47",
+              "code": "es-MX"
+            }
+          ]
+        },
+        "preferred": true
+      }
+    ],
+    "id": "6ee9d98e-061f-4c2e-8681-3e233f299474",
+    "meta": {
+      "versionId": "d4c62d49-6e14-4079-9783-5a0b8f1220e9",
+      "lastUpdated": "2026-07-31T02:51:07.930Z"
+    }
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "system": "https://teachback.demo/id",
+        "value": "teachback-elena"
+      }
+    ],
+    "name": [
+      {
+        "given": [
+          "Emily"
+        ],
+        "family": "Carter",
+        "text": "Emily Carter"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1992-01-08",
+    "communication": [
+      {
+        "language": {
+          "coding": [
+            {
+              "system": "urn:ietf:bcp:47",
+              "code": "es-MX"
+            }
+          ]
+        },
+        "preferred": true
+      }
+    ],
+    "id": "5ede2b89-c368-4874-9b5c-5f32a21cf274",
+    "meta": {
+      "versionId": "20c1ee32-1334-4db8-b0b9-6207ed5e198d",
+      "lastUpdated": "2026-07-31T02:51:07.942Z"
+    }
+  }
+]

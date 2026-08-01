@@ -1,0 +1,14 @@
+{
+  "checkId": "cov-fallback-0000",
+  "checkedAt": "2026-08-01T18:29:43Z",
+  "status": "unknown",
+  "payerName": "Unknown",
+  "planName": null,
+  "copayCents": null,
+  "coinsurancePercent": null,
+  "deductible": null,
+  "priorAuthRequired": null,
+  "raw271Id": null,
+  "voiceSummary": "No pude verificar tu cobertura en este momento. Tu equipo de cuidado puede confirmarlo por ti.",
+  "latencyMs": 3000
+}

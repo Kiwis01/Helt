@@ -1,0 +1,90 @@
+{
+  "patientId": "loop-demo-patient-001",
+  "callId": "call-8f2a",
+  "startedAt": "2026-08-01T18:20:02Z",
+  "endedAt": "2026-08-01T18:34:50Z",
+  "outcome": "resolved-with-intervention",
+  "escalation": {
+    "triggered": false,
+    "rule": null,
+    "triggeredAt": null,
+    "action": null
+  },
+  "severitySelfReported": 7,
+  "interventionsAttempted": [
+    {
+      "carePlanActivityId": "cp-act-1",
+      "startedAt": "2026-08-01T18:23:10Z",
+      "completed": true,
+      "patientReportedRelief": 6
+    }
+  ],
+  "biometricsSnapshot": {
+    "peakHeartRate": 126,
+    "minHrv": 18,
+    "peakRespiratoryRate": 27
+  },
+  "transcript": {
+    "redacted": true,
+    "turns": [
+      {
+        "speaker": "system",
+        "at": "2026-08-01T18:20:02Z",
+        "text": "Esta llamada no sustituye la atención de emergencia. Si crees que es una emergencia, cuelga y llama al 911."
+      },
+      {
+        "speaker": "patient",
+        "at": "2026-08-01T18:20:09Z",
+        "text": "Me está costando respirar y siento el corazón muy acelerado, creo que está pasando otra vez."
+      },
+      {
+        "speaker": "agent",
+        "at": "2026-08-01T18:20:14Z",
+        "text": "Estoy contigo. Tu frecuencia cardiaca está en 118 y tu promedio de los últimos 30 días es 68. Tu variabilidad también bajó. Esto se parece a los últimos cuatro episodios que registraste."
+      },
+      {
+        "speaker": "agent",
+        "at": "2026-08-01T18:20:26Z",
+        "text": "Tu plan de cuidado, el que escribió la doctora Chen, dice empezar con respiración de caja. ¿Lo hacemos juntos?"
+      },
+      {
+        "speaker": "patient",
+        "at": "2026-08-01T18:20:33Z",
+        "text": "Sí, está bien."
+      },
+      {
+        "speaker": "agent",
+        "at": "2026-08-01T18:23:10Z",
+        "text": "Inhala conmigo durante cuatro tiempos. Sostén cuatro. Exhala cuatro. Sostén cuatro. No tienes que hablar."
+      },
+      {
+        "speaker": "patient",
+        "at": "2026-08-01T18:28:41Z",
+        "text": "Ya respiro mejor. Como un seis de diez."
+      },
+      {
+        "speaker": "agent",
+        "at": "2026-08-01T18:29:05Z",
+        "text": "Tu frecuencia bajó a 94 desde que empezamos. Tu plan también menciona agendar una sesión con tu equipo de cuidado. Déjame revisar tu cobertura."
+      },
+      {
+        "speaker": "agent",
+        "at": "2026-08-01T18:29:42Z",
+        "text": "Tu sesión de telesalud sí está cubierta. Tu copago es de 25 dólares, y te quedan 80 dólares por cubrir de tu deducible."
+      },
+      {
+        "speaker": "patient",
+        "at": "2026-08-01T18:34:20Z",
+        "text": "Gracias. Creo que ya estoy mejor."
+      }
+    ]
+  },
+  "coverageChecks": [
+    {
+      "checkId": "cov-1a2b3c",
+      "serviceType": "telehealth-mental-health",
+      "result": "covered",
+      "copayCents": 2500
+    }
+  ]
+}

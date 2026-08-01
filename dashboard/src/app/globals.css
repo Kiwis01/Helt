@@ -1,0 +1,570 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================================================================
+   Sistema de diseño — vidrio sobre aurora.
+
+   Tres reglas que lo gobiernan todo:
+
+   1. ESCALERA DE TEXTO DE TRES PELDAÑOS. Solo tres opacidades de blanco.
+      Nada de texto de color salvo estado semántico. Si algo necesita
+      destacar, se hace más GRANDE, no de otro color.
+   2. UN NÚMERO HÉROE POR WIDGET. La etiqueta es pequeña y callada; el dato
+      es enorme. Si dos cosas compiten por ser el héroe, una sobra.
+   3. EL TEXTO EXPLICATIVO ES DEUDA. Si un panel necesita un párrafo para
+      entenderse, el panel está mal. Una línea corta, o ninguna.
+   ================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Tinta HELT (#0B2B31) oscurecida. El tinte es verde-azulado, de la marca,
+     no el azul-violeta de antes. Nunca #000: los proyectores lo rinden como
+     gris sucio, y el contraste extremo cansa en una pantalla que alguien mira
+     con el pulso a 120. */
+  --bg: #061a1e;
+  --ink-base: #0b2b31;
+
+  /* --- vidrio tipo iOS --- */
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-2: rgba(255, 255, 255, 0.1);
+  --hair: rgba(255, 255, 255, 0.1);
+  /* El brillo especular del borde superior es lo que hace que una
+     superficie se lea como vidrio y no como un rectángulo gris. */
+  --spec: inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 26px 64px rgba(0, 0, 0, 0.45);
+  --blur: blur(30px) saturate(180%);
+  --blur-strong: blur(44px) saturate(190%);
+
+  /* --- escalera de texto: tres peldaños, ni uno más --- */
+  --ink: rgba(255, 255, 255, 0.95);
+  --ink-2: rgba(255, 255, 255, 0.62);
+  --ink-3: rgba(255, 255, 255, 0.38);
+
+  /* --- un solo acento: el teal de HELT ---
+     La marca trae Aqua #2DE2E6, Teal #12B5C9 y Deep teal #0A8FA6. El aqua puro
+     es el del icono —un cuadrado de 60 px que tiene que destacar en la pantalla
+     de inicio— y es demasiado eléctrico para superficies grandes o para tres
+     series a la vez. Aquí se usa el teal medio, que es el mismo color de marca
+     con la croma bajada lo justo para poder mirarlo un rato. */
+  --accent: #2a97a5;
+  --accent-soft: rgba(42, 151, 165, 0.14);
+  --accent-line: rgba(42, 151, 165, 0.32);
+  /* El aqua puro se reserva para el logotipo y para un solo realce por
+     pantalla. Si aparece en dos sitios a la vez, sobra en uno. */
+  --brand-aqua: #2de2e6;
+  --brand-teal: #12b5c9;
+  --brand-deep: #0a8fa6;
+
+  /* --- estado semántico ---
+     `--ok` se aleja del teal a propósito, hacia el verde: si "todo bien" y "el
+     color corporativo" se parecen, un panel en verde deja de comunicar nada.
+     El rojo es el único color saturado de la interfaz — es el badge de
+     escalación, el único momento que DEBE alarmar. Todo lo demás cede
+     protagonismo para que ese rojo siga siendo lo más fuerte de la pantalla. */
+  --ok: #55b98c;
+  --ok-soft: rgba(85, 185, 140, 0.13);
+  --ok-line: rgba(85, 185, 140, 0.3);
+  --danger: #f5867a;
+  --danger-soft: rgba(245, 134, 122, 0.13);
+  --danger-line: rgba(245, 134, 122, 0.36);
+  --warn: #e8bc72;
+  --warn-soft: rgba(232, 188, 114, 0.12);
+  --warn-line: rgba(232, 188, 114, 0.32);
+
+  /* Alias de compatibilidad: los charts ya escriben var(--line). */
+  --line: var(--hair);
+
+  /* --- series de gráficos (válidas en atributos SVG) ---
+     Tres tonos SEPARADOS EN EL CÍRCULO CROMÁTICO (teal ~190°, periwinkle ~250°,
+     arena ~40°), no tres intensidades del mismo. Separarlas por tono es lo que
+     las hace distinguibles también sin visión cromática completa; separarlas
+     por brillo habría obligado a subir la saturación de todas, que es
+     justamente lo que no queremos.
+
+     La principal (HR) es el teal de marca: es la serie que se enseña por
+     defecto y la que más superficie ocupa. */
+  /* La línea de HR cubre casi todo el ancho de la tarjeta y se mira fijo: es la
+     superficie de color más grande de la pantalla. Va varios escalones por
+     debajo del teal de marca —la croma bajada, no el brillo— porque a plena
+     saturación esa serie sola convierte el panel en un neón. */
+  --chart-hr: #4aa8b4;
+  --chart-hrv: #9585c4;
+  --chart-rr: #c9974f;
+  --chart-episode: #e07a6f;
+  --chart-grid: rgba(255, 255, 255, 0.045);
+  --chart-band: rgba(74, 168, 180, 0.1);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* La curva de las transiciones de iOS: sale rápido y frena largo. Es lo que
+     hace que un indicador que se desliza se sienta con masa en vez de
+     interpolado. Se reserva para movimiento espacial (el pastilla del control
+     segmentado); `--ease` sigue valiendo para opacidad y color. */
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --radius: 24px;
+  --radius-sm: 16px;
+  /* Alto de la barra de navegación, en una variable porque la usan el chrome
+     y el cálculo de alto de las rejillas de cada vista. */
+  --nav-h: 52px;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    /* Cifras alineadas en columna: es un tablero de datos, no un blog. */
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.012em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Requisito duro del brief: nunca scroll horizontal. */
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  /* Scrollbars finas: una barra nativa gorda sobre fondo oscuro es lo que
+     hace que un panel se vea "roto" en el proyector. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ---------------- aurora de fondo ----------------
+     Recreada en CSS en vez de con un shader: el tablero ya está lleno de
+     series y una animación pesada detrás competiría con ellas. Estática,
+     muy tenue, solo para que el vidrio tenga algo sobre lo que posarse. */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .aurora::before,
+  .aurora::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+  }
+
+  /* Teal de marca a muy baja opacidad. Bajada respecto al azul anterior
+     (0.17 -> 0.10): la aurora es atmósfera, no un elemento. Si se nota que
+     está, está de más. */
+  .aurora::before {
+    width: 62vw;
+    height: 62vw;
+    left: -12vw;
+    bottom: -34vw;
+    background: radial-gradient(circle, rgba(18, 181, 201, 0.1), transparent 68%);
+  }
+
+  .aurora::after {
+    width: 54vw;
+    height: 54vw;
+    right: -14vw;
+    bottom: -30vw;
+    background: radial-gradient(circle, rgba(10, 143, 166, 0.09), transparent 68%);
+  }
+
+  /* ---------------- superficie de vidrio ---------------- */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--hair);
+    box-shadow: var(--spec), var(--shadow);
+  }
+
+  /* Entrada escalonada. `--i` en el elemento define el orden:
+     style={{ '--i': 3 }} → 150ms de retraso. */
+  .bloom {
+    animation: bloom 0.7s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+
+  @keyframes bloom {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.985);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+
+  /* ---------------- tipografía del tablero ----------------
+     La etiqueta susurra, el número grita. */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+  }
+
+  .hero {
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .hero small {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink-3);
+    margin-left: 3px;
+  }
+
+  /* ---------------- controles ---------------- */
+  .ghostbtn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--hair);
+    border-radius: 11px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+
+  .ghostbtn:hover:not(:disabled) {
+    color: var(--ink);
+    background: var(--glass-2);
+  }
+
+  .ghostbtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .ghostbtn[data-on='true'] {
+    color: var(--ink);
+    background: var(--glass-2);
+    border-color: var(--accent-line);
+  }
+
+  /* ---------------- campos de formulario ----------------
+     El sistema no tenía controles de entrada hasta que hubo que dar de alta
+     pacientes. Se definen como clase y no con utilidades sueltas de Tailwind
+     porque los colores del tema son var() y los modificadores de opacidad
+     (`bg-glass/60`) NO aplican sobre ellos — ver tailwind.config.ts. */
+  .field {
+    width: 100%;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--hair);
+    border-radius: 11px;
+    padding: 9px 11px;
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+
+  .field::placeholder {
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+
+  .field:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .field:focus {
+    /* El :focus-visible global ya dibuja el anillo de acento; aquí solo se sube
+       el borde para que el campo enfocado se distinga también sin teclado. */
+    border-color: var(--accent-line);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Un campo inválido se marca en el BORDE, no en el fondo: el rojo de fondo
+     compite con las banderas clínicas, y en esta pantalla el color de estado
+     está reservado para el paciente, no para el formulario. */
+  .field[aria-invalid='true'] {
+    border-color: var(--danger-line);
+  }
+
+  .field:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* El icono nativo del selector de fecha es negro sobre negro en WebKit.
+     Invertirlo es la diferencia entre un campo usable y uno que parece roto
+     justo cuando está proyectado. */
+  .field::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.45;
+    cursor: pointer;
+  }
+
+  .field::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.8;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+    margin-bottom: 5px;
+  }
+
+  /* ---------------- píldoras de estado ---------------- */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 5px 11px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .pill-ok {
+    color: var(--ok);
+    background: var(--ok-soft);
+    border-color: var(--ok-line);
+  }
+  .pill-warn {
+    color: var(--warn);
+    background: var(--warn-soft);
+    border-color: var(--warn-line);
+  }
+  .pill-danger {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: var(--danger-line);
+  }
+  .pill-accent {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: var(--accent-line);
+  }
+  .pill-quiet {
+    color: var(--ink-3);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--hair);
+  }
+
+  /* Tesela interior: para agrupar datos dentro de un widget sin meter
+     otra caja de vidrio (el vidrio sobre vidrio se ensucia). */
+  .tile {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-sm);
+  }
+
+  /* ---------------- control segmentado (iOS) ----------------
+
+     Un solo riel con una pastilla que se desliza, no N botones sueltos. La
+     diferencia no es estética: con botones independientes el usuario ve N
+     controles y tiene que leerlos todos para saber cuál está activo; con un
+     riel ve UN control con una posición, y la pastilla en movimiento le dice
+     de dónde viene y a dónde va.
+
+     Columnas de igual ancho a propósito —como UISegmentedControl—: permite
+     que el indicador se posicione con un `translateX` de porcentaje entero,
+     sin medir el DOM, y por tanto sin parpadeo en el primer pintado ni
+     recálculo al redimensionar. */
+  .seg {
+    position: relative;
+    display: grid;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--hair);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+  }
+
+  .seg-indicator {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.11);
+    box-shadow: var(--spec), 0 2px 10px rgba(0, 0, 0, 0.35);
+    transition: transform 0.42s var(--spring);
+    pointer-events: none;
+  }
+
+  .seg-item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: color 0.25s var(--ease);
+  }
+
+  .seg-item:hover {
+    color: var(--ink-2);
+  }
+
+  .seg-item[data-on='true'] {
+    color: var(--ink);
+  }
+
+  /* ---------------- retroceso tipo iOS ----------------
+
+     Chevron + NOMBRE de la vista anterior, sin caja. Apple no rotula el
+     retroceso como "Atrás": rotula a dónde va, porque eso es lo que el
+     usuario necesita saber antes de pulsar. Va en color de acento —es la
+     única excepción a la regla de "nada de texto de color": aquí el color no
+     decora, señala que es lo único pulsable del renglón. */
+  .backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: -6px;
+    padding: 4px 6px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    transition: opacity 0.2s var(--ease), transform 0.25s var(--spring),
+      background 0.2s var(--ease);
+  }
+
+  .backlink:hover {
+    background: var(--accent-soft);
+  }
+
+  .backlink:active {
+    transform: scale(0.96);
+  }
+
+  .backlink svg {
+    /* Ópticamente el chevron pesa menos que la mayúscula que le sigue; -1px lo
+       asienta sobre la línea base del texto. */
+    margin-top: -1px;
+  }
+
+  /* Tecla de atajo dibujada como tecla física. Solo decorativa: el atajo lo
+     gestiona el manejador de teclado, esto únicamente lo anuncia. */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 5px;
+    border: 1px solid var(--hair);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink-3);
+  }
+
+  /* Punto de latido para estados vivos. */
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--ink-3);
+  }
+
+  .dot-live {
+    background: var(--ok);
+    box-shadow: 0 0 10px rgba(130, 214, 171, 0.7);
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+
+  .dot-alert {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(232, 134, 124, 0.7);
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(0.85);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+}
+
+/* Respeta a quien pide menos movimiento — y a los proyectores lentos. */
+@media (prefers-reduced-motion: reduce) {
+  .bloom,
+  .dot-live,
+  .dot-alert {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

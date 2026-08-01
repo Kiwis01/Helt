@@ -1,0 +1,49 @@
+{
+  "patientId": "loop-demo-patient-001",
+  "displayName": "Alex Rivera",
+  "age": 34,
+  "gender": "female",
+  "conditions": [
+    {
+      "code": "197480006",
+      "system": "http://snomed.info/sct",
+      "display": "Anxiety disorder",
+      "onsetDate": "2023-04-12",
+      "clinicalStatus": "active"
+    }
+  ],
+  "medications": [
+    {
+      "display": "Sertraline 50mg",
+      "status": "active",
+      "rxnorm": "312938",
+      "coverageCheckable": true
+    }
+  ],
+  "carePlanAuthor": "Dr. Maya Chen",
+  "carePlanLastUpdated": "2026-07-02",
+  "baseline": {
+    "heartRate": {
+      "mean": 68,
+      "sd": 6,
+      "unit": "bpm"
+    },
+    "hrv": {
+      "mean": 54,
+      "sd": 11,
+      "unit": "ms"
+    },
+    "respiratoryRate": {
+      "mean": 14,
+      "sd": 2,
+      "unit": "breaths/min"
+    },
+    "sleepHours": {
+      "mean": 6.8,
+      "sd": 1.1,
+      "unit": "h"
+    }
+  },
+  "episodeCount": 12,
+  "lastEpisodeAt": "2026-07-31T20:05:00.000Z"
+}

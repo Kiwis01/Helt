@@ -1,0 +1,26 @@
+{
+  "name": "@loop/coverage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "loop-coverage — elegibilidad en tiempo real (Stedi 270/271). Puerto 3003.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@loop/shared": "*",
+    "fastify": "^5.2.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
