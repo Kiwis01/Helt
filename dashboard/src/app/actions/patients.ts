@@ -27,7 +27,7 @@ import { createPatient } from '@/lib/chart/write';
  * arrastrar el error del intento anterior solo sirve para enseñar un mensaje
  * que ya no es cierto.
  */
-export async function crearPacienteAction(
+export async function createPatientAction(
   _previous: NewPatientState,
   formData: FormData,
 ): Promise<NewPatientState> {

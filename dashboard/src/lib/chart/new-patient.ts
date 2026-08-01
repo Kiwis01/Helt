@@ -33,12 +33,21 @@ import { z } from 'zod';
  */
 export const IDENTIFIER_SYSTEM = 'https://teachback.demo/id';
 
-/** Los cuatro valores de `Patient.gender` en FHIR R4. No hay más. */
+/**
+ * Los cuatro valores de `Patient.gender` en FHIR R4. No hay más.
+ *
+ * Las etiquetas coinciden con las de `describeGender()` en `format.ts`: el
+ * formulario y el expediente nombran el mismo dato, y verlo escrito de dos
+ * formas distintas en dos pantallas seguidas se lee como si fueran campos
+ * distintos. La excepción es `unknown` —aquí "Unknown", allí "Sex not
+ * recorded"— porque no dicen lo mismo: en el formulario es una elección que
+ * se toma, en el expediente es la constatación de que nadie la tomó.
+ */
 export const GENDERS = [
-  { code: 'female', label: 'Femenino' },
-  { code: 'male', label: 'Masculino' },
-  { code: 'other', label: 'Otro' },
-  { code: 'unknown', label: 'Sin especificar' },
+  { code: 'female', label: 'Female' },
+  { code: 'male', label: 'Male' },
+  { code: 'other', label: 'Other' },
+  { code: 'unknown', label: 'Unknown' },
 ] as const;
 
 /**
@@ -49,8 +58,8 @@ export const GENDERS = [
  * formulario y no una constante escondida.
  */
 export const LANGUAGES = [
-  { code: 'es-MX', label: 'Español (México)' },
-  { code: 'en-US', label: 'Inglés (EE. UU.)' },
+  { code: 'en-US', label: 'English (US)' },
+  { code: 'es-MX', label: 'Spanish (Mexico)' },
 ] as const;
 
 const GENDER_CODES = GENDERS.map((g) => g.code) as [string, ...string[]];
@@ -101,38 +110,38 @@ export const newPatientSchema = z.object({
   given: z
     .string()
     .trim()
-    .min(1, 'El nombre es obligatorio')
-    .max(70, 'El nombre es demasiado largo'),
+    .min(1, 'First name is required')
+    .max(70, 'First name is too long'),
 
   family: z
     .string()
     .trim()
-    .min(1, 'Los apellidos son obligatorios')
-    .max(70, 'Los apellidos son demasiado largos'),
+    .min(1, 'Last name is required')
+    .max(70, 'Last name is too long'),
 
   birthDate: z
     .string()
     .trim()
-    .refine((v) => v === '' || ISO_DATE.test(v), 'Usa el formato AAAA-MM-DD')
-    .refine((v) => v === '' || isRealDate(v), 'Esa fecha no existe en el calendario')
-    .refine((v) => v === '' || v <= todayUtc(), 'La fecha de nacimiento no puede estar en el futuro')
-    .refine((v) => v === '' || v >= '1900-01-01', 'La fecha es demasiado antigua'),
+    .refine((v) => v === '' || ISO_DATE.test(v), 'Use the YYYY-MM-DD format')
+    .refine((v) => v === '' || isRealDate(v), 'That date is not on the calendar')
+    .refine((v) => v === '' || v <= todayUtc(), 'Date of birth cannot be in the future')
+    .refine((v) => v === '' || v >= '1900-01-01', 'That date is too far back'),
 
   gender: z.enum(GENDER_CODES).describe('Patient.gender'),
 
   identifier: z
     .string()
     .trim()
-    .max(64, 'El identificador es demasiado largo')
-    .refine((v) => !/\s/.test(v), 'El identificador no puede llevar espacios'),
+    .max(64, 'Identifier is too long')
+    .refine((v) => !/\s/.test(v), 'Identifier cannot contain spaces'),
 
   phone: z
     .string()
     .trim()
-    .max(32, 'El teléfono es demasiado largo')
+    .max(32, 'Phone number is too long')
     .refine(
       (v) => v === '' || (v.match(PHONE_DIGITS) ?? []).length >= 8,
-      'Un teléfono necesita al menos 8 dígitos',
+      'A phone number needs at least 8 digits',
     ),
 
   language: z.enum(LANGUAGE_CODES),
@@ -153,7 +162,15 @@ export type NewPatientField = keyof NewPatientInput;
  */
 export type NewPatientValues = Record<NewPatientField, string>;
 
-/** Lo que se manda cuando el formulario se abre por primera vez. */
+/**
+ * Lo que se manda cuando el formulario se abre por primera vez.
+ *
+ * `language` por defecto en `en-US` y no en español: de este campo cuelga el
+ * idioma en que Loop LLAMA al paciente, no el de la interfaz. Con el valor
+ * anterior, cada paciente dado de alta durante el demo habría recibido una
+ * llamada en español delante de un público que escucha en inglés. Sigue siendo
+ * un desplegable: el paciente hispanohablante se elige, no se asume.
+ */
 export const EMPTY_PATIENT_FORM: NewPatientValues = {
   given: '',
   family: '',
@@ -161,7 +178,7 @@ export const EMPTY_PATIENT_FORM: NewPatientValues = {
   gender: 'unknown',
   identifier: '',
   phone: '',
-  language: 'es-MX',
+  language: 'en-US',
 };
 
 /** Los campos del formulario, en el orden en que se declararon. */

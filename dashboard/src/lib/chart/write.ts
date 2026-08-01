@@ -50,7 +50,7 @@ function messageOf(error: unknown): string {
 }
 
 /**
- * Traduce el fallo de Medplum a algo accionable en español.
+ * Traduce el fallo de Medplum a algo accionable.
  *
  * Se distinguen los casos porque el remedio es distinto en cada uno, y un
  * "error al crear el paciente" genérico obliga a abrir la consola para saber si
@@ -62,7 +62,7 @@ function describeWriteError(error: unknown): { message: string; detail: string |
     // escritura fallara, solo que no llegó la respuesta. El `POST` puede haber
     // aterrizado igual, y reintentar a ciegas crea dos veces al mismo paciente.
     return {
-      message: `Medplum no respondió en ${MEDPLUM_WRITE_TIMEOUT_MS / 1000} s. Puede que el alta sí se haya guardado: recarga la agenda antes de volver a intentarlo.`,
+      message: `Medplum did not respond within ${MEDPLUM_WRITE_TIMEOUT_MS / 1000}s. The patient may have been saved anyway — reload the schedule before trying again.`,
       detail: null,
     };
   }
@@ -71,19 +71,19 @@ function describeWriteError(error: unknown): { message: string; detail: string |
 
   if (/forbidden|not allowed|access denied|403/i.test(raw)) {
     return {
-      message: 'Medplum rechazó el alta: estas credenciales no tienen permiso de escritura sobre Patient.',
+      message: 'Medplum rejected the request: these credentials cannot write to Patient.',
       detail: raw,
     };
   }
 
   if (/invalid|unauthorized|401/i.test(raw)) {
     return {
-      message: 'No se pudo autenticar con Medplum. Revisa MEDPLUM_CLIENT_ID y MEDPLUM_CLIENT_SECRET.',
+      message: 'Could not authenticate with Medplum. Check MEDPLUM_CLIENT_ID and MEDPLUM_CLIENT_SECRET.',
       detail: raw,
     };
   }
 
-  return { message: 'No se pudo guardar el paciente en Medplum.', detail: raw };
+  return { message: 'Could not save the patient to Medplum.', detail: raw };
 }
 
 /* ================================================================== */
@@ -109,7 +109,7 @@ export async function createPatient(input: NewPatientInput): Promise<WriteOutcom
     // desaparecería en la siguiente recarga.
     return {
       ok: false,
-      message: 'Medplum no está configurado: sin MEDPLUM_CLIENT_ID y MEDPLUM_CLIENT_SECRET no se puede dar de alta a nadie.',
+      message: 'Medplum is not configured: without MEDPLUM_CLIENT_ID and MEDPLUM_CLIENT_SECRET no patient can be added.',
       detail: null,
     };
   }
@@ -132,7 +132,7 @@ export async function createPatient(input: NewPatientInput): Promise<WriteOutcom
     if (!created.id) {
       return {
         ok: false,
-        message: 'Medplum guardó el paciente pero no devolvió su identificador. Recarga la agenda para verlo.',
+        message: 'Medplum saved the patient but returned no identifier. Reload the schedule to see them.',
         detail: null,
       };
     }

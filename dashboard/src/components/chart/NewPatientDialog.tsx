@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { crearPacienteAction } from '@/app/actions/pacientes';
+import { createPatientAction } from '@/app/actions/patients';
 import {
   GENDERS,
   IDLE_STATE,
@@ -46,7 +46,7 @@ interface NewPatientDialogProps {
   label?: string;
 }
 
-export function NewPatientDialog({ canWrite, usingFallback, label = 'Nuevo paciente' }: NewPatientDialogProps) {
+export function NewPatientDialog({ canWrite, usingFallback, label = 'New patient' }: NewPatientDialogProps) {
   const [open, setOpen] = useState(false);
   // Remontar el formulario es lo que lo limpia: el estado de `useActionState`
   // vive dentro de él, así que una llave nueva es un formulario nuevo de verdad.
@@ -95,8 +95,8 @@ export function NewPatientDialog({ canWrite, usingFallback, label = 'Nuevo pacie
         disabled={!canWrite}
         title={
           canWrite
-            ? 'Dar de alta un paciente en Medplum'
-            : 'Medplum no está configurado: sin credenciales no se puede dar de alta a nadie'
+            ? 'Add a patient to Medplum'
+            : 'Medplum is not configured: without credentials no patient can be added'
         }
       >
         + {label}
@@ -121,13 +121,13 @@ export function NewPatientDialog({ canWrite, usingFallback, label = 'Nuevo pacie
             <div className="flex items-start justify-between gap-4 pb-1">
               <div>
                 <h2 id={titleId} className="text-lg font-semibold tracking-tight">
-                  Nuevo paciente
+                  New patient
                 </h2>
                 <p className="pt-0.5 text-2xs text-ink-3">
-                  Se crea un recurso Patient en Medplum. Aparece en la agenda al instante.
+                  Creates a Patient resource in Medplum. Shows up on the schedule right away.
                 </p>
               </div>
-              <button type="button" className="ghostbtn" onClick={close} aria-label="Cerrar">
+              <button type="button" className="ghostbtn" onClick={close} aria-label="Close">
                 Esc
               </button>
             </div>
@@ -159,7 +159,7 @@ function NewPatientForm({
   onRestart: () => void;
 }) {
   const [state, formAction] = useActionState<NewPatientState, FormData>(
-    crearPacienteAction,
+    createPatientAction,
     IDLE_STATE,
   );
   const router = useRouter();
@@ -185,15 +185,15 @@ function NewPatientForm({
     <form action={formAction} className="flex flex-col gap-3 pt-4" noValidate>
       {usingFallback ? (
         <p className="tile rounded-tile px-3.5 py-2.5 text-2xs leading-relaxed text-ink-2">
-          La agenda se está pintando desde el respaldo local. El alta se intenta contra Medplum de
-          todas formas; si no responde, te lo decimos aquí.
+          The schedule is rendering from the local fallback. The patient is still written to Medplum
+          for real; if it does not respond, you will see it here.
         </p>
       ) : null}
 
       <div className="grid grid-cols-2 gap-3">
         <Field
           name="given"
-          label="Nombre(s)"
+          label="First name"
           placeholder="María José"
           autoComplete="off"
           autoFocus
@@ -203,7 +203,7 @@ function NewPatientForm({
         />
         <Field
           name="family"
-          label="Apellidos"
+          label="Last name"
           placeholder="Ramírez"
           autoComplete="off"
           required
@@ -213,7 +213,7 @@ function NewPatientForm({
 
         <Field
           name="birthDate"
-          label="Fecha de nacimiento"
+          label="Date of birth"
           type="date"
           error={fieldErrors.birthDate}
           defaultValue={values.birthDate}
@@ -221,7 +221,7 @@ function NewPatientForm({
 
         <SelectField
           name="gender"
-          label="Género"
+          label="Sex"
           defaultValue={values.gender}
           options={GENDERS}
           error={fieldErrors.gender}
@@ -229,33 +229,33 @@ function NewPatientForm({
 
         <Field
           name="phone"
-          label="Teléfono"
+          label="Phone"
           type="tel"
-          placeholder="+52 55 1234 5678"
+          placeholder="+1 415 555 0134"
           autoComplete="off"
           error={fieldErrors.phone}
           defaultValue={values.phone}
-          hint="Es al que llama Loop"
+          hint="The number Loop calls"
         />
 
         <SelectField
           name="language"
-          label="Idioma preferido"
+          label="Preferred language"
           defaultValue={values.language}
           options={LANGUAGES}
           error={fieldErrors.language}
-          hint="En el que habla el agente"
+          hint="The one the agent speaks"
         />
 
         <div className="col-span-2">
           <Field
             name="identifier"
-            label="Identificador"
+            label="Identifier"
             placeholder="teachback-maria"
             autoComplete="off"
             error={fieldErrors.identifier}
             defaultValue={values.identifier}
-            hint="Opcional · es el MRN que se ve en la agenda"
+            hint="Optional · this is the MRN shown on the schedule"
           />
         </div>
       </div>
@@ -273,7 +273,7 @@ function NewPatientForm({
 
       <div className="flex items-center justify-end gap-2 pt-1">
         <button type="button" className="ghostbtn" onClick={onClose}>
-          Cancelar
+          Cancel
         </button>
         <SubmitButton />
       </div>
@@ -290,7 +290,7 @@ function SubmitButton() {
 
   return (
     <button type="submit" className="ghostbtn" data-on="true" disabled={pending}>
-      {pending ? 'Guardando en Medplum…' : 'Crear paciente'}
+      {pending ? 'Saving to Medplum…' : 'Create patient'}
     </button>
   );
 }
@@ -314,7 +314,7 @@ function CreatedView({
         <div className="flex items-center gap-2">
           <span className="pill pill-ok">
             <span className="dot dot-live" aria-hidden />
-            Guardado en Medplum
+            Saved to Medplum
           </span>
         </div>
         <p className="pt-3 text-lg font-semibold leading-tight">{state.displayName}</p>
@@ -327,13 +327,13 @@ function CreatedView({
 
       <div className="flex items-center justify-end gap-2">
         <button type="button" className="ghostbtn" onClick={onRestart}>
-          Crear otro
+          Create another
         </button>
         <button type="button" className="ghostbtn" onClick={onClose}>
-          Volver a la agenda
+          Back to schedule
         </button>
         <Link href={`/paciente/${state.id}`} className="ghostbtn" data-on="true">
-          Abrir expediente
+          Open chart
         </Link>
       </div>
     </div>
