@@ -7,6 +7,11 @@ ops/.env
 **/.env
 !ops/.env.example
 
+# La app de iOS lee su key de Deepgram de un Secrets.xcconfig que, segun
+# ios/README.md, va en la RAIZ del repo — fuera del alcance de ios/.gitignore.
+Secrets.xcconfig
+**/Secrets.xcconfig
+
 # --- Dependencias -------------------------------------------------------------
 node_modules/
 .npm/
