@@ -19,7 +19,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { createPortal, useFormStatus } from 'react-dom';
 
 import { createPatientAction } from '@/app/actions/patients';
 import {
@@ -102,7 +102,21 @@ export function NewPatientDialog({ canWrite, usingFallback, label = 'New patient
         + {label}
       </button>
 
-      {open ? (
+      {/*
+        Al `body` por portal, y no donde vive el disparador.
+
+        `AppNav` lleva `backdrop-filter`, y esa propiedad convierte al elemento
+        en bloque contenedor de sus descendientes `position: fixed` —igual que
+        haría un `transform`—. Con el diálogo colgando de la barra, `inset-0`
+        dejaba de medirse contra el viewport y pasaba a medirse contra la
+        cabecera: el formulario salía recortado a la altura de la barra y el
+        fondo solo oscurecía esa franja. El portal lo saca de ese subárbol y le
+        devuelve a `fixed` su significado, viva donde viva el botón.
+
+        Se monta solo con `open`, que únicamente puede ser cierto tras un clic:
+        en el render del servidor no se toca `document`.
+      */}
+      {open ? createPortal(
         <div
           className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 px-6 py-10 backdrop-blur-sm"
           // Cierre al pinchar fuera. Se compara el objetivo con el propio fondo
@@ -139,7 +153,8 @@ export function NewPatientDialog({ canWrite, usingFallback, label = 'New patient
               onRestart={openFresh}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       ) : null}
     </>
   );
