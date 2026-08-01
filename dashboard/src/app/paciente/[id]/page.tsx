@@ -1,14 +1,18 @@
 import { notFound } from 'next/navigation';
 
 import { DocumentsPanel } from '@/components/chart/DocumentsPanel';
+import { ImagingPanel } from '@/components/chart/ImagingPanel';
 import { LabsPanel } from '@/components/chart/LabsPanel';
 import { MedicationsPanel } from '@/components/chart/MedicationsPanel';
 import { PatientBanner } from '@/components/chart/PatientBanner';
 import { ProblemsPanel } from '@/components/chart/ProblemsPanel';
 import { SourceBadge } from '@/components/chart/SourceBadge';
+import { LoopSection } from '@/components/loop/LoopSection';
 import { AppNav } from '@/components/nav/AppNav';
 import { BackLink } from '@/components/nav/BackLink';
 import { chartFlags, readPatientChart } from '@/lib/chart/read';
+import { readLoopPanels } from '@/lib/loop-panels';
+import { isLoopPatient } from '@/lib/medplum/loop-patient';
 
 /**
  * Expediente de un paciente.
@@ -23,6 +27,11 @@ import { chartFlags, readPatientChart } from '@/lib/chart/read';
  * paciente, y comprimirlo en una pantalla obligaría a recortar contenido clínico
  * para que quepa. La banda de identidad se queda pegada arriba justamente para
  * que el scroll no haga perder de vista de quién es lo que se está leyendo.
+ *
+ * Loop vive DENTRO de esta pantalla, no en una pestaña hermana. El compañero de
+ * voz y el expediente hablan del mismo paciente, y separarlos obligaba a saltar
+ * de vista para cruzar una escalada con la medicación que la explica. Aparece
+ * solo en el paciente enrolado: ver `lib/medplum/loop-patient.ts`.
  */
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +42,14 @@ export default async function PatientChartPage({
 }) {
   const { id } = await params;
   const now = new Date();
-  const { chart, source } = await readPatientChart(id, now);
+
+  // Las dos tandas van en paralelo porque no dependen entre sí: el expediente
+  // sale de Medplum y los paneles de Loop de loop-core. Encadenarlas sumaría
+  // los dos peores casos de latencia en una pantalla que se proyecta en vivo.
+  const [{ chart, source }, loop] = await Promise.all([
+    readPatientChart(id, now),
+    isLoopPatient(id) ? readLoopPanels(id) : null,
+  ]);
 
   // Ni Medplum ni el respaldo conocen a este paciente: es una URL escrita a mano.
   if (!chart) notFound();
@@ -62,6 +78,12 @@ export default async function PatientChartPage({
           now={now}
         />
 
+        {/* Loop va sobre la rejilla clínica, no debajo: es lo único de esta
+            pantalla que cambia mientras se mira. Una escalada en curso importa
+            más que una receta de hace tres semanas, y si el paciente no está
+            enrolado esto no existe en vez de dejar un hueco que explicar. */}
+        {loop ? <LoopSection data={loop} /> : null}
+
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <MedicationsPanel medications={chart.medications} index={1} />
           <LabsPanel metrics={chart.metrics} index={2} />
@@ -73,6 +95,14 @@ export default async function PatientChartPage({
             index={4}
           />
         </div>
+
+        {/* A todo el ancho, no como celda de la rejilla: el visor de imagen es lo
+            único de esta pantalla que mejora de verdad con más píxeles. */}
+        <ImagingPanel
+          patientId={chart.patient.id}
+          patientName={chart.patient.displayName}
+          index={5}
+        />
       </div>
     </main>
   );

@@ -22,6 +22,9 @@ dist/
 build/
 out/
 .next/
+# El dashboard compila en dev a `.next-dev` para no pisar el `.next` de
+# producción (ver `distDir` en dashboard/next.config.ts).
+.next-dev/
 *.tsbuildinfo
 
 # --- Reportes de test ---------------------------------------------------------

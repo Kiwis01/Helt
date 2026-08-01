@@ -139,6 +139,20 @@ console.log(`[loop-dashboard] .env → ${applyPublicEnv() ?? 'ninguno (solo ento
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // `next dev` y `next build` comparten `.next` por defecto, y `next dev` NO lo
+  // limpia al arrancar: lo reutiliza. Si alguien corre un build de producción
+  // mientras hay un dev server vivo, el directorio queda con artefactos de los
+  // dos modos mezclados (`server/pages/_document.js` del router viejo, chunks
+  // numerados que luego desaparecen) y TODAS las rutas devuelven 500 con
+  // `Cannot find module './775.js'`. Reiniciar el server no basta, porque
+  // vuelve a levantar la basura; hay que borrar `.next` a mano.
+  //
+  // Aquí somos tres sesiones sobre el mismo repo y el `npm run build` de la
+  // raíz construye dashboard, coverage y voice de una sola vez: cualquiera
+  // puede tumbarle el :3000 a otro sin enterarse. Separar los directorios
+  // elimina la clase de error entera.
+  distDir: process.env.NODE_ENV === 'development' ? '.next-dev' : '.next',
+
   // `@loop/shared` se publica como TypeScript crudo (main: ./index.ts) y vive
   // fuera de dashboard/. Sin transpilePackages, webpack lo trata como JS ya
   // compilado de node_modules y el build falla en el primer `import type`.

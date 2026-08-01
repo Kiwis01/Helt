@@ -227,16 +227,28 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
   const active = series[metric];
   const digits = digitsFor(metric);
 
+  /**
+   * Los episodios solo se marcan sobre la serie sintética.
+   *
+   * Vienen de loop-core y describen el mismo dataset que el fixture: sus
+   * `peakHeartRate` son picos de esa serie. Pintarlos encima de las
+   * observaciones reales de Medplum colgaría una escalada de 125 bpm sobre una
+   * línea que nunca pasó de 74 — una coincidencia visual que el ojo lee como
+   * causa. Cuando la serie es real y todavía no hay episodios reales que
+   * marcar, lo correcto es no marcar nada.
+   */
   const marks = useMemo<EpisodeMark[]>(
     () =>
-      episodes
-        .map((episode) => ({
-          episode,
-          start: Date.parse(episode.startedAt),
-          end: Date.parse(episode.endedAt),
-        }))
-        .filter((m) => Number.isFinite(m.start) && Number.isFinite(m.end)),
-    [episodes],
+      active.source === 'fixture'
+        ? episodes
+            .map((episode) => ({
+              episode,
+              start: Date.parse(episode.startedAt),
+              end: Date.parse(episode.endedAt),
+            }))
+            .filter((m) => Number.isFinite(m.start) && Number.isFinite(m.end))
+        : [],
+    [episodes, active.source],
   );
 
   /**
@@ -329,6 +341,28 @@ export function BaselineChart({ series, episodes }: BaselineChartProps) {
         <p className="hero mt-2">{active.baseline.mean.toFixed(digits)}</p>
         <p className="mt-2 text-2xs leading-tight text-ink-3">
           {active.unit} · ± {active.baseline.sd.toFixed(digits)}
+        </p>
+
+        {/* Origen de ESTA métrica, no de la pantalla.
+
+            El selector cambia de serie sin recargar, y hoy conviven las dos
+            cosas: el ritmo cardíaco sale del expediente y la HRV todavía es
+            sintética. Una píldora por métrica es lo único que evita que alguien
+            señale un número generado creyendo que lo midió un reloj. */}
+        <p
+          className={`mt-2 pill ${active.source === 'medplum' ? 'pill-ok' : 'pill-warn'} self-start`}
+          title={
+            active.source === 'medplum'
+              ? `${active.sourcePoints.toLocaleString('en-US')} observations from Medplum · every ${active.bucket}`
+              : 'Synthetic series from shared/fixtures — this patient has no such observations in Medplum'
+          }
+        >
+          <span
+            aria-hidden
+            className={`dot ${active.source === 'medplum' ? 'dot-live' : ''}`}
+            style={active.source === 'medplum' ? undefined : { background: 'var(--warn)' }}
+          />
+          {active.source === 'medplum' ? 'Medplum' : 'Fixture'}
         </p>
 
         {/* Tesela y no otra caja de vidrio: agrupar dentro de un panel se hace

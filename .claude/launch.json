@@ -8,6 +8,12 @@
       "port": 3000
     },
     {
+      "name": "loop-dashboard-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["exec", "--workspace", "@loop/dashboard", "--", "next", "dev"],
+      "autoPort": true
+    },
+    {
       "name": "loop-coverage",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--workspace", "@loop/coverage"],

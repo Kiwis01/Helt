@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Barra de navegación persistente. Es la misma en las tres vistas.
+ * Barra de navegación persistente. Es la misma en todas las vistas.
  *
  * ## El problema que resuelve
  *
@@ -12,30 +12,25 @@
  * vistas del mismo producto también significa que el usuario no puede
  * construirse un modelo de dónde está.
  *
- * La barra unifica las dos cosas: identidad fija a la izquierda, y un control
- * segmentado que hace visibles LOS DOS MUNDOS a la vez —el expediente
- * clínico y el compañero de voz— con el actual marcado. Que ambos estén
- * siempre en pantalla es lo que convierte "navegar" en "cambiar de pestaña".
+ * ## Por qué ya no hay control segmentado
+ *
+ * Llevaba dos "mundos", Chart y Loop, porque el compañero de voz era una ruta
+ * hermana con su propio paciente. Ya no lo es: Loop es una sección del
+ * expediente del paciente enrolado. Un control segmentado de un solo elemento
+ * no es navegación, es un adorno que ocupa el sitio donde antes había una
+ * decisión — así que se fue, y con él el atajo `2`.
  *
  * ## Atajos de teclado
  *
- * `1` y `2` cambian de mundo; `Esc` sube un nivel. Existen porque esto se
- * conduce desde un portátil delante de un público: en el escenario no quieres
- * buscar un objetivo de 90 px con el trackpad mientras hablas. Se ignoran
- * mientras se escribe en un campo, para no secuestrar la escritura.
+ * `1` vuelve a la agenda y `Esc` sube un nivel. Existen porque esto se conduce
+ * desde un portátil delante de un público: en el escenario no quieres buscar un
+ * objetivo de 90 px con el trackpad mientras hablas. Se ignoran mientras se
+ * escribe en un campo, para no secuestrar la escritura.
  */
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-
-import { SegmentedControl, type SegmentItem } from '@/components/nav/SegmentedControl';
-
-/** Los dos mundos del producto. El orden fija también el de los atajos. */
-const WORLDS: readonly SegmentItem[] = [
-  { key: 'chart', label: 'Chart', href: '/', title: 'Clinical chart · key 1' },
-  { key: 'loop', label: 'Loop', href: '/loop', title: 'Voice companion · key 2' },
-];
 
 /** ¿Se está escribiendo? Entonces las teclas sueltas no son atajos. */
 function isTyping(target: EventTarget | null): boolean {
@@ -56,8 +51,6 @@ export function AppNav({ actions }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const world = pathname.startsWith('/loop') ? 'loop' : 'chart';
-
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       // Con modificador no es un atajo nuestro: puede ser del sistema o del
@@ -68,9 +61,6 @@ export function AppNav({ actions }: AppNavProps) {
       if (event.key === '1') {
         event.preventDefault();
         router.push('/');
-      } else if (event.key === '2') {
-        event.preventDefault();
-        router.push('/loop');
       } else if (event.key === 'Escape') {
         // Sube un nivel en vez de `router.back()`: el historial puede venir de
         // cualquier sitio y "atrás" desde el expediente podría sacarte de la
@@ -78,7 +68,7 @@ export function AppNav({ actions }: AppNavProps) {
         //
         // Las dos rutas que cuelgan de la agenda comparten la regla: el
         // expediente de un paciente e Imaging se alcanzan desde ella y vuelven
-        // a ella. `/loop` no está aquí porque es un mundo hermano, no un hijo.
+        // a ella.
         if (pathname.startsWith('/paciente/') || pathname.startsWith('/imaging')) {
           event.preventDefault();
           router.push('/');
@@ -112,8 +102,6 @@ export function AppNav({ actions }: AppNavProps) {
       >
         LOOP
       </Link>
-
-      <SegmentedControl items={WORLDS} activeKey={world} ariaLabel="View" />
 
       {actions ? <div className="ml-auto flex shrink-0 items-center gap-3">{actions}</div> : null}
     </header>

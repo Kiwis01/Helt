@@ -39,6 +39,16 @@ export interface DrawablePoint {
   v: number;
 }
 
+/**
+ * De dónde salió una serie concreta.
+ *
+ * Va por serie y no por pantalla porque conviven: el ritmo cardíaco puede venir
+ * de Medplum mientras la HRV sigue siendo sintética, y un único badge arriba no
+ * puede decir las dos cosas a la vez. El selector del gráfico cambia de métrica
+ * sin recargar nada, así que el origen tiene que viajar pegado a la serie.
+ */
+export type SeriesSource = 'medplum' | 'fixture';
+
 export interface DrawableSeries {
   metric: ObservationMetric;
   unit: string;
@@ -47,6 +57,7 @@ export interface DrawableSeries {
   points: DrawablePoint[];
   /** Puntos que traía la serie original. La UI lo enseña: submuestrear a escondidas es engañar. */
   sourcePoints: number;
+  source: SeriesSource;
 }
 
 /** ISO → época. Un punto con fecha o valor no finito se descarta en vez de meter un NaN que rompe el eje entero. */
@@ -107,6 +118,7 @@ export function downsampleExtremes(
 
 export function toDrawableSeries(
   series: ObservationSeries,
+  source: SeriesSource,
   budget: number = DRAWN_POINT_BUDGET,
 ): DrawableSeries {
   return {
@@ -116,5 +128,6 @@ export function toDrawableSeries(
     baseline: series.baseline,
     points: downsampleExtremes(toDrawablePoints(series.points), budget),
     sourcePoints: series.points.length,
+    source,
   };
 }
