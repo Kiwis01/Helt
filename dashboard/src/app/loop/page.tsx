@@ -97,7 +97,15 @@ export default async function DashboardPage() {
         gráfico de outcomes se repinta con `episode.written`.
         ----------------------------------------------------------------
       */}
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_24rem] gap-3 p-3">
+      {/*
+        Columna derecha a 25rem y no 24: el transcript es lo único de la pantalla
+        que es texto corrido, y con burbujas al 88% de 384px las frases del
+        paciente partían en tres líneas donde caben dos. Los 16px salen de la
+        columna izquierda, que los tenía de sobra —el gráfico de baseline y el de
+        outcomes son elásticos y ninguno de los dos tiene un ancho mínimo
+        cerca—.
+      */}
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_25rem] gap-3 p-3">
         <LiveCallProvider>
           <div className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_minmax(0,1.15fr)] gap-3">
             <BaselineChart series={series} episodes={episodes.data.episodes} />

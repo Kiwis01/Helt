@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
+import HeltMark from '@/components/brand/HeltMark';
 import { SegmentedControl, type SegmentItem } from '@/components/nav/SegmentedControl';
 
 /** Los dos mundos del producto. El orden fija también el de los atajos. */
@@ -104,9 +105,10 @@ export function AppNav({ actions }: AppNavProps) {
       <Link
         href="/"
         title="Home"
-        className="shrink-0 text-[15px] font-semibold tracking-[0.2em] text-ink transition-opacity hover:opacity-70"
+        className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-70"
       >
-        LOOP
+        <HeltMark size={24} />
+        <span className="text-[15px] font-semibold tracking-[0.18em] text-ink">HELT</span>
       </Link>
 
       <SegmentedControl items={WORLDS} activeKey={world} ariaLabel="View" />

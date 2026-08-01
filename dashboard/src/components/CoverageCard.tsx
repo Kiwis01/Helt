@@ -32,7 +32,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { CoverageStatus, Deductible } from '@loop/shared/contracts';
 
-import { Card, EmptyState } from '@/components/Card';
+import { Card } from '@/components/Card';
 import { useLiveCall } from '@/components/LiveCallProvider';
 import { DATA, FOOT } from '@/components/tokens';
 import type { DataSource } from '@/lib/core-client';
@@ -159,11 +159,20 @@ export function CoverageCard() {
     };
   }, [event, detail]);
 
+  /*
+   * La píldora del encabezado es EL MISMO HUECO antes y después de la
+   * respuesta: primero dice "no check yet" en gris y luego se convierte en
+   * "Covered". Que el estado viva siempre en el mismo sitio y solo cambie de
+   * texto es lo que hace que la llegada de la 271 se lea como una transición y
+   * no como la aparición de una tarjeta nueva.
+   */
   const actions = (
     <>
       {view ? (
         <span className={`pill ${STATUS_PILL[view.status]}`}>{STATUS_LABEL[view.status]}</span>
-      ) : null}
+      ) : (
+        <span className="pill pill-quiet">No check yet</span>
+      )}
       <button
         type="button"
         onClick={() => void run(state.callId)}
@@ -175,12 +184,21 @@ export function CoverageCard() {
     </>
   );
 
+  /*
+   * Sin respuesta, esta tarjeta es UNA LÍNEA.
+   *
+   * Antes se llevaba ~20% del alto de la columna para escribir "No check on
+   * this call" centrado en un rectángulo vacío — y lo hacía justo durante los
+   * 60 segundos de llamada en vivo, que es cuando el alto de esa columna es lo
+   * más disputado de la pantalla. El estado vacío no ha desaparecido: lo dice
+   * la píldora del encabezado, en tres palabras y sin gastar un solo píxel de
+   * más. Todo lo que suelta aquí se lo queda el transcript, que es lo que el
+   * público está mirando.
+   *
+   * `shrink-0` porque a un encabezado no le queda nada que ceder.
+   */
   if (!view) {
-    return (
-      <Card title="Coverage" subtitle="Stedi" actions={actions} index={3}>
-        <EmptyState>No check on this call</EmptyState>
-      </Card>
-    );
+    return <Card title="Coverage" subtitle="Stedi" actions={actions} index={3} className="shrink-0" />;
   }
 
   /** El detalle llegó del fixture, no de loop-coverage. Cambia lo que es honesto enseñar. */
@@ -213,10 +231,26 @@ export function CoverageCard() {
       subtitle="Stedi"
       actions={actions}
       index={3}
-      // `shrink`: si el panel en vivo necesita el alto (barrera de escalación en
-      // pantalla), esta tarjeta cede en vez de desbordar la columna. Lo que cede
-      // por dentro está decidido abajo, hijo por hijo.
-      className="shrink"
+      /*
+       * Techo, no fracción.
+       *
+       * La tarjeta crece a lo que mide su contenido y ahí se para: el panel en
+       * vivo es `flex-1` y se queda todo lo demás, así que este número es
+       * literalmente el peor caso del transcript. 15.5rem = 248px deja al panel
+       * 319px garantizados a 1280x720 —header, biometría, pie y aún ~140px de
+       * conversación— y es lo que ocupa la tarjeta entera menos la última fila
+       * de contexto, que es justo el primer hijo que este componente ya tenía
+       * decidido sacrificar.
+       *
+       * Con una regla disparada el techo baja a 12rem: ahí dentro solo quedan
+       * copago, deducible y pie (ver `standDown`), y los 56px que suelta se los
+       * lleva la barrera de escalación, que es `shrink-0` y no admite quedarse a
+       * medias.
+       *
+       * `shrink-0` para que el techo sea el único que manda: sin él el navegador
+       * podría recortar por debajo y volver a partir el héroe del copago.
+       */
+      className={`shrink-0 ${standDown ? 'max-h-[12rem]' : 'max-h-[15.5rem]'}`}
       bodyClassName="flex min-h-0 flex-col px-5 pb-4"
     >
       {/*

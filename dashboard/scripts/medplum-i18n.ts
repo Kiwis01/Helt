@@ -277,7 +277,28 @@ const TEXT_PATHS: Record<string, readonly string[]> = {
     'dosageInstruction.*.patientInstruction',
     'note.*.text',
   ],
-  Observation: ['code.text', 'code.coding.*.display', 'note.*.text'],
+  /* Las UNIDADES son texto visible aunque no lo parezcan: el panel de
+     laboratorio las pinta pegadas al valor ("27 seg"), y una unidad en español
+     al lado de una cifra canta más que una etiqueta, porque está en el sitio
+     donde el ojo va primero. Se añadieron después de ver "27 seg" en una
+     captura: la primera versión solo miraba nombres. */
+  Observation: [
+    'code.text',
+    'code.coding.*.display',
+    'note.*.text',
+    'valueQuantity.unit',
+    'valueCodeableConcept.text',
+    'valueCodeableConcept.coding.*.display',
+    'valueString',
+    'component.*.valueQuantity.unit',
+    'component.*.code.text',
+    'component.*.code.coding.*.display',
+    'referenceRange.*.low.unit',
+    'referenceRange.*.high.unit',
+    'referenceRange.*.text',
+    'interpretation.*.text',
+    'interpretation.*.coding.*.display',
+  ],
   DocumentReference: ['description', 'type.text', 'type.coding.*.display', 'content.*.attachment.title'],
   ServiceRequest: ['code.text', 'code.coding.*.display', 'note.*.text', 'patientInstruction'],
   AllergyIntolerance: ['code.text', 'code.coding.*.display', 'note.*.text'],

@@ -28,7 +28,9 @@ export function ProblemsPanel({
 
   return (
     <Card title="Problems & allergies" subtitle={`${active.length} active`} index={index}>
-      <div className="flex flex-col gap-4">
+      {/* Alto acotado y scroll propio, igual que los otros tres paneles del
+          expediente: ninguno puede decidir el alto de la página. */}
+      <div className="flex max-h-[19rem] flex-col gap-3 overflow-y-auto">
         <section>
           {conditions.length === 0 ? (
             <MissingData>Medplum has no Condition for this patient.</MissingData>

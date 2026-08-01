@@ -31,9 +31,19 @@ export function LabsPanel({ metrics, index }: { metrics: readonly ChartMetric[];
           Medplum has no Observation for this patient.
         </MissingData>
       ) : (
-        <ul className="flex flex-col divide-y divide-[var(--hair)]">
+        /* Alto acotado + scroll PROPIO.
+​
+           Con 54 magnitudes la tarjeta crecía sin freno y arrastraba a toda la
+           página a un scroll larguísimo: para llegar al panel de abajo había
+           que pasar por delante de cincuenta filas que nadie va a leer. Un
+           panel no puede decidir el alto de la página.
+​
+           `max-h` en la lista y no en la tarjeta porque la cabecera (título y
+           contador) tiene que quedarse fija: es la que dice cuántas hay, y
+           perderla al hacer scroll es perder la referencia. */
+        <ul className="flex max-h-[19rem] flex-col divide-y divide-[var(--hair)] overflow-y-auto">
           {withData.map((metric) => (
-            <li key={metric.key} className="py-3 first:pt-0 last:pb-0">
+            <li key={metric.key} className="py-1.5 first:pt-0 last:pb-0">
               <MetricRow metric={metric} />
             </li>
           ))}
@@ -50,35 +60,64 @@ function MetricRow({ metric }: { metric: ChartMetric }) {
   if (!latest) return null;
 
   const range = metric.referenceRange;
+  /* El renglón secundario SOLO existe si aporta.
+​
+     Antes decía "1 reading · no reference range" en casi todas las filas: un
+     renglón entero, cincuenta veces, para informar de que no hay información.
+     Eso es lo que hacía la tarjeta el doble de alta de lo necesario. Sin rango,
+     la fila es de una línea. El recuento de lecturas ya lo insinúa la
+     sparkline, y el dato exacto vive en el `title`. */
+  const secondary = range ? describeRange(metric) : null;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3" title={rowTitle(metric)}>
       {/* Identidad de la magnitud y su rango, con fuente auditable. */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-ink">{metric.label}</p>
-        <p className="truncate text-2xs text-ink-3" title={range?.source}>
-          {describeRange(metric)}
-        </p>
+        <p className="truncate text-xs font-semibold leading-tight text-ink">{metric.label}</p>
+        {secondary ? (
+          <p className="truncate text-2xs leading-tight text-ink-3" title={range?.source}>
+            {secondary}
+          </p>
+        ) : null}
       </div>
 
-      {/* La serie. Comprime nueve meses en 96 píxeles: se lee la forma, no el detalle. */}
+      {/* La serie. Comprime nueve meses en 72 píxeles: se lee la forma, no el detalle. */}
       <Sparkline points={metric.points} metric={metric} />
 
-      {/* El valor de ahora, que es el que manda. */}
-      <div className="w-[8.5rem] shrink-0 text-right">
-        <p className="flex items-baseline justify-end gap-1">
-          <span className={`text-xl font-semibold leading-none ${rangeTextClass(latest.flag)}`}>
-            {formatNumber(latest.value)}
-          </span>
-          {metric.unit ? <span className="text-2xs text-ink-3">{metric.unit}</span> : null}
-        </p>
-        <p className="flex items-baseline justify-end gap-1.5">
-          <TrendMark trend={metric.trend} unit={metric.unit} />
-          <span className="text-2xs text-ink-3">{formatDateShort(latest.at)}</span>
-        </p>
-      </div>
+      {/* El valor de ahora, que es el que manda.
+​
+          Anchos FIJOS por bloque —número, delta, fecha— en vez de dejar que el
+          flex reparta: con anchos elásticos la columna se partía en un amasijo
+          ("0.1 10^3/µL ↑ 0.0 10^3/µL · 1743 d Aug 29" en cuatro líneas) y era
+          justo lo que hacía ilegible el panel. */}
+      <p className="flex w-[5.5rem] shrink-0 items-baseline justify-end gap-1">
+        <span className={`text-base font-semibold leading-none ${rangeTextClass(latest.flag)}`}>
+          {formatNumber(latest.value)}
+        </span>
+        {metric.unit ? (
+          <span className="truncate text-[10px] text-ink-3">{metric.unit}</span>
+        ) : null}
+      </p>
+
+      <span className="w-[4.5rem] shrink-0 truncate text-right text-2xs text-ink-3">
+        <TrendMark trend={metric.trend} unit={metric.unit} />
+      </span>
+
+      <span className="w-[3.25rem] shrink-0 text-right text-2xs tabular-nums text-ink-3">
+        {formatDateShort(latest.at)}
+      </span>
     </div>
   );
+}
+
+/** Todo el detalle que se quitó de la fila sigue a un hover de distancia. */
+function rowTitle(metric: ChartMetric): string {
+  const n = metric.points.length;
+  const parts = [metric.label, `${n} reading${n === 1 ? '' : 's'}`];
+  const range = metric.referenceRange;
+  parts.push(range ? describeRange(metric) : 'no reference range');
+  if (range?.source) parts.push(range.source);
+  return parts.join(' · ');
 }
 
 function describeRange(metric: ChartMetric): string {
@@ -102,8 +141,11 @@ function describeRange(metric: ChartMetric): string {
 
 /* ================================================================== */
 
-const SPARK_WIDTH = 96;
-const SPARK_HEIGHT = 28;
+/* Más ancha que alta y más baja que antes (28 -> 18): la sparkline aporta la
+   FORMA, y su alto era parte de lo que inflaba la fila. A 18 px sigue
+   distinguiéndose subir de bajar, que es todo lo que se le pide aquí. */
+const SPARK_WIDTH = 72;
+const SPARK_HEIGHT = 18;
 
 /**
  * Serie mínima en SVG, dibujada a mano en vez de con Recharts.
@@ -124,7 +166,11 @@ function Sparkline({
 }) {
   if (points.length < 2) {
     return (
-      <span className="w-24 shrink-0 text-center text-2xs text-ink-3" title="Only one reading">
+      <span
+        className="shrink-0 text-center text-2xs text-ink-3"
+        style={{ width: SPARK_WIDTH }}
+        title="Only one reading"
+      >
         —
       </span>
     );

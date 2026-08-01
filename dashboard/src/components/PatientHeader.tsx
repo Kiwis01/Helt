@@ -69,12 +69,17 @@ export function PatientHeader({ summary }: { summary: PatientSummary }) {
     >
       {/* Quién es. */}
       <div className="flex min-w-0 items-center gap-3">
+        {/* El avatar era el último resto del azul-violeta anterior a la marca:
+            un `rgba(127,196,238,…)` escrito a mano que ya no salía de ningún
+            token y que, al lado del teal de HELT, se leía como de otra
+            aplicación. Ahora es el mismo acento que todo lo demás, en sus dos
+            alfas ya definidas —`--accent-line` a 0.32 y `--accent-soft` a
+            0.14—, así que el degradado no inventa ningún color nuevo. */}
         <span
           aria-hidden
-          className={`grid size-10 shrink-0 place-items-center rounded-full ${DATA} font-semibold text-ink`}
+          className={`grid size-10 shrink-0 place-items-center rounded-full border border-hair ${DATA} font-semibold text-ink`}
           style={{
-            background: 'linear-gradient(150deg, rgba(127,196,238,0.40), rgba(127,196,238,0.14))',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'linear-gradient(150deg, var(--accent-line), var(--accent-soft))',
           }}
         >
           {initialsOf(summary.displayName)}

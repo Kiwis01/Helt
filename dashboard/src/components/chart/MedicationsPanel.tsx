@@ -41,10 +41,14 @@ export function MedicationsPanel({
       {medications.length === 0 ? (
         <MissingData>Medplum has no MedicationRequest for this patient.</MissingData>
       ) : (
-        <div className="flex flex-col gap-3">
+        /* Mismo trato que el panel de laboratorio: alto acotado y scroll
+           PROPIO. Cuatro medicamentos activos más el histórico bastaban para
+           que la tarjeta midiera media pantalla, y con ocho se comía la
+           página entera. */
+        <div className="flex max-h-[19rem] flex-col gap-2.5 overflow-y-auto">
           <ul className="flex flex-col divide-y divide-[var(--hair)]">
             {active.map((med) => (
-              <li key={med.id} className="py-2.5 first:pt-0">
+              <li key={med.id} className="py-1.5 first:pt-0">
                 <MedicationRow medication={med} />
               </li>
             ))}
@@ -52,10 +56,12 @@ export function MedicationsPanel({
 
           {past.length > 0 ? (
             <section>
-              <h3 className="label pb-1">Stopped and completed</h3>
+              {/* Pegajosa: al hacer scroll dentro del panel, saber si lo que
+                  estás leyendo es activo o suspendido no es un detalle. */}
+              <h3 className="label sticky top-0 z-10 bg-[var(--bg)] pb-1">Stopped and completed</h3>
               <ul className="flex flex-col divide-y divide-[var(--hair)]">
                 {past.map((med) => (
-                  <li key={med.id} className="py-2 first:pt-0">
+                  <li key={med.id} className="py-1.5 first:pt-0">
                     <MedicationRow medication={med} muted />
                   </li>
                 ))}
@@ -104,34 +110,51 @@ function MedicationRow({
         ) : null}
       </div>
 
-      {/* La pauta, completa. Es el texto que el paciente sigue. */}
+      {/* La pauta, completa. Es el texto que el paciente sigue y donde vive el
+          cambio de dosis, así que no se trunca. */}
       {medication.dosage ? (
         <p className="pt-0.5 text-2xs leading-snug text-ink-2">{medication.dosage}</p>
       ) : (
         <p className="pt-0.5 text-2xs text-warn">No dosage instructions recorded</p>
       )}
 
-      <p className="flex flex-wrap items-baseline gap-x-3 pt-0.5 text-2xs text-ink-3">
-        {medication.rxnorm ? (
-          <span className="font-mono" title={medication.rxnormDisplay ?? 'RxNorm code'}>
-            RxNorm {medication.rxnorm}
-          </span>
-        ) : (
-          <span className="text-warn">No RxNorm</span>
-        )}
+      {/* Procedencia en UNA línea, no en tres.
+​
+          El RxNorm baja a `title`: es lo que hace fiable una comprobación de
+          interacción, pero no es lo que se lee de un vistazo — y ocupaba un
+          renglón entero en cada fila. Lo que SÍ se queda visible es la
+          ausencia: "no RxNorm" y "no prescriber" son hallazgos, no huecos, y
+          esos no se esconden nunca. */}
+      <p className="flex items-baseline gap-x-2 truncate pt-0.5 text-2xs text-ink-3">
+        <span className="shrink-0 tabular-nums">
+          {medication.authoredOn ? formatDate(medication.authoredOn) : 'no date'}
+        </span>
 
-        <span>{medication.authoredOn ? formatDate(medication.authoredOn) : 'no date'}</span>
+        <span className="shrink-0 text-ink-3/50">·</span>
 
         {medication.prescriber ? (
-          <span>{medication.prescriber}</span>
+          <span className="truncate">{medication.prescriber}</span>
         ) : (
-          <span className="text-warn">no prescriber</span>
+          <span className="shrink-0 text-warn">no prescriber</span>
         )}
-      </p>
 
-      {medication.statusReason ? (
-        <p className="pt-0.5 text-2xs text-ink-3">Reason: {medication.statusReason}</p>
-      ) : null}
+        {medication.rxnorm ? (
+          <span
+            className="shrink-0 font-mono text-ink-3/70"
+            title={medication.rxnormDisplay ?? `RxNorm ${medication.rxnorm}`}
+          >
+            {medication.rxnorm}
+          </span>
+        ) : (
+          <span className="shrink-0 text-warn">no RxNorm</span>
+        )}
+
+        {medication.statusReason ? (
+          <span className="truncate" title={medication.statusReason}>
+            · {medication.statusReason}
+          </span>
+        ) : null}
+      </p>
     </div>
   );
 }
