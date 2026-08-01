@@ -3,42 +3,73 @@
 @tailwind utilities;
 
 /* ==================================================================
-   Paleta — herramienta clínica, no dashboard de startup.
+   Sistema de diseño — vidrio sobre aurora.
 
-   Oscuro por defecto y sin modo claro: los proyectores lavan los tonos
-   claros y el demo se ve a 1280x720 en una sala iluminada. Se evita el
-   negro puro (#000) porque los proyectores lo rinden como gris sucio.
+   Tres reglas que lo gobiernan todo:
+
+   1. ESCALERA DE TEXTO DE TRES PELDAÑOS. Solo tres opacidades de blanco.
+      Nada de texto de color salvo estado semántico. Si algo necesita
+      destacar, se hace más GRANDE, no de otro color.
+   2. UN NÚMERO HÉROE POR WIDGET. La etiqueta es pequeña y callada; el dato
+      es enorme. Si dos cosas compiten por ser el héroe, una sobra.
+   3. EL TEXTO EXPLICATIVO ES DEUDA. Si un panel necesita un párrafo para
+      entenderse, el panel está mal. Una línea corta, o ninguna.
    ================================================================== */
 
 :root {
   color-scheme: dark;
 
-  --bg: #090d12;
-  --surface: #111820;
-  --surface-2: #16202b;
-  --line: #1e2a36;
-  --line-strong: #2c3d4e;
+  /* Casi negro con tinte azul. Nunca #000: los proyectores lo rinden
+     como gris sucio y la aurora pierde su base. */
+  --bg: #070c11;
 
-  --ink: #e9eff5;
-  --ink-2: #a2b3c3;
-  --ink-3: #6c8093;
+  /* --- vidrio tipo iOS --- */
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-2: rgba(255, 255, 255, 0.1);
+  --hair: rgba(255, 255, 255, 0.1);
+  /* El brillo especular del borde superior es lo que hace que una
+     superficie se lea como vidrio y no como un rectángulo gris. */
+  --spec: inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 26px 64px rgba(0, 0, 0, 0.45);
+  --blur: blur(30px) saturate(180%);
+  --blur-strong: blur(44px) saturate(190%);
 
-  /* Una sola familia de acento. Todo lo demás es estado semántico. */
-  --accent: #4fc3e8;
-  --accent-dim: #1d5d75;
+  /* --- escalera de texto: tres peldaños, ni uno más --- */
+  --ink: rgba(255, 255, 255, 0.95);
+  --ink-2: rgba(255, 255, 255, 0.62);
+  --ink-3: rgba(255, 255, 255, 0.38);
 
-  --danger: #ff6b6b;
-  --warn: #f5a524;
-  --ok: #4ade80;
+  /* --- un solo acento --- */
+  --accent: #7fc4ee;
+  --accent-soft: rgba(127, 196, 238, 0.14);
+  --accent-line: rgba(127, 196, 238, 0.32);
 
-  /* Series de los gráficos. El siguiente agente las usa como
-     `stroke="var(--chart-hr)"` — funcionan directas en atributos SVG. */
-  --chart-hr: #4fc3e8;
-  --chart-hrv: #8fa6d8;
-  --chart-rr: #e0b252;
-  --chart-episode: #ff6b6b;
-  --chart-grid: #1e2a36;
-  --chart-band: rgba(79, 195, 232, 0.1);
+  /* --- estado semántico --- */
+  --ok: #82d6ab;
+  --ok-soft: rgba(130, 214, 171, 0.14);
+  --ok-line: rgba(130, 214, 171, 0.35);
+  --danger: #f0a094;
+  --danger-soft: rgba(232, 134, 124, 0.12);
+  --danger-line: rgba(232, 134, 124, 0.34);
+  --warn: #f0c07a;
+  --warn-soft: rgba(240, 192, 122, 0.12);
+  --warn-line: rgba(240, 192, 122, 0.34);
+
+  /* Alias de compatibilidad: los charts ya escriben var(--line). */
+  --line: var(--hair);
+
+  /* --- series de gráficos (válidas en atributos SVG) --- */
+  --chart-hr: #7fc4ee;
+  --chart-hrv: #a0b2e8;
+  --chart-rr: #f0c07a;
+  --chart-episode: #e8867c;
+  --chart-grid: rgba(255, 255, 255, 0.055);
+  --chart-band: rgba(127, 196, 238, 0.1);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius: 24px;
+  --radius-sm: 16px;
 }
 
 @layer base {
@@ -50,32 +81,35 @@
   body {
     background-color: var(--bg);
     color: var(--ink);
+    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     /* Cifras alineadas en columna: es un tablero de datos, no un blog. */
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.012em;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     /* Requisito duro del brief: nunca scroll horizontal. */
     overflow-x: hidden;
   }
 
   ::selection {
-    background: var(--accent-dim);
+    background: var(--accent-soft);
     color: var(--ink);
   }
 
-  /* Barras de scroll discretas: un scrollbar nativo gordo sobre fondo
-     oscuro es lo que hace que un panel se vea "roto" en el proyector. */
+  /* Scrollbars finas: una barra nativa gorda sobre fondo oscuro es lo que
+     hace que un panel se vea "roto" en el proyector. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--line-strong) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
   }
 
   *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: var(--line-strong);
+    background-color: rgba(255, 255, 255, 0.14);
     border-radius: 999px;
   }
 
@@ -84,39 +118,232 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 1.5px solid var(--accent);
     outline-offset: 2px;
   }
 }
 
 @layer components {
-  /* Transparencias explícitas: los colores del tema son `var()`, así que
-     los modificadores de opacidad de Tailwind (`bg-danger/10`) no aplican. */
-  .tint-accent {
-    background-color: rgba(79, 195, 232, 0.1);
+  /* ---------------- aurora de fondo ----------------
+     Recreada en CSS en vez de con un shader: el tablero ya está lleno de
+     series y una animación pesada detrás competiría con ellas. Estática,
+     muy tenue, solo para que el vidrio tenga algo sobre lo que posarse. */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
   }
 
-  .tint-danger {
-    background-color: rgba(255, 107, 107, 0.12);
+  .aurora::before,
+  .aurora::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
   }
 
-  .tint-warn {
-    background-color: rgba(245, 165, 36, 0.12);
+  .aurora::before {
+    width: 62vw;
+    height: 62vw;
+    left: -12vw;
+    bottom: -34vw;
+    background: radial-gradient(circle, rgba(127, 196, 238, 0.17), transparent 68%);
   }
 
-  .tint-ok {
-    background-color: rgba(74, 222, 128, 0.12);
+  .aurora::after {
+    width: 54vw;
+    height: 54vw;
+    right: -14vw;
+    bottom: -30vw;
+    background: radial-gradient(circle, rgba(160, 178, 232, 0.13), transparent 68%);
   }
 
-  /* Rejilla diagonal de los placeholders. Comunica "aquí va algo" en vez
-     de "esto se rompió". */
-  .placeholder-hatch {
-    background-image: repeating-linear-gradient(
-      135deg,
-      transparent,
-      transparent 9px,
-      rgba(108, 128, 147, 0.07) 9px,
-      rgba(108, 128, 147, 0.07) 10px
-    );
+  /* ---------------- superficie de vidrio ---------------- */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--hair);
+    box-shadow: var(--spec), var(--shadow);
+  }
+
+  /* Entrada escalonada. `--i` en el elemento define el orden:
+     style={{ '--i': 3 }} → 150ms de retraso. */
+  .bloom {
+    animation: bloom 0.7s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+
+  @keyframes bloom {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.985);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+
+  /* ---------------- tipografía del tablero ----------------
+     La etiqueta susurra, el número grita. */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+  }
+
+  .hero {
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .hero small {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink-3);
+    margin-left: 3px;
+  }
+
+  /* ---------------- controles ---------------- */
+  .ghostbtn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--hair);
+    border-radius: 11px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+
+  .ghostbtn:hover:not(:disabled) {
+    color: var(--ink);
+    background: var(--glass-2);
+  }
+
+  .ghostbtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .ghostbtn[data-on='true'] {
+    color: var(--ink);
+    background: var(--glass-2);
+    border-color: var(--accent-line);
+  }
+
+  /* ---------------- píldoras de estado ---------------- */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 5px 11px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .pill-ok {
+    color: var(--ok);
+    background: var(--ok-soft);
+    border-color: var(--ok-line);
+  }
+  .pill-warn {
+    color: var(--warn);
+    background: var(--warn-soft);
+    border-color: var(--warn-line);
+  }
+  .pill-danger {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: var(--danger-line);
+  }
+  .pill-accent {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: var(--accent-line);
+  }
+  .pill-quiet {
+    color: var(--ink-3);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--hair);
+  }
+
+  /* Tesela interior: para agrupar datos dentro de un widget sin meter
+     otra caja de vidrio (el vidrio sobre vidrio se ensucia). */
+  .tile {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Punto de latido para estados vivos. */
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--ink-3);
+  }
+
+  .dot-live {
+    background: var(--ok);
+    box-shadow: 0 0 10px rgba(130, 214, 171, 0.7);
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+
+  .dot-alert {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(232, 134, 124, 0.7);
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(0.85);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+}
+
+/* Respeta a quien pide menos movimiento — y a los proyectores lentos. */
+@media (prefers-reduced-motion: reduce) {
+  .bloom,
+  .dot-live,
+  .dot-alert {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
   }
 }

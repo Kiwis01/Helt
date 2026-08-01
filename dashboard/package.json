@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@loop/shared": "*",
+    "@medplum/core": "^5.1.27",
+    "@medplum/fhirtypes": "^5.1.27",
     "next": "15.5.22",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "recharts": "^3.10.1",
+    "server-only": "^0.0.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {

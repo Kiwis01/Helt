@@ -1,50 +1,54 @@
 'use client';
 
 /**
- * Outcomes por intervención — el loop cerrado.
+ * Outcomes por intervención — el loop cerrado. La última visualización del
+ * pitch, y la única que tiene que entenderse sin que nadie la explique.
  *
- * Es la última visualización que ven los jueces y la frase de cierre del pitch:
- * *esta es la parte que nadie más está construyendo*. Todo lo demás del
- * dashboard existe en otros productos; esto no.
+ * El argumento se cuenta en tres golpes de vista, en este orden:
  *
- * Tres decisiones que sostienen el argumento:
+ * 1. **El ahorro es el titular.** "−17 min" es la conclusión; las barras son la
+ *    prueba. Antes el titular no existía: había dos barras verdes iguales y
+ *    había que restar mentalmente contra una línea roja para sacar el dato.
+ * 2. **La línea de "sin intervención" es un umbral, no otra serie.** Discontinua
+ *    y sin relleno: lo que se mide es la distancia hasta ella, y ese hueco es
+ *    literalmente el tiempo que la intervención le quitó al episodio.
+ * 3. **El color lo decide el dato.** Verde si bate al umbral, ámbar si no. Con
+ *    estos fixtures salen las dos verdes; el día que una no funcione se verá.
  *
- * 1. **La línea de "sin intervención" es el gráfico.** Las barras solas no
- *    dicen nada — 14 minutos no es bueno ni malo hasta que se ve contra los 31
- *    que dura un episodio cuando no se hace nada. Por eso la línea es roja,
- *    gruesa y etiquetada, y cada barra lleva escrita su distancia hasta ella.
- * 2. **La n va SIEMPRE visible, junto al título de cada intervención.** Un
- *    promedio de 3 intentos y uno de 5 no valen lo mismo y el gráfico no puede
- *    disimularlo. Sin la n a la vista, esto no es honesto.
- * 3. **El color lo decide el dato, no el diseño.** Verde si la intervención
- *    bate al baseline, ámbar si no. Con estos fixtures salen las dos verdes,
- *    pero el día que una no funcione se verá.
+ * Se dibuja con cajas y no con Recharts a propósito: son dos barras y un
+ * umbral, y en HTML se controlan la tipografía, el radio y el orden de lectura
+ * mucho mejor que con `LabelList` —que además solo se pinta cuando termina la
+ * animación de la barra, y aquí llegan eventos en vivo que la reinician—.
  *
- * La tira semanal de abajo es la segunda mitad del argumento: no solo los
- * episodios duran menos, además son menos.
+ * `episodeCountByWeek` ya no es un segundo gráfico peleando por el panel: es un
+ * dato de apoyo (3 → 2 por semana) en una tesela del encabezado.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  ReferenceLine,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from 'recharts';
 
 import type { OutcomesSummary } from '@loop/shared/contracts';
 
-import { Card } from '@/components/Card';
+import { Card, EmptyState } from '@/components/Card';
 import { useLiveCall } from '@/components/LiveCallProvider';
-import { formatDateShort, formatDuration, formatSeverity } from '@/lib/format';
+import { DATA, STAT } from '@/components/tokens';
+import { formatDuration, formatSeverity } from '@/lib/format';
 
 /** Cuánto se queda el aviso de "actualizado" tras un `episode.written`. */
 const REFRESH_FLASH_MS = 8_000;
+
+/**
+ * Geometría de las filas. La columna de nombres es fija para que la línea de
+ * umbral —que se pinta en una capa aparte— caiga exactamente sobre las pistas.
+ */
+const NAME_COL_PX = 168;
+const TRACK_GAP_PX = 16;
+const TRACK_LEFT_PX = NAME_COL_PX + TRACK_GAP_PX;
+
+/**
+ * Aire a la derecha del valor más alto. Sin él, la barra más larga y su cifra
+ * se salen de la pista.
+ */
+const SCALE_HEADROOM = 1.3;
 
 interface OutcomeRow {
   id: string;
@@ -58,181 +62,44 @@ interface OutcomeRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* Etiquetas del gráfico                                               */
+/* Episodios por semana                                                */
 /* ------------------------------------------------------------------ */
 
-interface LabelViewBox {
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-}
-
-/**
- * Recharts tipa las coordenadas de ticks y etiquetas como `string | number`
- * (los ejes de categorías pueden dar strings). Aquí solo sirven números, y un
- * valor no numérico tiene que degradar a "no dibujo" en vez de a un `NaN` que
- * saca el elemento del SVG sin decir nada.
- */
-function coord(value: string | number | undefined): number | null {
-  const parsed = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-/**
- * Etiqueta de la línea de referencia: una pastilla roja encima del eje.
- *
- * El ancho se estima a partir del número de caracteres porque en SVG no hay
- * forma barata de medir texto antes de pintarlo. 6.2 px por carácter es lo que
- * mide la tipografía del sistema a 11 px en peso 700.
- */
-function renderNoInterventionLabel(minutes: number) {
-  return function NoInterventionLabel(props: { viewBox?: LabelViewBox }) {
-    const x = props.viewBox?.x;
-    const y = props.viewBox?.y;
-    if (x === undefined || y === undefined) return <g />;
-
-    const text = `sin intervención · ${formatDuration(minutes)}`;
-    const width = text.length * 6.2 + 18;
-
-    return (
-      <g>
-        <rect x={x - width / 2} y={y - 21} width={width} height={17} rx={4} fill="var(--danger)" />
-        <text
-          x={x}
-          y={y - 12.5}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize={11}
-          fontWeight={700}
-          fill="var(--bg)"
-        >
-          {text}
-        </text>
-      </g>
-    );
-  };
-}
-
-/**
- * Nombre de la intervención + su n. Dos líneas dentro de un tick del eje Y para
- * que la muestra viaje pegada al nombre y no se pueda leer una sin la otra.
- */
-function renderInterventionTick(rows: readonly OutcomeRow[]) {
-  return function InterventionTick(props: {
-    x?: string | number;
-    y?: string | number;
-    payload?: { index?: number };
-  }) {
-    const x = coord(props.x);
-    const y = coord(props.y);
-    const row = rows[props.payload?.index ?? -1];
-    if (x === null || y === null || !row) return <g />;
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={-12} y={-4} textAnchor="end" fontSize={13} fontWeight={600} fill="var(--ink)">
-          {row.title}
-        </text>
-        <text x={-12} y={12} textAnchor="end" fontSize={11} fill="var(--ink-3)">
-          n = {row.attempts} · alivio {formatSeverity(row.relief)}
-        </text>
-      </g>
-    );
-  };
-}
-
-/** Duración al final de la barra, con los minutos ahorrados debajo. */
-function renderBarLabel(rows: readonly OutcomeRow[]) {
-  return function BarLabel(props: {
-    x?: string | number;
-    y?: string | number;
-    width?: string | number;
-    height?: string | number;
-    index?: number;
-  }) {
-    const x = coord(props.x);
-    const y = coord(props.y);
-    const width = coord(props.width);
-    const height = coord(props.height);
-    const row = rows[props.index ?? -1];
-    if (x === null || y === null || width === null || height === null || !row) return <g />;
-
-    const left = x + width + 12;
-    const middle = y + height / 2;
-
-    return (
-      <g>
-        <text x={left} y={middle - 5} fontSize={15} fontWeight={700} fill="var(--ink)">
-          {formatDuration(row.minutes)}
-        </text>
-        <text
-          x={left}
-          y={middle + 11}
-          fontSize={11}
-          fill={row.beatsBaseline ? 'var(--ok)' : 'var(--warn)'}
-        >
-          {row.beatsBaseline
-            ? `−${formatDuration(row.saved)} vs. sin intervención`
-            : `+${formatDuration(-row.saved)} vs. sin intervención`}
-        </text>
-      </g>
-    );
-  };
-}
-
-/* ------------------------------------------------------------------ */
-/* Tira de episodios por semana                                        */
-/* ------------------------------------------------------------------ */
-
-function WeeklyTrend({ weeks }: { weeks: OutcomesSummary['episodeCountByWeek'] }) {
-  if (weeks.length === 0) {
-    return (
-      <p className="shrink-0 border-t border-line pt-2 text-2xs text-ink-3">
-        Sin episodios agrupados por semana todavía.
-      </p>
-    );
-  }
+function WeeklyTile({ weeks }: { weeks: OutcomesSummary['episodeCountByWeek'] }) {
+  if (weeks.length < 2) return null;
 
   const max = Math.max(...weeks.map((w) => w.count), 1);
-  const total = weeks.reduce((sum, w) => sum + w.count, 0);
   const first = weeks[0].count;
   const last = weeks[weeks.length - 1].count;
-  const falling = last < first;
 
   return (
-    <div className="shrink-0 border-t border-line pt-2">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="text-2xs font-semibold uppercase tracking-[0.12em] text-ink-3">
-          Episodios por semana
-        </p>
-        <p className="truncate text-2xs text-ink-3">
-          {total} episodios en {weeks.length} semanas ·{' '}
-          <span className={falling ? 'text-ok' : 'text-ink-2'}>
-            {first} {falling ? '↓' : '→'} {last} por semana
-          </span>
+    <div
+      className="tile flex shrink-0 items-center gap-3.5 px-3.5 py-2.5"
+      title={weeks.map((w) => `${w.weekStart}: ${w.count}`).join(' · ')}
+    >
+      <div>
+        <p className="label">episodios/semana</p>
+        <p className={`mt-1 ${STAT} text-ink`}>
+          {first}
+          <span className="mx-1.5 text-2xs font-medium text-ink-3">→</span>
+          {last}
         </p>
       </div>
 
-      <div className="mt-1.5 flex items-end gap-1.5">
+      <div aria-hidden className="flex h-7 items-end gap-1">
         {weeks.map((week) => (
-          <div key={week.weekStart} className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
-            <span className="text-2xs leading-none text-ink-2">{week.count}</span>
-            {/* Altura en px y no en %: la celda de la rejilla ya es de altura
-                fija y un porcentaje aquí se resolvería contra un contenedor
-                que puede quedarse sin alto y colapsar las barras a 0. */}
-            <div
-              className="w-full rounded-sm"
-              style={{
-                height: `${6 + (week.count / max) * 18}px`,
-                backgroundColor: 'var(--accent)',
-                opacity: 0.35 + (week.count / max) * 0.45,
-              }}
-            />
-            <span className="truncate text-2xs leading-none text-ink-3">
-              {formatDateShort(week.weekStart)}
-            </span>
-          </div>
+          <div
+            key={week.weekStart}
+            className="w-[5px] rounded-full"
+            style={{
+              // Altura en px y no en %: la celda de la rejilla es de altura fija
+              // y un porcentaje se resolvería contra un contenedor que puede
+              // quedarse sin alto y colapsar las barras a 0.
+              height: `${7 + (week.count / max) * 19}px`,
+              background: 'var(--accent)',
+              opacity: 0.3 + (week.count / max) * 0.5,
+            }}
+          />
         ))}
       </div>
     </div>
@@ -259,142 +126,173 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
           saved: baseline - item.avgEpisodeDurationMinutes,
           beatsBaseline: item.avgEpisodeDurationMinutes < baseline,
         }))
-        // De mejor a peor: la intervención que más acorta el episodio arriba.
+        // De mejor a peor: la que más acorta el episodio, arriba.
         .sort((a, b) => a.minutes - b.minutes),
     [outcomes.byIntervention, baseline],
   );
 
   /* --- Aviso de refresco en vivo tras `episode.written` --- */
   const writtenId = state.written?.encounterId ?? null;
-  const [flash, setFlash] = useState<string | null>(null);
+  const [flash, setFlash] = useState(false);
   const seen = useRef<string | null>(null);
 
   useEffect(() => {
     if (!writtenId || seen.current === writtenId) return;
     seen.current = writtenId;
-    setFlash(writtenId);
-    const timer = window.setTimeout(() => setFlash(null), REFRESH_FLASH_MS);
+    setFlash(true);
+    const timer = window.setTimeout(() => setFlash(false), REFRESH_FLASH_MS);
     return () => window.clearTimeout(timer);
   }, [writtenId]);
 
-  // Un poco de aire por encima del valor más alto para que la pastilla de la
-  // línea de referencia no toque el borde cuando el baseline es el máximo.
-  const maxValue = Math.max(baseline, ...rows.map((r) => r.minutes));
-  const xMax = Math.ceil((maxValue * 1.06) / 5) * 5;
-
   /*
-   * El subárbol de Recharts se memoiza sobre los datos, no sobre el render.
+   * Las barras crecen una vez, al montar.
    *
-   * Esta tarjeta consume el contexto de la llamada en vivo para el aviso de
-   * "actualizado", así que se vuelve a renderizar con CADA `biometrics.tick`
-   * —uno cada pocos segundos mientras dura la llamada—. Devolviendo el mismo
-   * elemento, React se salta el subárbol entero y el gráfico solo se rehace
-   * cuando cambian los datos de verdad.
-   *
-   * Va ANTES del estado vacío a propósito: un `useMemo` después de un `return`
-   * temprano se salta en unos renders y en otros no, y React revienta con
-   * "rendered fewer hooks than expected" en cuanto `/outcomes` devuelva una
-   * lista vacía —justo lo que pasaría con un paciente sin intervenciones aún.
+   * Sin `requestAnimationFrame`: en una pestaña en segundo plano el navegador
+   * no ejecuta los frames, y el gráfico que cierra el pitch se quedaría con las
+   * pistas vacías hasta que alguien le diera el foco. Un `useEffect` corre
+   * siempre; si el navegador une los dos pintados, lo peor que pasa es que la
+   * barra aparezca ya crecida.
    */
-  const chart = useMemo(
-    () => (
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          layout="vertical"
-          data={rows}
-          // `right` deja sitio a la etiqueta del final de la barra, que se
-          // pinta fuera del área de dibujo cuando la barra es larga.
-          margin={{ top: 26, right: 170, bottom: 2, left: 0 }}
-          barCategoryGap="34%"
-        >
-          <CartesianGrid horizontal={false} stroke="var(--chart-grid)" />
-          <XAxis
-            type="number"
-            domain={[0, xMax]}
-            tick={{ fill: 'var(--ink-3)', fontSize: 11 }}
-            tickLine={false}
-            axisLine={{ stroke: 'var(--line)' }}
-          />
-          <YAxis
-            type="category"
-            dataKey="title"
-            width={196}
-            tickLine={false}
-            axisLine={false}
-            tick={renderInterventionTick(rows)}
-          />
-
-          {/*
-            Sin animación de entrada, y no por gusto.
-
-            Recharts solo pinta el `LabelList` cuando la animación de la barra
-            ha terminado, y esa animación se reinicia con cada re-render. Con
-            eventos llegando a mitad de llamada se queda interrumpida en torno
-            al 10 %: las barras aparecen como muñones junto al eje y las
-            etiquetas de minutos no llegan a salir nunca. Es el peor fallo
-            posible en el gráfico que cierra el pitch, y una animación de medio
-            segundo no vale ese riesgo.
-          */}
-          <Bar dataKey="minutes" barSize={26} radius={[0, 4, 4, 0]} isAnimationActive={false}>
-            {rows.map((row) => (
-              <Cell key={row.id} fill={row.beatsBaseline ? 'var(--ok)' : 'var(--warn)'} />
-            ))}
-            <LabelList dataKey="minutes" content={renderBarLabel(rows)} />
-          </Bar>
-
-          {/* El argumento entero: todo lo que quede a la izquierda de esta
-              línea es tiempo que la intervención le quitó al episodio. */}
-          <ReferenceLine
-            x={baseline}
-            stroke="var(--danger)"
-            strokeWidth={2}
-            strokeDasharray="6 4"
-            ifOverflow="extendDomain"
-            label={renderNoInterventionLabel(baseline)}
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    ),
-    [rows, xMax, baseline],
-  );
+  const [grown, setGrown] = useState(false);
+  useEffect(() => setGrown(true), []);
 
   if (rows.length === 0) {
     return (
-      <Card title="Outcomes por intervención" subtitle="intervención → resultado medido">
-        <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-          <p className="text-sm font-medium text-ink-2">Todavía no hay intervenciones medidas</p>
-          <p className="max-w-sm text-xs leading-relaxed text-ink-3">
-            El gráfico aparece en cuanto se registre el primer episodio con una actividad del care
-            plan. Sin intervención, un episodio dura {formatDuration(baseline)} de media.
-          </p>
-        </div>
+      <Card title="Outcomes por intervención" subtitle="min por episodio" index={3}>
+        <EmptyState>Sin intervenciones medidas todavía</EmptyState>
       </Card>
     );
   }
 
+  const best = rows[0];
+  const scaleMax = Math.max(baseline, ...rows.map((r) => r.minutes)) * SCALE_HEADROOM;
+  const thresholdPct = (baseline / scaleMax) * 100;
+
   return (
     <Card
       title="Outcomes por intervención"
-      subtitle="esta es la parte que nadie más está construyendo"
-      bodyClassName="flex min-h-0 flex-col gap-2 p-3 pt-3"
+      subtitle="min por episodio"
+      index={3}
+      bodyClassName="flex min-h-0 flex-col gap-3 px-5 pb-4"
       actions={
         flash ? (
-          <span className="tint-ok flex items-center gap-1.5 rounded-md border border-line-strong px-2 py-1">
-            <span
-              aria-hidden
-              className="size-1.5 animate-pulse rounded-full"
-              style={{ backgroundColor: 'var(--ok)' }}
-            />
-            <span className="text-2xs font-semibold uppercase tracking-[0.1em] text-ok">
-              actualizado · {flash}
-            </span>
+          <span className="pill pill-ok">
+            <span aria-hidden className="dot dot-live" />
+            actualizado
           </span>
         ) : null
       }
     >
-      <div className="min-h-0 flex-1">{chart}</div>
+      {/* --- el titular: cuánto tiempo le quita al episodio la que mejor va --- */}
+      <div className="flex shrink-0 items-end justify-between gap-4">
+        <div className="min-w-0">
+          <p className="label truncate">
+            {best.saved > 0 ? 'ahorro' : 'exceso'} · {best.title}
+          </p>
+          <p className="hero mt-1.5">
+            {best.saved > 0 ? '−' : '+'}
+            {Math.round(Math.abs(best.saved))}
+            <small>min</small>
+          </p>
+        </div>
 
-      <WeeklyTrend weeks={outcomes.episodeCountByWeek} />
+        <WeeklyTile weeks={outcomes.episodeCountByWeek} />
+      </div>
+
+      {/* --- rótulo del umbral, alineado con su línea --- */}
+      <div className="relative h-4 shrink-0">
+        <div className="absolute inset-y-0 right-0" style={{ left: TRACK_LEFT_PX }}>
+          <p
+            className="absolute bottom-0 whitespace-nowrap pr-2 text-2xs text-ink-2"
+            style={{ right: `${100 - thresholdPct}%` }}
+          >
+            sin intervención · {formatDuration(baseline)}
+          </p>
+        </div>
+      </div>
+
+      {/* --- las barras --- */}
+      {/* Con dos o tres intervenciones las filas se centran en el hueco; a
+          partir de ahí el panel hace scroll dentro de sí mismo en vez de
+          empujar la rejilla, que es de altura fija. Centrar Y desbordar a la
+          vez deja la primera fila fuera de alcance, así que es una cosa o la
+          otra. */}
+      <div
+        className={`relative flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto ${
+          rows.length > 3 ? 'justify-start' : 'justify-center'
+        }`}
+      >
+        {/* El umbral vive en su propia capa para poder cruzar todas las filas
+            sin depender del alto de ninguna. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0"
+          style={{ left: TRACK_LEFT_PX }}
+        >
+          <div
+            className="absolute inset-y-0 border-l border-dashed"
+            style={{ left: `${thresholdPct}%`, borderColor: 'var(--danger)', opacity: 0.55 }}
+          />
+        </div>
+
+        {rows.map((row, i) => {
+          const pct = (row.minutes / scaleMax) * 100;
+          const color = row.beatsBaseline ? 'var(--ok)' : 'var(--warn)';
+          /* La cifra va dentro de la barra si cabe: fuera se apoyaría sobre el
+             lecho del umbral y ensuciaría justo el hueco que hay que leer. */
+          const inside = pct >= 20;
+
+          return (
+            <div
+              key={row.id}
+              className="flex shrink-0 items-center"
+              style={{ gap: TRACK_GAP_PX }}
+            >
+              <div className="shrink-0" style={{ width: NAME_COL_PX }}>
+                <p className={`truncate ${DATA} font-semibold text-ink`}>{row.title}</p>
+                {/* La n va pegada al nombre: un promedio de 4 intentos y uno de
+                    5 no valen lo mismo y el gráfico no puede disimularlo. */}
+                <p className="mt-1 truncate text-2xs text-ink-3">
+                  n = {row.attempts} · alivio {formatSeverity(row.relief)}
+                </p>
+              </div>
+
+              <div className="relative h-9 min-w-0 flex-1">
+                {/* La pista termina EN el umbral: el lecho es lo que dura el
+                    episodio sin hacer nada, el relleno es lo que duró de
+                    verdad, y el hueco que queda es el tiempo ahorrado. Esa
+                    resta es todo el argumento y no hace falta escribirla. */}
+                <div
+                  aria-hidden
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{ width: `${thresholdPct}%`, background: 'var(--danger-soft)' }}
+                />
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{
+                    width: grown ? `${pct}%` : '0%',
+                    background: color,
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.22)',
+                    transition: `width 900ms var(--ease) ${i * 90}ms`,
+                  }}
+                />
+                <span
+                  className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap ${DATA} font-semibold`}
+                  style={{
+                    ...(inside
+                      ? { right: `calc(${100 - pct}% + 12px)`, color: 'var(--bg)' }
+                      : { left: `calc(${pct}% + 12px)`, color: 'var(--ink)' }),
+                    opacity: grown ? 1 : 0,
+                    transition: `opacity 500ms var(--ease) ${400 + i * 90}ms`,
+                  }}
+                >
+                  {formatDuration(row.minutes)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 }

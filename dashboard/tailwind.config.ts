@@ -9,8 +9,8 @@ import type { Config } from 'tailwindcss';
  * cómo se termina con un gráfico que no combina con su tarjeta.
  *
  * Consecuencia a tener en cuenta: los modificadores de opacidad de Tailwind
- * (`bg-surface/60`) NO funcionan sobre estos colores. Para transparencias hay
- * utilidades explícitas en globals.css.
+ * (`bg-glass/60`) NO funcionan sobre estos colores. Para transparencias hay
+ * utilidades explícitas en globals.css (.pill-*, .tile, .glass).
  */
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
@@ -18,15 +18,14 @@ const config: Config = {
     extend: {
       colors: {
         bg: 'var(--bg)',
-        surface: 'var(--surface)',
-        'surface-2': 'var(--surface-2)',
+        glass: 'var(--glass)',
+        'glass-2': 'var(--glass-2)',
+        hair: 'var(--hair)',
         line: 'var(--line)',
-        'line-strong': 'var(--line-strong)',
         ink: 'var(--ink)',
         'ink-2': 'var(--ink-2)',
         'ink-3': 'var(--ink-3)',
         accent: 'var(--accent)',
-        'accent-dim': 'var(--accent-dim)',
         danger: 'var(--danger)',
         warn: 'var(--warn)',
         ok: 'var(--ok)',
@@ -36,35 +35,25 @@ const config: Config = {
         'chart-episode': 'var(--chart-episode)',
       },
       fontFamily: {
-        // Tipografía del sistema a propósito: el wifi del hackathon puede
-        // morir y una fuente que no carga arruina el primer plano del demo.
-        sans: [
-          'ui-sans-serif',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'Helvetica Neue',
-          'Arial',
-          'sans-serif',
-        ],
-        mono: [
-          'ui-monospace',
-          'SFMono-Regular',
-          'SF Mono',
-          'Menlo',
-          'Consolas',
-          'Liberation Mono',
-          'monospace',
-        ],
+        // Manrope va versionada en `src/fonts/` y se sirve con next/font/local
+        // (ver `src/app/layout.tsx`). Cero red: ni en runtime ni al construir.
+        // El wifi del hackathon puede morir y la tipografía sigue ahí.
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'monospace'],
       },
       fontSize: {
-        // Escala pensada para leerse proyectada: no hay nada por debajo de 11px.
-        '2xs': ['0.6875rem', { lineHeight: '0.875rem', letterSpacing: '0.04em' }],
+        // Escala pensada para leerse proyectada: nada por debajo de 11px.
+        '2xs': ['0.6875rem', { lineHeight: '0.875rem', letterSpacing: '0.02em' }],
       },
       borderRadius: {
-        card: '10px',
+        card: 'var(--radius)',
+        tile: 'var(--radius-sm)',
+      },
+      backdropBlur: {
+        glass: '30px',
+      },
+      transitionTimingFunction: {
+        ease: 'var(--ease)',
       },
     },
   },

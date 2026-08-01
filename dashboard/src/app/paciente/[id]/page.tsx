@@ -1,0 +1,76 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { DocumentsPanel } from '@/components/chart/DocumentsPanel';
+import { LabsPanel } from '@/components/chart/LabsPanel';
+import { MedicationsPanel } from '@/components/chart/MedicationsPanel';
+import { PatientBanner } from '@/components/chart/PatientBanner';
+import { ProblemsPanel } from '@/components/chart/ProblemsPanel';
+import { SourceBadge } from '@/components/chart/SourceBadge';
+import { chartFlags, readPatientChart } from '@/lib/chart/read';
+
+/**
+ * Expediente de un paciente.
+ *
+ * Orden de la pantalla, de arriba abajo y de izquierda a derecha: identidad →
+ * lo que hay que decidir → lo que lo sustenta. La medicación va arriba a la
+ * izquierda porque es desde donde se actúa; los laboratorios a su derecha porque
+ * son la evidencia que justifica el cambio, y quedan a un golpe de vista sin
+ * tener que desplazarse.
+ *
+ * Es scroll vertical y no una rejilla de altura fija: un expediente crece con el
+ * paciente, y comprimirlo en una pantalla obligaría a recortar contenido clínico
+ * para que quepa. La banda de identidad se queda pegada arriba justamente para
+ * que el scroll no haga perder de vista de quién es lo que se está leyendo.
+ */
+export const dynamic = 'force-dynamic';
+
+export default async function PatientChartPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const now = new Date();
+  const { chart, source } = await readPatientChart(id, now);
+
+  // Ni Medplum ni el respaldo conocen a este paciente: es una URL escrita a mano.
+  if (!chart) notFound();
+
+  const flags = chartFlags(chart, now);
+  const nextAppointment =
+    chart.appointments.find((a) => Date.parse(a.start ?? '') >= now.getTime()) ??
+    chart.appointments[chart.appointments.length - 1] ??
+    null;
+
+  return (
+    <main className="mx-auto flex w-full max-w-[1400px] flex-col gap-3 px-6 pb-10 pt-3">
+      <div className="flex items-center justify-end gap-3">
+        <SourceBadge status={source} />
+        <Link href="/loop" className="ghostbtn">
+          Loop · ansiedad
+        </Link>
+      </div>
+
+      <PatientBanner
+        patient={chart.patient}
+        flags={flags}
+        allergyLabels={chart.allergies.map((a) => a.display)}
+        appointment={nextAppointment}
+        now={now}
+      />
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <MedicationsPanel medications={chart.medications} index={1} />
+        <LabsPanel metrics={chart.metrics} index={2} />
+        <ProblemsPanel conditions={chart.conditions} allergies={chart.allergies} index={3} />
+        <DocumentsPanel
+          notes={chart.notes}
+          orders={chart.orders}
+          careTeam={chart.careTeam}
+          index={4}
+        />
+      </div>
+    </main>
+  );
+}
