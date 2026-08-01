@@ -19,9 +19,10 @@
     "name": [
       {
         "given": [
-          "Sofía"
+          "Sophia"
         ],
-        "family": "Ramírez"
+        "family": "Reynolds",
+        "text": "Sophia Reynolds"
       }
     ],
     "gender": "female",
@@ -56,9 +57,10 @@
     "name": [
       {
         "given": [
-          "Marco"
+          "Michael"
         ],
-        "family": "Herrera"
+        "family": "Harrison",
+        "text": "Michael Harrison"
       }
     ],
     "gender": "male",
@@ -93,9 +95,10 @@
     "name": [
       {
         "given": [
-          "Elena"
+          "Emily"
         ],
-        "family": "Castro"
+        "family": "Carter",
+        "text": "Emily Carter"
       }
     ],
     "gender": "female",

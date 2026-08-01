@@ -1,10 +1,12 @@
 import Link from 'next/link';
 
+import { NewPatientDialog } from '@/components/chart/NewPatientDialog';
 import { Avatar, FlagRow, MetricValue } from '@/components/chart/primitives';
 import { SourceBadge } from '@/components/chart/SourceBadge';
 import { describeGender, formatAge, formatDateTime, formatRelativeDays } from '@/lib/chart/format';
 import { readRoster } from '@/lib/chart/read';
 import type { RosterEntry } from '@/lib/chart/types';
+import { medplumConfigured } from '@/lib/medplum/server';
 
 /**
  * Agenda del día — la portada.
@@ -26,6 +28,10 @@ export default async function RosterPage() {
   // días" contra instantes distintos.
   const now = new Date();
   const roster = await readRoster(now);
+  // El alta es lo ÚNICO de esta pantalla que no puede degradar a fixture: se
+  // escribe en Medplum o no ocurre. Por eso el disparador depende de que haya
+  // credenciales, y no de que la lectura del roster haya salido bien.
+  const usingFallback = roster.source.source === 'fixture';
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[1400px] flex-col px-6 pb-10">
@@ -39,8 +45,15 @@ export default async function RosterPage() {
 
         <div className="ml-auto flex shrink-0 items-center gap-3">
           <SourceBadge status={roster.source} />
+          <NewPatientDialog canWrite={medplumConfigured} usingFallback={usingFallback} />
           <Link href="/loop" className="ghostbtn">
             Loop · ansiedad
+          </Link>
+          {/* Entry point to the DICOM section. That route is English on purpose
+              (explicit request), so the label stays English here too — it names
+              the destination rather than describing it in the page's language. */}
+          <Link href="/imaging" className="ghostbtn">
+            Imaging
           </Link>
         </div>
       </header>
@@ -58,9 +71,17 @@ export default async function RosterPage() {
       </div>
 
       {roster.entries.length === 0 ? (
-        <p className="tile rounded-tile px-5 py-8 text-center text-sm text-ink-3">
-          No hay pacientes en este proyecto de Medplum.
-        </p>
+        // Una agenda vacía es un estado legítimo —proyecto recién creado—, no un
+        // fallo. Se pinta con la salida delante en vez de dejar al médico
+        // buscando dónde se empieza.
+        <div className="tile flex flex-col items-center gap-3 rounded-tile px-5 py-10 text-center">
+          <p className="text-sm text-ink-3">No hay pacientes en este proyecto de Medplum.</p>
+          <NewPatientDialog
+            canWrite={medplumConfigured}
+            usingFallback={usingFallback}
+            label="Dar de alta al primero"
+          />
+        </div>
       ) : (
         <ul className="flex flex-col gap-2.5">
           {roster.entries.map((entry, index) => (
