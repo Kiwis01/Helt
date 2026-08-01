@@ -22,6 +22,11 @@ protocol HealthProvider {
     /// Weekly HRV (SDNN). Apple Watch writes this; AirPods cannot produce it,
     /// so an empty array is a normal, expected answer.
     func weeklyHRV(weeks: Int) async throws -> [WeeklyPoint]
+
+    /// The average heart rate during the most recent reading, and when it was
+    /// taken. This is what gets pushed to Medplum — never shown during a
+    /// reading, only recorded and seen later in the trend.
+    func latestReading() async throws -> (date: Date, average: Double)?
 }
 
 struct MockHealthProvider: HealthProvider {
@@ -33,6 +38,9 @@ struct MockHealthProvider: HealthProvider {
     func weeklyHRV(weeks: Int) async throws -> [WeeklyPoint] {
         Array(MockData.hrv.suffix(weeks))
     }
+    func latestReading() async throws -> (date: Date, average: Double)? {
+        MockData.readingAverages.last.map { (date: $0.weekStart, average: $0.value) }
+    }
 }
 
 /// For exercising the empty state.
@@ -41,4 +49,5 @@ struct EmptyHealthProvider: HealthProvider {
     func requestAccess() async throws {}
     func weeklyReadingAverages(weeks: Int) async throws -> [WeeklyPoint] { [] }
     func weeklyHRV(weeks: Int) async throws -> [WeeklyPoint] { [] }
+    func latestReading() async throws -> (date: Date, average: Double)? { nil }
 }

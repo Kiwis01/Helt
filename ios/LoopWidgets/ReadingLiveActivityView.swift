@@ -20,7 +20,7 @@ struct ReadingLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label("Loop", systemImage: "waveform.path.ecg")
+                    Label("HELT", systemImage: "waveform.path.ecg")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

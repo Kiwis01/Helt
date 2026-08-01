@@ -15,6 +15,13 @@ struct TalkView: View {
                 Spacer()
 
                 VStack(spacing: 14) {
+                    Image(.wordmark)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 32)
+                        .accessibilityLabel("HELT")
+                        .padding(.bottom, 12)
+
                     Text("Talk it through")
                         .font(.largeTitle.weight(.semibold))
                     Text("A conversation with what your care plan says and what your numbers are doing.")
@@ -44,7 +51,7 @@ struct TalkView: View {
 /// Shown wherever a conversation can start, and again during one.
 struct EmergencyDisclosure: View {
     var body: some View {
-        Text("Loop is not emergency care. If you're in danger, call 911. For thoughts of harming yourself, call or text 988.")
+        Text("HELT is not emergency care. If you're in danger, call 911. For thoughts of harming yourself, call or text 988.")
             .font(.footnote)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)

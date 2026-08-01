@@ -42,6 +42,21 @@ final class CallModel {
 
         static func == (a: Self, b: Self) -> Bool { a.call == b.call }
     }
+
+    /// Set when the agent surfaces a medication from this person's own history.
+    private(set) var pendingMedication: PendingMedication?
+
+    struct PendingMedication: Identifiable, Equatable {
+        let call: AgentTools.Call
+        let medication: PriorMedication
+        var id: String { call.id }
+
+        static func == (a: Self, b: Self) -> Bool { a.call == b.call }
+    }
+
+    /// Looks up what a clinician has actually prescribed. Nil for the canned
+    /// script, which has no record behind it.
+    var medicationHistory: (() async -> [PriorMedication])?
     /// 0–1, drives the orb.
     private(set) var level: Double = 0
     var isMuted = false {
@@ -120,6 +135,9 @@ final class CallModel {
         case .agentAudio:
             break // real playback lands with the audio engine
 
+        case .toolCall(let call) where call.name == "request_medication":
+            await handleMedicationRequest(call)
+
         case .toolCall(let call):
             guard let instrument = call.instrument else {
                 // Asked for something we don't have. Tell the model plainly
@@ -137,6 +155,55 @@ final class CallModel {
             level = 0
             state = .ended
         }
+    }
+
+    /// The gate on the whole medication feature: whatever the model named has
+    /// to exist in this person's prescribing history. A drug it invented is
+    /// refused here, in code, before any UI appears — the model is told no and
+    /// what it may actually raise.
+    private func handleMedicationRequest(_ call: AgentTools.Call) async {
+        guard let proposed = call.medication else {
+            await service.answer(call, with: ["error": "no medication named"])
+            return
+        }
+        guard let history = await medicationHistory?(), !history.isEmpty else {
+            await service.answer(call, with: [
+                "error": "no prescribing history available",
+                "guidance": "Do not suggest a medication. Suggest they raise it with their clinician.",
+            ])
+            return
+        }
+        guard let match = MedicationHistory.match(proposed, in: history) else {
+            await service.answer(call, with: [
+                "error": "not in this patient's history",
+                "refused": proposed,
+                "available": history.map(\.display).joined(separator: ", "),
+                "guidance": "Only raise something already prescribed to them. Do not suggest anything else.",
+            ])
+            return
+        }
+        pendingMedication = PendingMedication(call: call, medication: match)
+    }
+
+    /// The person asked for it. Tell the model what happened so it can respond.
+    func sendMedicationRequest(recorder: MedicationRequestRecorder?) async {
+        guard let pending = pendingMedication else { return }
+        pendingMedication = nil
+        let created = await recorder?.request(pending.medication, reason: pending.call.reason)
+        await service.answer(pending.call, with: [
+            "requested": created != nil,
+            "medication": pending.medication.display,
+            "awaiting": "clinician approval",
+            "prescriber": pending.medication.prescriber ?? "their clinician",
+        ])
+        state = .thinking
+    }
+
+    func declineMedicationRequest() async {
+        guard let pending = pendingMedication else { return }
+        pendingMedication = nil
+        await service.answer(pending.call, with: ["requested": false, "reason": "declined"])
+        state = .thinking
     }
 
     /// The questionnaire came back. Hand the score to the model so it can

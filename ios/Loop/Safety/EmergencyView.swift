@@ -26,7 +26,7 @@ struct EmergencyView: View {
                     .foregroundStyle(.white.opacity(0.75))
                     .padding(.top, 12)
 
-                Text("Loop has stopped. It can't help with this.")
+                Text("HELT has stopped. It can't help with this.")
                     .font(.body)
                     .foregroundStyle(.white.opacity(0.55))
                     .padding(.top, 20)

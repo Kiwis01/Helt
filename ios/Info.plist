@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>HELT</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -42,12 +44,12 @@
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Loop needs your microphone so you can talk to it. Audio is streamed for transcription while a conversation is open, and not recorded to your phone.</string>
+	<string>HELT needs your microphone so you can talk to it. Audio is streamed for transcription while a conversation is open, and not recorded to your phone.</string>
 	<key>DEEPGRAM_API_KEY</key>
 	<string>$(DEEPGRAM_API_KEY)</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Loop reads heart rate from your weekly readings, and heart rate variability if your Apple Watch records it, to show whether your treatment is changing your numbers over time.</string>
+	<string>HELT reads heart rate from your weekly readings, and heart rate variability if your Apple Watch records it, to show whether your treatment is changing your numbers over time.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Loop saves each weekly reading as a session so your AirPods can measure. It never writes health measurements of its own.</string>
+	<string>HELT saves each weekly reading as a session so your AirPods can measure. It never writes health measurements of its own.</string>
 </dict>
 </plist>

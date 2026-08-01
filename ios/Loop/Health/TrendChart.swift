@@ -97,14 +97,14 @@ struct WeeklyTrendChart: View {
                 ForEach(events) { event in
                     RuleMark(x: .value("Week", event.date, unit: .weekOfYear))
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.accentColor)
                         .annotation(position: .top, alignment: .center, spacing: 4) {
                             Text(event.kind.label.lowercased())
                                 .font(.caption2.weight(.medium))
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(Color.accentColor)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(.blue.opacity(0.12), in: .capsule)
+                                .background(Color.accentColor.opacity(0.12), in: .capsule)
                         }
                 }
             }
@@ -135,7 +135,7 @@ struct MedicationLegend: View {
             ForEach(events) { event in
                 HStack(spacing: 10) {
                     Rectangle()
-                        .fill(.blue)
+                        .fill(Color.accentColor)
                         .frame(width: 2, height: 14)
                     Text(event.summary)
                         .font(.subheadline)

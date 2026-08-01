@@ -49,6 +49,27 @@ final class LiveHealthProvider: HealthProvider {
         try await weeklyAverages(of: hrvSDNN, in: .secondUnit(with: .milli), matching: nil, weeks: weeks)
     }
 
+    /// The most recent reading and the average heart rate the AirPods recorded
+    /// inside it — the value that gets pushed to Medplum.
+    func latestReading() async throws -> (date: Date, average: Double)? {
+        guard let workout = try await loopReadings(weeks: 2)
+            .max(by: { $0.startDate < $1.startDate })
+        else { return nil }
+
+        let descriptor = HKStatisticsQueryDescriptor(
+            predicate: .quantitySample(
+                type: heartRate,
+                predicate: HKQuery.predicateForObjects(from: workout)
+            ),
+            options: .discreteAverage
+        )
+        guard let average = try await descriptor.result(for: store)?
+            .averageQuantity()?.doubleValue(for: bpm)
+        else { return nil }
+
+        return (date: workout.startDate, average: average)
+    }
+
     // MARK: - Queries
 
     /// Loop's own readings — this app, mind-and-body, inside the window. Heart

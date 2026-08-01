@@ -87,12 +87,6 @@ protocol ConversationService {
     func disconnect() async
 }
 
-/// Posts weekly aggregates, returns confirmation.
-protocol HealthSyncService {
-    @discardableResult
-    func post(reading: ReadingSummary, weekly: [WeeklyPoint]) async throws -> String
-}
-
 /// Fetches medication list and weekly outcome history.
 protocol ClinicalDataService {
     func medications() async throws -> [Medication]

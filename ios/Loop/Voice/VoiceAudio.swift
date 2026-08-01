@@ -194,7 +194,7 @@ enum VoiceAudioError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unsupportedInputFormat: "This device's microphone isn't usable for a call."
-        case .microphoneDenied: "Loop needs microphone access. Turn it on in Settings › Loop."
+        case .microphoneDenied: "HELT needs microphone access. Turn it on in Settings › HELT."
         }
     }
 }

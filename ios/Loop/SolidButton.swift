@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The app's only filled control. Monochrome on purpose — colour is reserved
-/// for medication marks on the chart.
+/// The app's only filled control, and the one place brand teal carries a tap
+/// target. Everything else on the page stays monochrome so this reads first.
 struct SolidButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         Content(configuration: configuration)
@@ -17,9 +17,9 @@ struct SolidButton: ButtonStyle {
                 .font(.body.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .foregroundStyle(isEnabled ? Color(.systemBackground) : Color(.secondaryLabel))
+                .foregroundStyle(isEnabled ? Color.white : Color.secondary)
                 .background(
-                    Color.primary.opacity(opacity),
+                    Color.accentColor.opacity(opacity),
                     in: .rect(cornerRadius: 14)
                 )
         }

@@ -1,18 +1,10 @@
 import Foundation
 
-/// Single place the app points outward. Everything clinical — Medplum, care
-/// plans, episodes — lives behind `backendBaseURL` and the app holds no key
-/// for any of it. Deepgram is the one exception, and a temporary one: see
+/// Single place the app points outward. Medplum is the backend — there is no
+/// proxy service — and the app holds no key for it: it authenticates as the
+/// patient. Deepgram is the one exception, and a temporary one: see
 /// `deepgramKey`.
 nonisolated enum Config {
-    static let backendBaseURL = URL(string: "http://localhost:3001")!
-
-    /// Clinical data — medications, care plan, episode history — comes from
-    /// mocks until the backend exists. Nothing to do with HealthKit.
-    static var useMocks: Bool {
-        true // flip when the backend is up
-    }
-
     /// HealthKit is real on any physical device. The Simulator has no AirPods
     /// and cannot run a workout session, so it is the only place that mocks.
     static var useRealHealthKit: Bool {
@@ -91,8 +83,15 @@ nonisolated enum Config {
         plan says, and let them draw conclusions. Their clinician wrote the care \
         plan; you read it back. Keep replies to one or two sentences — they may be \
         mid-episode and cannot follow long answers. Cite concrete numbers when you \
-        have them. Never recommend medication, supplements, or dosage changes. If \
-        someone describes a medical emergency, tell them to hang up and call 911.
+        have them.
+
+        On medication: you never prescribe and you never recommend starting \
+        anything new. You may use request_medication to raise something already \
+        in their prescribing history, so a clinician can decide — that is a \
+        request for review, not advice to take it. Never suggest a supplement, a \
+        medication they have not been prescribed, or a change of dose.
+
+        If someone describes a medical emergency, tell them to hang up and call 911.
         """
 
     static let agentGreeting =

@@ -71,7 +71,7 @@ struct SettingsView: View {
                     Text("Reminders")
                 } footer: {
                     if notificationsDenied {
-                        Text("Notifications are off for Loop. Turn them on in Settings › Notifications › Loop.")
+                        Text("Notifications are off for HELT. Turn them on in Settings › Notifications › HELT.")
                     } else if times.isEmpty {
                         Text("No reminders. Add one and it repeats every day at that time.")
                     } else {
@@ -86,7 +86,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Health data")
                 } footer: {
-                    Text("Loop saves each reading as a workout because that is the only way to start the AirPods sensor. It never writes a health measurement. Change any of this in Settings › Health › Data Access › Loop.")
+                    Text("HELT saves each reading as a workout because that is the only way to start the AirPods sensor. It never writes a health measurement. Change any of this in Settings › Health › Data Access › HELT.")
                 }
 
                 Section {
@@ -96,12 +96,14 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    LabeledContent("Clinical data", value: Config.useMocks ? "Mock" : Config.backendBaseURL.absoluteString)
+                    LabeledContent("Clinical data",
+                                   value: auth.isSignedIn ? "Medplum" : "Mock (signed out)")
+                    LabeledContent("Record", value: Config.medplumBaseURL.host() ?? "—")
                     LabeledContent("Voice", value: Config.canUseLiveVoice ? "Deepgram" : "Scripted")
                 } header: {
                     Text("Connection")
                 } footer: {
-                    Text("Clinical data goes through the backend. The Deepgram key is currently built into the app — it should move behind the backend before this ships to anyone.")
+                    Text("Readings, questionnaires and medication requests are written to your own Medplum record. The Deepgram key is currently built into the app — it should move behind a server before this ships to anyone.")
                 }
 
                 Section {

@@ -34,6 +34,31 @@ nonisolated enum AgentTools {
                 ],
                 "required": ["instrument"],
             ],
+        ], [
+            "name": "request_medication",
+            "description": """
+                Surface a medication this person has been prescribed before, so they can \
+                ask their clinician about restarting or continuing it. Use only when \
+                recurring symptoms suggest it is worth raising, and only for something \
+                already in their history — you can see their current and past medication \
+                above. You are not prescribing: the app sends a request and a clinician \
+                decides. Never propose a medication or supplement they have not been \
+                prescribed before, and never suggest a dose change.
+                """,
+            "parameters": [
+                "type": "object",
+                "properties": [
+                    "medication": [
+                        "type": "string",
+                        "description": "The medication name, as it appears in their history",
+                    ],
+                    "reason": [
+                        "type": "string",
+                        "description": "What in the conversation makes this worth raising with their clinician",
+                    ],
+                ],
+                "required": ["medication", "reason"],
+            ],
         ]]
     }
 
@@ -46,6 +71,7 @@ nonisolated enum AgentTools {
         var instrument: Instrument? {
             arguments["instrument"].flatMap { Instruments.named($0) }
         }
+        var medication: String? { arguments["medication"] }
         var reason: String? { arguments["reason"] }
     }
 

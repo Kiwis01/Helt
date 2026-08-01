@@ -12,9 +12,23 @@ struct LoopApp: App {
                 }
                 Tab("Analytics", systemImage: "chart.xyaxis.line") {
                     HealthView(
-                        model: HealthModel(health: Self.healthProvider),
+                        model: HealthModel(
+                            health: Self.healthProvider,
+                            // Real prescriptions once signed in; mock data only
+                            // when there is no record to read.
+                            clinical: auth.isSignedIn
+                                ? MedplumClinicalDataService(auth: auth)
+                                : MockClinicalDataService(),
+                            heartRate: auth.isSignedIn
+                                ? HeartRateSync(auth: auth, medplum: MedplumClient(auth: auth))
+                                : nil,
+                            checkIn: auth.isSignedIn
+                                ? CheckInRecorder(medplum: MedplumClient(auth: auth))
+                                : nil
+                        ),
                         readingSession: Self.readingSession
                     )
+                    .id(auth.isSignedIn)
                 }
                 Tab("Settings", systemImage: "gearshape") {
                     SettingsView()

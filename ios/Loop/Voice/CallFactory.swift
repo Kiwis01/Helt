@@ -23,6 +23,8 @@ enum CallFactory {
         let service = DeepgramConversationService(audio: audio) {
             await PatientContext(auth: auth).build()
         }
-        return CallModel(service: service, audio: audio)
+        let model = CallModel(service: service, audio: audio)
+        model.medicationHistory = { await MedicationHistory(auth: auth).all() }
+        return model
     }
 }

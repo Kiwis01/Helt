@@ -60,6 +60,51 @@ nonisolated enum FHIR {
         }
     }
 
+    // MARK: - MedicationRequest
+
+    /// A *proposal*, never an order. `intent: "proposal"` + `status: "draft"` is
+    /// FHIR's own way of saying "suggested, awaiting authorisation" — the
+    /// clinician turns it into an order, or doesn't.
+    struct MedicationRequest: Codable, Hashable, Sendable {
+        var resourceType = "MedicationRequest"
+        var status: String = "draft"
+        var intent: String = "proposal"
+        var subject: Reference
+        var medicationCodeableConcept: CodeableConcept
+        var authoredOn: String
+        /// The patient asked for this. Recorded honestly as such.
+        var requester: Reference
+        var performer: Reference?
+        var reasonCode: [CodeableConcept]?
+        var basedOn: [Reference]?
+        var note: [Annotation]?
+
+        struct Annotation: Codable, Hashable, Sendable {
+            var text: String
+        }
+    }
+
+    /// What lands in the clinician's queue.
+    struct Task: Codable, Hashable, Sendable {
+        var resourceType = "Task"
+        var status: String = "requested"
+        var intent: String = "order"
+        var priority: String = "routine"
+        var code: CodeableConcept
+        var description: String?
+        var focus: Reference
+        var forReference: Reference
+        var owner: Reference?
+        var requester: Reference
+        var authoredOn: String
+
+        enum CodingKeys: String, CodingKey {
+            case resourceType, status, intent, priority, code, description
+            case focus, owner, requester, authoredOn
+            case forReference = "for"
+        }
+    }
+
     // MARK: - Observation
 
     struct Observation: Codable, Hashable, Sendable {
@@ -71,6 +116,7 @@ nonisolated enum FHIR {
         var effectiveDateTime: String
         var valueQuantity: Quantity?
         var valueInteger: Int?
+        var valueBoolean: Bool?
         var interpretation: [CodeableConcept]?
         var derivedFrom: [Reference]?
 

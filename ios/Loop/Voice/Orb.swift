@@ -36,25 +36,25 @@ struct Orb: View {
         switch state {
         case .connecting, .ended, .failed, .escalated:
             Circle()
-                .stroke(.white.opacity(0.22), lineWidth: 2)
+                .stroke(Color.brandAqua.opacity(0.30), lineWidth: 2)
                 .frame(width: base, height: base)
 
         case .listening:
             Circle()
-                .stroke(.white.opacity(0.9), lineWidth: 6)
+                .stroke(Color.brandAqua, lineWidth: 6)
                 .frame(width: base, height: base)
                 .scaleEffect(reduceMotion ? 1 : 1 + level * 0.16)
 
         case .thinking:
             Circle()
                 .trim(from: 0, to: reduceMotion ? 0.72 : 0.26)
-                .stroke(.white.opacity(0.9), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .stroke(Color.brandAqua, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                 .frame(width: base, height: base)
                 .rotationEffect(.degrees(reduceMotion ? -90 : spin))
 
         case .speaking:
             Circle()
-                .fill(.white)
+                .fill(Color.brandAqua)
                 .frame(width: base, height: base)
                 .scaleEffect(reduceMotion ? 1 : 1 + level * 0.1)
         }
@@ -74,7 +74,7 @@ struct Orb: View {
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [.white.opacity(strength), .clear],
+                        colors: [Color.brandAqua.opacity(strength), .clear],
                         center: .center,
                         startRadius: base * 0.35,
                         endRadius: base * 0.82

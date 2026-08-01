@@ -63,6 +63,23 @@ struct VoiceView: View {
             )
             .interactiveDismissDisabled()
         }
+        .sheet(item: Binding(
+            get: { model.pendingMedication },
+            set: { if $0 == nil { Task { await model.declineMedicationRequest() } } }
+        )) { pending in
+            MedicationRequestView(
+                medication: pending.medication,
+                reason: pending.call.reason,
+                onRequest: {
+                    Task {
+                        await model.sendMedicationRequest(
+                            recorder: MedicationRequestRecorder(medplum: MedplumClient(auth: auth))
+                        )
+                    }
+                },
+                onDismiss: { Task { await model.declineMedicationRequest() } }
+            )
+        }
         .animation(.smooth(duration: 0.2), value: model.escalation)
         .preferredColorScheme(.dark)
         .statusBarHidden()

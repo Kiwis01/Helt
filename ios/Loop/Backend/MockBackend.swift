@@ -48,9 +48,3 @@ struct MockClinicalDataService: ClinicalDataService {
     func medicationEvents() async throws -> [MedicationEvent] { MockData.events }
 }
 
-struct MockHealthSyncService: HealthSyncService {
-    @discardableResult
-    func post(reading: ReadingSummary, weekly: [WeeklyPoint]) async throws -> String {
-        "mock-\(UUID().uuidString.prefix(8))"
-    }
-}

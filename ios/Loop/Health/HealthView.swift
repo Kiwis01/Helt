@@ -5,7 +5,10 @@ import SwiftUI
 final class HealthModel {
     private let health: any HealthProvider
     private let clinical: any ClinicalDataService
-    private let sync: any HealthSyncService
+    /// Present once signed in. When it is, Medplum is the source of truth for
+    /// the trend and this phone is one of several things contributing to it.
+    private let heartRate: HeartRateSync?
+    private let checkIn: CheckInRecorder?
 
     private(set) var access: HealthAccess = .notDetermined
     private(set) var weekly: [WeeklyPoint] = []
@@ -19,11 +22,13 @@ final class HealthModel {
     init(
         health: any HealthProvider,
         clinical: any ClinicalDataService = MockClinicalDataService(),
-        sync: any HealthSyncService = MockHealthSyncService()
+        heartRate: HeartRateSync? = nil,
+        checkIn: CheckInRecorder? = nil
     ) {
         self.health = health
         self.clinical = clinical
-        self.sync = sync
+        self.heartRate = heartRate
+        self.checkIn = checkIn
     }
 
     func load() async {
@@ -31,7 +36,13 @@ final class HealthModel {
         nextReminder = Reminders.next
         guard access == .granted else { loaded = true; return }
         do {
-            weekly = try await health.weeklyReadingAverages(weeks: Config.trendWeeks)
+            // Medplum holds every reading, wherever it was taken. HealthKit is
+            // only the local source; it is not the whole picture.
+            if let heartRate {
+                weekly = await heartRate.weeklyPoints(weeks: Config.trendWeeks)
+            } else {
+                weekly = try await health.weeklyReadingAverages(weeks: Config.trendWeeks)
+            }
             hrv = try await health.weeklyHRV(weeks: Config.trendWeeks)
             events = try await clinical.medicationEvents()
             medications = try await clinical.medications()
@@ -52,7 +63,14 @@ final class HealthModel {
     }
 
     func record(_ reading: ReadingSummary) async {
-        try? await sync.post(reading: reading, weekly: weekly)
+        // Push what the AirPods actually measured, then reload from Medplum so
+        // the new reading appears alongside everything already on the record.
+        if let heartRate, let latest = (try? await health.latestReading()) ?? nil {
+            await heartRate.push(average: latest.average, at: latest.date)
+        }
+        if let checkIn, let answers = reading.answers {
+            await checkIn.record(answers, at: reading.startedAt)
+        }
         await load()
     }
 
@@ -253,13 +271,13 @@ struct AccessExplainer: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             Spacer()
-            Text("Loop needs two things from Health")
+            Text("HELT needs two things from Health")
                 .font(.title.weight(.semibold))
 
             VStack(alignment: .leading, spacing: 18) {
-                Bullet("Read your heart rate", "Only what your AirPods record during a Loop reading.")
+                Bullet("Read your heart rate", "Only what your AirPods record during a HELT reading.")
                 Bullet("Read heart rate variability", "If your Apple Watch writes it. Optional.")
-                Bullet("Save each reading as a session", "The only way to turn the AirPods sensor on. Loop never writes a measurement of its own.")
+                Bullet("Save each reading as a session", "The only way to turn the AirPods sensor on. HELT never writes a measurement of its own.")
             }
 
             Text("Nothing else is read. You can change this any time in Settings › Health › Data Access.")
@@ -290,7 +308,7 @@ struct AccessDenied: View {
     var body: some View {
         MessageState(
             title: "Health access is off",
-            detail: "Loop can't read your readings without it. Turn it on in Settings › Health › Data Access › Loop."
+            detail: "HELT can't read your readings without it. Turn it on in Settings › Health › Data Access › HELT."
         )
     }
 }
