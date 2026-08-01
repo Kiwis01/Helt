@@ -543,6 +543,14 @@ async function findDicomStudy(medplum: MedplumClient, uid: string): Promise<Dico
  * materialized. Such a row has no instances and nothing to open, so listing it
  * would only offer a viewer that can never load.
  */
+type ResolveOutcome =
+  | { readonly kind: 'ok'; readonly study: StoredStudy }
+  /** The link outlived its bytes. Nothing to open, so it is dropped — silently,
+   *  because the list is still a complete answer about what is actually stored. */
+  | { readonly kind: 'missing' }
+  /** The lookup itself failed. The list is INCOMPLETE and must say so. */
+  | { readonly kind: 'failed'; readonly reason: Exclude<DicomFallbackReason, null>; readonly detail: string };
+
 async function resolveStoredStudy(
   medplum: MedplumClient,
   uid: string,
@@ -586,6 +594,8 @@ async function resolveStoredStudy(
     seriesCount: pickNumber(study, 'numberOfStudyRelatedSeries'),
     instanceCount: pickNumber(study, 'numberOfStudyRelatedInstances'),
   };
+
+  return { kind: 'ok', study: resolved };
 }
 
 /** Newest first; studies without a date sink to the bottom rather than to 1970. */
@@ -636,11 +646,22 @@ export async function listPatientStudies(patientId: string): Promise<StudiesResu
     );
 
     const studies: StoredStudy[] = [];
-    for (const study of resolved) {
-      if (study) studies.push(study);
+    let failure: Extract<ResolveOutcome, { kind: 'failed' }> | null = null;
+    for (const outcome of resolved) {
+      if (outcome.kind === 'ok') studies.push(outcome.study);
+      else if (outcome.kind === 'failed' && !failure) failure = outcome;
     }
 
-    return apiOk<readonly StoredStudy[]>(studies.sort(byStudyDateDesc));
+    studies.sort(byStudyDateDesc);
+
+    // Any resolution that FAILED means this list is missing rows that do exist.
+    // Returning `apiOk` here would put a "live from Medplum" badge over a
+    // partial chart — the one outcome the source badge exists to prevent.
+    if (failure) {
+      return apiDegraded<readonly StoredStudy[]>(studies, failure.reason, failure.detail);
+    }
+
+    return apiOk<readonly StoredStudy[]>(studies);
   } catch (error) {
     return degrade<readonly StoredStudy[]>([], error, 'listPatientStudies');
   }
