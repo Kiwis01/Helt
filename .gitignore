@@ -1,0 +1,50 @@
+# --- Secretos -----------------------------------------------------------------
+# El .env de la raiz tiene credenciales reales. NUNCA se commitea.
+.env
+.env.*
+!.env.example
+ops/.env
+**/.env
+!ops/.env.example
+
+# --- Dependencias -------------------------------------------------------------
+node_modules/
+.npm/
+.pnpm-store/
+
+# --- Builds -------------------------------------------------------------------
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# --- Reportes de test ---------------------------------------------------------
+# OJO: `coverage/` a secas NO se ignora — es la carpeta del servicio de Stedi
+# (loop-coverage, :3003). Solo se ignoran los reportes de cobertura de vitest.
+voice/coverage/
+core/coverage/
+dashboard/coverage/
+coverage/coverage/
+.nyc_output/
+*.lcov
+
+# --- Logs y temporales --------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-error.log*
+.cache/
+.tmp/
+tmp/
+
+# --- Audio de respaldo del demo (pesa y no aporta al repo) --------------------
+voice/recordings/
+*.wav.bak
+
+# --- Sistema operativo / editores ---------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json

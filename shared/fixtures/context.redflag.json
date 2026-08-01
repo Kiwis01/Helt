@@ -1,0 +1,88 @@
+{
+  "patientId": "loop-demo-patient-001",
+  "displayName": "Alex Rivera",
+  "age": 34,
+  "generatedAt": "2026-08-01T18:22:11Z",
+  "baseline": {
+    "heartRate": { "mean": 68, "sd": 6, "unit": "bpm" },
+    "hrv": { "mean": 54, "sd": 11, "unit": "ms" },
+    "respiratoryRate": { "mean": 14, "sd": 2, "unit": "breaths/min" },
+    "sleepHours": { "mean": 6.8, "sd": 1.1, "unit": "h" }
+  },
+  "current": {
+    "windowMinutes": 30,
+    "heartRate": { "latest": 163, "max": 171, "trend": "rising", "unit": "bpm" },
+    "hrv": { "latest": 14, "min": 11, "trend": "falling", "unit": "ms" },
+    "respiratoryRate": { "latest": 34, "max": 36, "trend": "rising", "unit": "breaths/min" },
+    "lastSampleAt": "2026-08-01T18:21:40Z"
+  },
+  "deltas": {
+    "heartRate": { "absolute": 95, "sdFromBaseline": 15.8 },
+    "hrv": { "absolute": -40, "sdFromBaseline": -3.6 },
+    "respiratoryRate": { "absolute": 20, "sdFromBaseline": 10.0 }
+  },
+  "conditions": [
+    {
+      "code": "197480006",
+      "system": "http://snomed.info/sct",
+      "display": "Anxiety disorder",
+      "onsetDate": "2023-04-12",
+      "clinicalStatus": "active"
+    }
+  ],
+  "carePlan": {
+    "id": "loop-demo-careplan-001",
+    "authoredBy": "Dr. Maya Chen",
+    "lastUpdated": "2026-07-02",
+    "activities": [
+      {
+        "id": "cp-act-1",
+        "order": 1,
+        "type": "breathing",
+        "title": "Box breathing",
+        "instruction": "4 in, 4 hold, 4 out, 4 hold — 5 cycles",
+        "durationMinutes": 4,
+        "voiceScript": "Vamos a hacerlo juntos, sin prisa. Si puedes, siéntate y suelta los hombros.\nInhala por la nariz mientras cuento cuatro: uno, dos, tres, cuatro.\nSostén el aire: uno, dos, tres, cuatro.\nExhala despacio por la boca: uno, dos, tres, cuatro.\nQuédate vacío un momento: uno, dos, tres, cuatro.\nEso fue un ciclo completo. Vamos por el segundo, yo cuento contigo.\nTercer ciclo. No busques respirar profundo, solo parejo.\nCuarto ciclo. Hombros abajo, mandíbula suelta.\nÚltimo ciclo, el quinto. Ya casi.\nListo. Respira normal un momento. ¿Del cero al diez, cuánto bajó?"
+      },
+      {
+        "id": "cp-act-2",
+        "order": 2,
+        "type": "grounding",
+        "title": "5-4-3-2-1 grounding",
+        "instruction": "Name 5 things you see, 4 you can touch...",
+        "durationMinutes": 3,
+        "voiceScript": "Vamos a anclarte en el lugar donde estás ahora mismo.\nMira alrededor y dime cinco cosas que puedas ver. Tómate tu tiempo, yo espero.\nAhora cuatro cosas que puedas tocar. Toca cada una mientras la nombras.\nTres cosas que puedas oír, aunque sean lejanas.\nDos cosas que puedas oler.\nY una cosa que puedas saborear.\nEso es. Estás aquí, en este cuarto, y tu cuerpo se está regulando."
+      },
+      {
+        "id": "cp-act-3",
+        "order": 3,
+        "type": "escalation-soft",
+        "title": "Message care team",
+        "instruction": "Reach out to your clinician for a same-week telehealth visit",
+        "voiceScript": "Tu plan dice que el siguiente paso es avisarle a tu equipo de cuidado.\nLa doctora Chen dejó escrito que quiere verte esta misma semana si esto se repite.\nPuedo revisar ahora mismo qué cubre tu seguro para una sesión de telesalud, para que no te lleves una sorpresa.\n¿Quieres que lo revise?",
+        "costItem": { "serviceType": "telehealth-mental-health", "cptCode": "90834" }
+      }
+    ]
+  },
+  "recentEpisodes": [
+    {
+      "encounterId": "enc-0031",
+      "startedAt": "2026-07-28T02:14:00Z",
+      "durationMinutes": 22,
+      "peakHeartRate": 121,
+      "interventions": ["cp-act-1"],
+      "resolution": "self-resolved",
+      "severitySelfReported": 7
+    }
+  ],
+  "medications": [
+    { "display": "Sertraline 50mg", "status": "active", "rxnorm": "312938", "coverageCheckable": true }
+  ],
+  "safetyEnvelope": {
+    "heartRateMax": 150,
+    "heartRateMin": 40,
+    "respiratoryRateMax": 32,
+    "spo2Min": 92,
+    "note": "Valores fuera del envelope DEBEN disparar escalación determinista ANTES de cualquier llamada al LLM."
+  }
+}

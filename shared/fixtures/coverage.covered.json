@@ -1,0 +1,14 @@
+{
+  "checkId": "cov-1a2b",
+  "checkedAt": "2026-08-01T18:29:40Z",
+  "status": "covered",
+  "payerName": "Test Payer Inc",
+  "planName": "PPO Silver",
+  "copayCents": 2500,
+  "coinsurancePercent": 0,
+  "deductible": { "individualCents": 150000, "metCents": 142000, "remainingCents": 8000 },
+  "priorAuthRequired": false,
+  "raw271Id": "stedi-271-0c7f41a9",
+  "voiceSummary": "Tu sesión de telesalud está cubierta. Tu copago es de 25 dólares y ya cubriste casi todo tu deducible.",
+  "latencyMs": 812
+}

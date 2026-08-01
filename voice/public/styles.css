@@ -1,0 +1,1881 @@
+/**
+ * =============================================================================
+ *  loop-voice · Estilos del cliente de navegador
+ *  Archivo: voice/public/styles.css
+ * =============================================================================
+ *
+ * Se proyecta en pantalla grande frente a jueces. Reglas de diseno:
+ *
+ *   - Disenado para 1280x720. La pagina NUNCA hace scroll (ni vertical ni
+ *     horizontal): lo unico que scrollea es el transcript, por dentro.
+ *   - Tipografia del sistema. Sin CDN ni webfonts: el wifi puede morir.
+ *     El stack arranca en SF Pro (Mac) y cae en Segoe UI Variable (Windows).
+ *   - Ningun estado (vacio, cargando, error, escalado) se ve roto.
+ *
+ * TEMA UNICO, A PROPOSITO
+ * -----------------------
+ * Esto no es una pagina: es un instrumento que se proyecta en una sala oscura.
+ * Un tema claro sobre proyector quema la imagen y mata el contraste del banner
+ * de escalacion, que es el momento del demo. Se fija oscuro (`color-scheme` en
+ * el <head>) y no se ofrece alternancia. Todo el color vive en los tokens de
+ * abajo: cambiar el bloque `:root` es cambiar el tema entero.
+ *
+ * COLOR
+ * -----
+ * `--mint` es la identidad (marca, favicon, voz del agente) y es el UNICO
+ * acento. Los colores clinicos --red / --amber / --indigo / --sky son
+ * SEMANTICOS, no decorativos: rojo es siempre critico, ambar siempre alerta,
+ * indigo siempre evento de sistema, azul siempre el agente hablando. Ninguno
+ * se usa jamas por gusto estetico.
+ *
+ * MOTION
+ * ------
+ * Un solo tempo ambiente: 4 s, que es el tiempo de la respiracion de caja del
+ * care plan (`4 in, 4 hold, 4 out, 4 hold`). Todo lo que vive en reposo respira
+ * a ese ritmo. Nada parpadea. La UNICA excepcion es la escalacion, a 1.1 s: la
+ * ruptura del tempo es la alarma.
+ */
+
+/* ========================================================================== */
+/* Tokens                                                                     */
+/* ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Fondo ------------------------------------------------------------ */
+  /* No es negro puro: grafito con sesgo al cian del acento, para que el
+     neutro se lea elegido y no heredado. */
+  --ink: #05070a;
+  --ink-lift: #0a0e14;
+
+  /* --- Superficies: luz sobre el fondo, no colores opacos --------------- */
+  --surface-1: rgb(226 240 250 / 4.5%); /* tarjeta                        */
+  --surface-2: rgb(226 240 250 / 7.5%); /* elevado dentro de una tarjeta   */
+  --surface-3: rgb(226 240 250 / 12%); /* control                          */
+
+  --hairline: rgb(226 240 250 / 9%);
+  --hairline-strong: rgb(226 240 250 / 15%);
+
+  /* --- Texto: cuatro niveles, como iOS ---------------------------------- */
+  --label-1: rgb(244 249 255 / 95%);
+  --label-2: rgb(226 240 250 / 62%);
+  --label-3: rgb(226 240 250 / 40%);
+  --label-4: rgb(226 240 250 / 25%);
+
+  /* --- Acento (uno solo) ------------------------------------------------ */
+  --mint: #5fe3c0;
+  --mint-deep: #1c7a68;
+
+  /* --- Semanticos clinicos (NO son acentos) ----------------------------- */
+  --red: #ff453a;
+  --red-deep: #5c0a0f;
+  --amber: #ff9f0a;
+  --indigo: #7d7aff;
+  --sky: #4aa8ff;
+
+  /* --- Forma ------------------------------------------------------------ */
+  --r-lg: 22px;
+  --r-md: 15px;
+  --r-sm: 10px;
+  --r-pill: 980px;
+
+  /* --- Tipografia ------------------------------------------------------- */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Segoe UI Variable Display", "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --mono: "SF Mono", ui-monospace, "Cascadia Code", "Cascadia Mono",
+    "JetBrains Mono", Consolas, monospace;
+
+  /* --- Movimiento ------------------------------------------------------- */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1); /* salida tipo hoja de iOS      */
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --breath: 4s; /* el tempo de la respiracion de caja */
+
+  /* --- Elevacion: sombra suave + luz interior en el borde superior ------ */
+  --elev-1: 0 1px 0 rgb(255 255 255 / 5%) inset, 0 14px 34px -16px rgb(0 0 0 / 80%);
+  --elev-2: 0 1px 0 rgb(255 255 255 / 7%) inset, 0 24px 60px -20px rgb(0 0 0 / 85%);
+}
+
+/* ========================================================================== */
+/* Reset                                                                      */
+/* ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* la pagina no scrollea: es un kiosco de demo */
+}
+
+body {
+  background:
+    /* Dos lavados muy tenues: sacan el fondo de plano sin ensuciarlo. */
+    radial-gradient(1200px 620px at 82% -12%, rgb(95 227 192 / 7%), transparent 62%),
+    radial-gradient(950px 520px at 4% 112%, rgb(125 122 255 / 6%), transparent 60%),
+    var(--ink);
+  color: var(--label-1);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: -0.006em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+::selection {
+  background: rgb(95 227 192 / 28%);
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: 0.84em;
+  padding: 2px 7px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 6px;
+  background: var(--surface-2);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 6%) inset;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Anillo de foco: visible sin gritar. */
+:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ========================================================================== */
+/* Esqueleto                                                                  */
+/* ========================================================================== */
+
+/**
+ * Flex, no grid, a proposito: el banner de escalacion es `hidden` la mayor
+ * parte del tiempo y con `grid-template-rows` fijas un hijo en display:none
+ * desplaza al resto de fila y el pie de controles se queda sin altura.
+ * Con flex, un hijo oculto simplemente desaparece.
+ */
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 13px 20px 16px;
+}
+
+.app > .topbar,
+.app > .escalation,
+.app > .controls {
+  flex: 0 0 auto;
+}
+
+.app > .main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Superficie compartida por las tarjetas grandes. */
+.panel,
+.side,
+.controls {
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* ========================================================================== */
+/* Barra superior                                                             */
+/* ========================================================================== */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 54px;
+  padding: 0 2px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  color: var(--mint);
+  filter: drop-shadow(0 0 12px rgb(95 227 192 / 45%));
+  animation: breathe var(--breath) var(--ease-soft) infinite;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+}
+
+.brand-sub {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--label-3);
+}
+
+/* --- Chip del paciente: el ancla de "con quien estoy hablando" --- */
+
+.patient-chip {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 6px 18px 6px 6px;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  min-width: 0;
+  transition: opacity 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.patient-chip.is-empty {
+  opacity: 0.5;
+}
+
+.patient-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, var(--mint-deep), #24354f);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 12%) inset;
+  color: #eafff9;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.patient-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.22;
+  min-width: 0;
+}
+
+.patient-text strong {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.patient-text small {
+  font-size: 11px;
+  color: var(--label-3);
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* --- Medidor de latencia --- */
+
+.latency-card {
+  display: grid;
+  grid-template-areas: "label value" "sub value";
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 16px;
+  padding: 7px 17px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  transition: border-color 0.5s var(--ease), background 0.5s var(--ease);
+}
+
+.latency-label {
+  grid-area: label;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--label-3);
+}
+
+.latency-sub {
+  grid-area: sub;
+  font-size: 11px;
+  color: var(--label-4);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.latency-value {
+  grid-area: value;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--mono);
+  /* La columna es `auto`: sin esto el `ms` se cae de linea cuando el valor
+     todavia es el guion largo. */
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* Reserva el ancho de 3 digitos para que la tarjeta no salte de tamano
+   cada vez que la latencia cambia de 98 a 412 ms. */
+.latency-value b {
+  min-width: 3ch;
+  text-align: right;
+}
+
+.latency-value b {
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.35s var(--ease);
+}
+
+.latency-value i {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--label-4);
+}
+
+.latency-card[data-status="measuring"] .latency-value b {
+  color: var(--label-3);
+}
+
+.latency-card[data-status="good"] {
+  border-color: rgb(95 227 192 / 38%);
+  background: rgb(95 227 192 / 8%);
+}
+
+.latency-card[data-status="good"] .latency-value b {
+  color: var(--mint);
+}
+
+.latency-card[data-status="warn"] {
+  border-color: rgb(255 159 10 / 38%);
+  background: rgb(255 159 10 / 8%);
+}
+
+.latency-card[data-status="warn"] .latency-value b {
+  color: var(--amber);
+}
+
+.latency-card[data-status="bad"] {
+  border-color: rgb(255 69 58 / 40%);
+  background: rgb(255 69 58 / 9%);
+}
+
+.latency-card[data-status="bad"] .latency-value b {
+  color: var(--red);
+}
+
+/* --- Chip de conexion --- */
+
+.conn-chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 17px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: var(--surface-1);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--label-2);
+  white-space: nowrap;
+  transition: color 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--label-4);
+  flex-shrink: 0;
+  transition: background 0.4s var(--ease);
+}
+
+.conn-chip[data-conn="online"] {
+  border-color: rgb(95 227 192 / 38%);
+  color: var(--mint);
+}
+
+.conn-chip[data-conn="online"] .conn-dot {
+  background: var(--mint);
+  animation: halo var(--breath) var(--ease-soft) infinite;
+}
+
+.conn-chip[data-conn="connecting"] {
+  border-color: rgb(255 159 10 / 38%);
+  color: var(--amber);
+}
+
+.conn-chip[data-conn="connecting"] .conn-dot {
+  background: var(--amber);
+  animation: breathe 1.4s var(--ease-soft) infinite;
+}
+
+.conn-chip[data-conn="failed"] {
+  border-color: rgb(255 69 58 / 40%);
+  color: var(--red);
+}
+
+.conn-chip[data-conn="failed"] .conn-dot {
+  background: var(--red);
+}
+
+.conn-chip[data-conn="ended"] {
+  color: var(--label-3);
+}
+
+/* --- Los dos unicos ritmos del sistema --- */
+
+/* Reposo: respira al tempo de la respiracion de caja. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+@keyframes halo {
+  0% {
+    box-shadow: 0 0 0 0 rgb(95 227 192 / 55%);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgb(95 227 192 / 0%);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(95 227 192 / 0%);
+  }
+}
+
+/* Alarma: rompe el tempo. Solo la usa la escalacion. */
+@keyframes alarm {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ========================================================================== */
+/* Banner de escalacion                                                       */
+/* ========================================================================== */
+
+.escalation {
+  display: grid;
+  grid-template-columns: auto minmax(250px, 340px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  padding: 15px 24px;
+  border-radius: var(--r-lg);
+  border: 1px solid rgb(255 69 58 / 55%);
+  background: linear-gradient(102deg, var(--red-deep) 0%, #2b0509 68%);
+  box-shadow:
+    0 0 0 1px rgb(255 69 58 / 22%),
+    0 0 60px -14px rgb(255 69 58 / 45%),
+    var(--elev-2);
+  animation: esc-in 0.42s var(--ease);
+}
+
+.escalation[hidden] {
+  display: none;
+}
+
+@keyframes esc-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.esc-glyph {
+  width: 38px;
+  height: 38px;
+  color: #ff8a83;
+  animation: alarm 1.1s var(--ease-soft) infinite;
+}
+
+.esc-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-right: 1px solid rgb(255 255 255 / 13%);
+  padding-right: 20px;
+  min-width: 0;
+}
+
+.esc-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffa8a2;
+}
+
+.esc-rule {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #fff;
+  line-height: 1.14;
+  word-break: break-all;
+}
+
+.esc-note {
+  font-size: 12px;
+  color: #ffbdb8;
+}
+
+.esc-body {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-width: 0;
+}
+
+.esc-action {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 112px;
+  padding: 8px 18px;
+  border-radius: 14px;
+  background: #fff;
+  color: #b00c1c;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 60%);
+}
+
+.esc-action[data-action="advise-988"] {
+  color: #4b2ea8;
+}
+
+.esc-action[data-action="connect-human"] {
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+
+.esc-lines {
+  min-width: 0;
+}
+
+.esc-script {
+  font-size: 18.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  color: #fff;
+  line-height: 1.34;
+  text-wrap: balance;
+}
+
+.esc-evidence {
+  font-size: 13px;
+  color: #ffbdb8;
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+  margin-top: 5px;
+}
+
+.esc-evidence[hidden] {
+  display: none;
+}
+
+/**
+ * Cuando hay escalacion, el resto se aparta: el sidebar retrocede y el
+ * transcript se tine de rojo en el borde. No se toca la legibilidad del
+ * transcript, que es donde esta el guion que el agente acaba de decir.
+ *
+ * No se atenua mas que esto a proposito: al escalar tambien aparece el panel
+ * de resultado con el `encounterId`, y esa es justo la prueba de que el
+ * episodio quedo escrito. Tiene que seguir leyendose.
+ */
+body.is-escalated .side {
+  opacity: 0.72;
+  filter: saturate(0.8);
+  transition: opacity 0.5s var(--ease), filter 0.5s var(--ease);
+}
+
+body.is-escalated .transcript-panel {
+  border-color: rgb(255 69 58 / 26%);
+}
+
+/**
+ * Al escalar entran a la vez el banner (arriba) y el panel de resultado
+ * (abajo), y el sidebar se queda sin alto: sin esto se recortaban el enlace a
+ * Medplum y el disclaimer.
+ *
+ * En vez de meter un scroll, el panel cambia de trabajo: deja de ser el
+ * catalogo de las 9 reglas y pasa a ser LA regla que disparo. El catalogo ya
+ * se vio durante toda la llamada; en este instante lo unico que importa es
+ * cual salto y que el episodio se escribio.
+ */
+body.is-escalated .rules-list li:not(.is-fired) {
+  display: none;
+}
+
+/* La nota ("9 reglas deterministas...") lleva toda la llamada en pantalla y
+   aqui solo le roba alto a la fila de la regla que disparo, que es lo unico
+   que un juez necesita leer en este segundo. El badge DISPARADO la sustituye. */
+body.is-escalated .rules-note {
+  display: none;
+}
+
+/**
+ * Y se retira el estado del agente, que en este instante es la unica cosa de
+ * la pantalla que no aporta nada: dice "ESCALADO / regla disparada" justo
+ * debajo de un banner que ya lo grita diez veces mas grande. Es el unico
+ * bloque 100% duplicado, asi que es el que cede los 63 px que faltaban.
+ */
+body.is-escalated .state-sec {
+  display: none;
+}
+
+/* Al ocultarse el estado, biometria pasa a ser el primer bloque y no debe
+   arrastrar el hairline que la separaba de el. */
+body.is-escalated .bio-sec {
+  border-top: none;
+}
+
+/* ========================================================================== */
+/* Cuerpo                                                                     */
+/* ========================================================================== */
+
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 28vw, 396px);
+  gap: 12px;
+  min-height: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Cabecera compartida por el transcript y por las secciones del sidebar. */
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 18px 11px;
+  flex-shrink: 0;
+}
+
+.panel-head h2 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--label-2);
+}
+
+.panel-meta {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--label-4);
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.transcript-panel > .panel-head {
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* Punto de "en vivo": solo se enciende cuando la conexion esta online.
+   `:has()` es progresivo — si el navegador no lo soporta, queda apagado. */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--label-4);
+  flex-shrink: 0;
+  transition: background 0.4s var(--ease);
+}
+
+body:has(#connChip[data-conn="online"]) .live-dot {
+  background: var(--mint);
+  animation: halo var(--breath) var(--ease-soft) infinite;
+}
+
+/* --- Transcript --- */
+
+.transcript {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+.transcript::-webkit-scrollbar {
+  width: 10px;
+}
+
+.transcript::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcript::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* --- Estado vacio --- */
+
+.empty-state {
+  margin: auto;
+  text-align: center;
+  padding: 24px;
+  max-width: 420px;
+}
+
+.empty-state[hidden] {
+  display: none;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: var(--surface-1);
+  color: var(--label-3);
+  animation: breathe var(--breath) var(--ease-soft) infinite;
+}
+
+.empty-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.empty-title {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  color: var(--label-2);
+}
+
+.empty-sub {
+  margin-top: 7px;
+  font-size: 14px;
+  color: var(--label-3);
+  line-height: 1.62;
+  text-wrap: balance;
+}
+
+.empty-sub b {
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+/* --- Burbujas --- */
+
+.bubble {
+  max-width: 76%;
+  padding: 11px 17px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+  animation: bubble-in 0.28s var(--ease);
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bubble-patient {
+  align-self: flex-start;
+  border-bottom-left-radius: 7px;
+}
+
+.bubble-agent {
+  align-self: flex-end;
+  border-bottom-right-radius: 7px;
+  background: linear-gradient(158deg, rgb(95 227 192 / 13%), rgb(95 227 192 / 5%));
+  border-color: rgb(95 227 192 / 26%);
+}
+
+.bubble-head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-bottom: 3px;
+}
+
+.bubble-who {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.004em;
+  color: var(--label-3);
+}
+
+.bubble-agent .bubble-who {
+  color: var(--mint);
+}
+
+.bubble-time {
+  font-size: 10.5px;
+  color: var(--label-4);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.bubble-text {
+  font-size: 19px;
+  line-height: 1.44;
+  letter-spacing: -0.016em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Turno todavia abierto: no se marca con bordes rotos, se marca con un
+   cursor vivo al final del texto. Menos ruido, misma informacion. */
+.bubble.is-partial {
+  opacity: 0.78;
+}
+
+.bubble.is-partial .bubble-text::after {
+  content: "";
+  display: inline-block;
+  width: 2.5px;
+  height: 19px;
+  margin-left: 4px;
+  vertical-align: -3px;
+  border-radius: 2px;
+  background: var(--mint);
+  animation: caret 1.1s var(--ease-soft) infinite;
+}
+
+@keyframes caret {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0.1;
+  }
+}
+
+/* Turno escrito en el modo de respaldo por texto. */
+.bubble.is-typed .bubble-who::after {
+  content: " · texto";
+  color: var(--indigo);
+  font-weight: 500;
+}
+
+/* --- Tarjetas de sistema dentro del transcript --- */
+
+.sys-card {
+  align-self: stretch;
+  padding: 12px 16px 13px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: var(--surface-1);
+  animation: bubble-in 0.28s var(--ease);
+}
+
+.sys-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.004em;
+  color: var(--label-2);
+  margin-bottom: 5px;
+}
+
+/* El punto de color es lo que clasifica la tarjeta de un vistazo. */
+.sys-head::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.sys-line {
+  font-size: 15px;
+  color: var(--label-1);
+  line-height: 1.46;
+  letter-spacing: -0.012em;
+}
+
+.sys-line + .sys-line {
+  color: var(--label-3);
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.sys-escalation {
+  border-color: rgb(255 69 58 / 34%);
+  background: rgb(255 69 58 / 8%);
+}
+
+.sys-escalation .sys-head {
+  color: var(--red);
+}
+
+.sys-coverage {
+  border-color: rgb(125 122 255 / 32%);
+  background: rgb(125 122 255 / 7%);
+}
+
+.sys-coverage .sys-head {
+  color: var(--indigo);
+}
+
+.sys-result {
+  border-color: rgb(95 227 192 / 30%);
+  background: rgb(95 227 192 / 6%);
+}
+
+.sys-result .sys-head {
+  color: var(--mint);
+}
+
+/* ========================================================================== */
+/* Panel lateral                                                              */
+/* ========================================================================== */
+
+/**
+ * Una SOLA superficie continua, dividida por hairlines, en vez de cuatro
+ * tarjetas flotando. Menos bordes, menos ruido, mas jerarquia.
+ *
+ * Flex y no grid por el mismo motivo que `.app`: la seccion de resultado esta
+ * oculta hasta que la llamada termina y no debe reservar fila.
+ */
+.side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Red de seguridad: con el reparto de alturas de abajo nunca deberia hacer
+     falta scrollear, pero si en otra maquina un texto envuelve una linea de
+     mas, preferimos que se pueda alcanzar antes que que se recorte. */
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+.side-sec {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.side-sec + .side-sec {
+  border-top: 1px solid var(--hairline);
+}
+
+.side-sec[hidden] {
+  display: none;
+}
+
+/* --- Estado del agente --- */
+
+.state-sec {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px 13px;
+}
+
+.state-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--label-4);
+  flex-shrink: 0;
+  transition: background 0.35s var(--ease);
+}
+
+.state-dot[data-state="listening"] {
+  background: var(--mint);
+  animation: halo var(--breath) var(--ease-soft) infinite;
+}
+.state-dot[data-state="thinking"] {
+  background: var(--indigo);
+  animation: breathe 1.2s var(--ease-soft) infinite;
+}
+.state-dot[data-state="speaking"] {
+  background: var(--sky);
+}
+.state-dot[data-state="intervention"] {
+  /* La intervencion ES la respiracion de caja: late a su tempo exacto. */
+  background: var(--sky);
+  animation: halo var(--breath) var(--ease-soft) infinite;
+}
+.state-dot[data-state="coverage"] {
+  background: var(--indigo);
+}
+.state-dot[data-state="greeting"] {
+  background: var(--mint);
+}
+.state-dot[data-state="connecting"] {
+  background: var(--amber);
+  animation: breathe 1.4s var(--ease-soft) infinite;
+}
+.state-dot[data-state="escalated"] {
+  background: var(--red);
+  animation: alarm 1.1s var(--ease-soft) infinite;
+}
+.state-dot[data-state="error"] {
+  background: var(--red);
+}
+
+.state-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.24;
+}
+
+.state-text strong {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.026em;
+  transition: color 0.35s var(--ease);
+}
+
+.state-dot[data-state="escalated"] + .state-text strong {
+  color: var(--red);
+}
+
+.state-text small {
+  font-size: 12px;
+  color: var(--label-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Biometria --- */
+
+.bio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--hairline);
+  border-top: 1px solid var(--hairline);
+}
+
+.bio-tile {
+  background: var(--ink-lift);
+  padding: 10px 13px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--label-3);
+}
+
+.bio-label svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.bio-value {
+  font-size: 27px;
+  font-weight: 600;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  transition: color 0.4s var(--ease);
+}
+
+/* Semantica, no decoracion: ambar = por encima del baseline,
+   azul = por debajo, menta = dentro de rango. */
+.bio-value[data-trend="high"] {
+  color: var(--amber);
+}
+.bio-value[data-trend="low"] {
+  color: var(--sky);
+}
+.bio-value[data-trend="normal"] {
+  color: var(--mint);
+}
+
+/* El baseline no es letra pequena decorativa: "tu ritmo esta en 118, tu
+   promedio es 68" ES el argumento. Se lee desde el fondo de la sala. */
+.bio-base {
+  font-size: 11px;
+  color: var(--label-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Motor de red-flags --- */
+
+.rules-sec {
+  flex: 1 1 auto;
+  /* Se deja encoger hasta cabecera + una fila: cuando entran el banner de
+     escalacion y el panel de resultado, esta seccion cede alto, pero la regla
+     que disparo NO puede desaparecer. */
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+}
+
+.badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  flex-shrink: 0;
+}
+
+.badge-armed {
+  color: var(--mint);
+  background: rgb(95 227 192 / 12%);
+  border: 1px solid rgb(95 227 192 / 32%);
+}
+
+/* Va DESPUES de .badge-armed a proposito: app.js anade `badge-fired` sin
+   quitar `badge-armed`, asi que gana por orden en la cascada. */
+.badge-fired {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+  animation: alarm 1.1s var(--ease-soft) infinite;
+}
+
+.rules-note {
+  padding: 0 18px 8px;
+  font-size: 11.5px;
+  color: var(--label-4);
+  line-height: 1.4;
+}
+
+.rules-note b {
+  font-weight: 600;
+  color: var(--label-3);
+}
+
+.rules-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px 10px;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+.rules-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rules-list::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Densidad calculada para que las NUEVE reglas quepan sin scroll a 1280x720,
+   que es la resolucion del escenario. Un juez tiene que poder contarlas de un
+   vistazo; si la lista se corta, la mitad del argumento se pierde. */
+.rules-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--label-3);
+  border: 1px solid transparent;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+/* Los IDs son lo que un juez va a querer leer y citar: no se esconden. */
+.rules-list code {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--label-3);
+  flex-shrink: 0;
+  width: 40px;
+}
+
+.rules-list span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rules-list em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--label-4);
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La regla que disparo. Es lo que un juez clinico va a querer ver. */
+.rules-list li.is-fired {
+  background: rgb(255 69 58 / 15%);
+  border-color: rgb(255 69 58 / 42%);
+  color: #fff;
+  font-weight: 500;
+}
+
+.rules-list li.is-fired code {
+  color: #ff8a83;
+}
+
+.rules-list li.is-fired em {
+  color: #fff;
+  background: rgb(255 69 58 / 55%);
+}
+
+/* --- Resultado --- */
+
+.result-sec[hidden] {
+  display: none;
+}
+
+.result-body {
+  padding: 0 18px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.result-outcome {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+
+.result-outcome[data-outcome="escalated-emergency"],
+.result-outcome[data-outcome="escalated-human"] {
+  color: var(--red);
+}
+
+.result-outcome[data-outcome="resolved-with-intervention"],
+.result-outcome[data-outcome="self-resolved"] {
+  color: var(--mint);
+}
+
+.result-encounter {
+  font-size: 12px;
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+  color: var(--label-4);
+}
+
+.result-link {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+  align-self: flex-start;
+  text-decoration: none;
+  border-bottom: 1px solid rgb(125 122 255 / 35%);
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.result-link::after {
+  content: " \2197";
+}
+
+.result-link:hover {
+  color: #a09eff;
+  border-bottom-color: rgb(160 158 255 / 60%);
+}
+
+.result-link[hidden] {
+  display: none;
+}
+
+/* --- Postura del producto: visible siempre, es parte del pitch --- */
+
+.disclosure {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px 10px;
+  border-top: 1px solid var(--hairline);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--label-4);
+  background: rgb(0 0 0 / 18%);
+}
+
+.disclosure svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--mint);
+  opacity: 0.65;
+}
+
+/* ========================================================================== */
+/* Controles                                                                  */
+/* ========================================================================== */
+
+.controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  transition: border-color 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+
+/* El dock se inclina hacia el paciente cuando esta hablando. */
+body.is-talking .controls {
+  border-color: rgb(95 227 192 / 32%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 6%) inset,
+    0 0 0 1px rgb(95 227 192 / 12%),
+    0 0 44px -18px rgb(95 227 192 / 55%),
+    var(--elev-1);
+}
+
+.ptt-zone {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* --- Push to talk --- */
+
+.ptt {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 10px 24px 10px 12px;
+  min-width: 278px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-2);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition:
+    transform 0.14s var(--ease),
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease),
+    box-shadow 0.2s var(--ease),
+    opacity 0.2s var(--ease);
+}
+
+.ptt:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.ptt:not(:disabled):hover {
+  background: var(--surface-3);
+  border-color: rgb(95 227 192 / 30%);
+}
+
+.ptt.is-active {
+  border-color: rgb(95 227 192 / 62%);
+  background: rgb(95 227 192 / 15%);
+  transform: scale(0.982);
+  box-shadow: 0 0 0 5px rgb(95 227 192 / 11%);
+}
+
+.ptt-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--label-2);
+  flex-shrink: 0;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.ptt-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.ptt.is-active .ptt-icon {
+  background: var(--mint);
+  color: #05241f;
+}
+
+.ptt-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.24;
+}
+
+.ptt-text b {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  transition: color 0.2s var(--ease);
+}
+
+.ptt-text small {
+  font-size: 11.5px;
+  color: var(--label-4);
+}
+
+.ptt.is-active .ptt-text b {
+  color: var(--mint);
+}
+
+/* --- Medidor de nivel ---
+   Barras espejadas al centro, como Voice Memos: el nivel se lee como una onda
+   y no como una barra de progreso. La rampa de altura la construye nth-child;
+   los zonas (`data-zone`) que pinta app.js van despues y ganan por orden. */
+
+.level {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 40px;
+  width: 172px;
+}
+
+.level-seg {
+  flex: 1;
+  height: 16%;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  transition: background 0.07s linear, height 0.12s var(--ease-soft);
+}
+
+.level-seg:nth-child(n + 6) {
+  height: 24%;
+}
+.level-seg:nth-child(n + 11) {
+  height: 33%;
+}
+.level-seg:nth-child(n + 16) {
+  height: 44%;
+}
+
+.level-seg[data-zone="warm"] {
+  height: 60%;
+}
+.level-seg[data-zone="hot"] {
+  height: 82%;
+}
+
+.level-seg.is-on {
+  background: var(--mint);
+}
+.level-seg[data-zone="warm"].is-on {
+  background: var(--amber);
+}
+.level-seg[data-zone="hot"].is-on {
+  background: var(--red);
+}
+
+/* --- Respaldo por texto --- */
+
+.text-fallback {
+  display: flex;
+  gap: 9px;
+  min-width: 0;
+}
+
+.text-fallback input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 17px;
+  font-size: 15px;
+  letter-spacing: -0.012em;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: rgb(0 0 0 / 32%);
+  color: var(--label-1);
+  outline: none;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.text-fallback input::placeholder {
+  color: var(--label-4);
+}
+
+.text-fallback input:focus {
+  border-color: rgb(125 122 255 / 60%);
+  box-shadow: 0 0 0 3.5px rgb(125 122 255 / 16%);
+  background: rgb(0 0 0 / 45%);
+}
+
+.text-fallback input:disabled {
+  opacity: 0.45;
+}
+
+.text-fallback button {
+  padding: 12px 19px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-2);
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+
+.text-fallback button:not(:disabled):hover {
+  background: var(--surface-3);
+}
+
+.text-fallback button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* --- Acciones --- */
+
+.actions {
+  display: flex;
+  gap: 9px;
+}
+
+.btn {
+  padding: 12px 22px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    filter 0.18s var(--ease),
+    opacity 0.18s var(--ease),
+    transform 0.14s var(--ease),
+    background 0.18s var(--ease);
+}
+
+/* Un boton primario desactivado seguia siendo lo mas brillante del dock y le
+   robaba la jerarquia a "Colgar", que durante la llamada es LA accion. Al
+   desactivarse pierde tambien el color, no solo opacidad. */
+.btn:disabled {
+  opacity: 0.3;
+  filter: saturate(0.3);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.975);
+}
+
+.btn-primary {
+  background: var(--mint);
+  color: #032420;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 25%) inset, 0 8px 22px -12px rgb(95 227 192 / 90%);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: rgb(255 69 58 / 45%);
+  color: #ff8a83;
+}
+
+.btn-danger:not(:disabled):hover {
+  background: rgb(255 69 58 / 12%);
+}
+
+/* ========================================================================== */
+/* Toasts                                                                     */
+/* ========================================================================== */
+
+.toast-stack {
+  position: fixed;
+  right: 22px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 420px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline-strong);
+  background: rgb(22 27 36 / 82%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  color: var(--label-1);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.014em;
+  line-height: 1.4;
+  box-shadow: var(--elev-2);
+  animation: toast-in 0.32s var(--ease);
+}
+
+.toast::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--label-3);
+  flex-shrink: 0;
+}
+
+.toast-info::before {
+  background: var(--sky);
+}
+
+.toast-warn {
+  border-color: rgb(255 159 10 / 42%);
+}
+
+.toast-warn::before {
+  background: var(--amber);
+}
+
+.toast-error {
+  border-color: rgb(255 69 58 / 48%);
+}
+
+.toast-error::before {
+  background: var(--red);
+}
+
+.toast.is-leaving {
+  opacity: 0;
+  transform: translateX(16px) scale(0.98);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ========================================================================== */
+/* Adaptaciones                                                               */
+/* ========================================================================== */
+
+/* Portatiles de 1366x768 o proyectores 720p: se compacta sin romper nada. */
+@media (max-height: 780px) {
+  .app {
+    gap: 10px;
+    padding: 11px 18px 13px;
+  }
+  .bubble-text {
+    font-size: 17.5px;
+  }
+  .bubble {
+    padding: 10px 16px 11px;
+  }
+  .transcript {
+    gap: 9px;
+    padding: 15px 18px 18px;
+  }
+  .esc-rule {
+    font-size: 21px;
+  }
+  .esc-action {
+    font-size: 31px;
+    min-width: 100px;
+  }
+  .escalation {
+    padding: 12px 20px;
+  }
+  .state-sec {
+    padding: 11px 18px 12px;
+  }
+  .bio-tile {
+    padding: 8px 12px 10px;
+  }
+  .controls {
+    padding: 10px 14px;
+  }
+  .panel-head {
+    padding: 10px 18px 9px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .ptt {
+    min-width: 218px;
+    padding-right: 16px;
+  }
+  .ptt-text small {
+    display: none;
+  }
+  .level {
+    width: 116px;
+  }
+  .escalation {
+    grid-template-columns: auto minmax(200px, 300px) minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Pantallas grandes de sala: se escala la tipografia clave, no el layout. */
+@media (min-width: 1700px) {
+  .bubble-text {
+    font-size: 21px;
+  }
+  .esc-rule {
+    font-size: 29px;
+  }
+  .esc-script {
+    font-size: 21px;
+  }
+  .sys-line {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

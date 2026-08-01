@@ -1,0 +1,22 @@
+{
+  "name": "loop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Loop — companero de voz con contexto clinico real (hackathon YC x Medplum)",
+  "license": "MIT",
+  "workspaces": [
+    "voice"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm -w voice run dev",
+    "start": "npm -w voice run start",
+    "build": "npm -w voice run build",
+    "test": "npm -w voice run test",
+    "redflag": "npm -w voice run redflag --",
+    "smoke": "npm -w voice run smoke"
+  }
+}

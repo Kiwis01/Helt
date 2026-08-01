@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Loop · Agente de voz y motor de seguridad</title>
+    <meta
+      name="description"
+      content="Cliente de microfono push-to-talk de loop-voice (:3002). Motor de red-flags determinista antes del LLM."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <!-- Sin CDN, sin frameworks, sin build step: el wifi del hackathon puede morir.
+         Todos los iconos son SVG en linea. Ninguna peticion sale de localhost. -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%235fe3c0' stroke-width='2.4'/%3E%3Ccircle cx='12' cy='4' r='2.4' fill='%235fe3c0'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ===================================================================
+           Barra superior
+           =================================================================== -->
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="8" stroke-width="2.4" />
+              <circle cx="12" cy="4" r="2.5" fill="currentColor" stroke="none" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <b class="brand-name">Loop</b>
+            <small class="brand-sub">Voz · Seguridad</small>
+          </span>
+        </div>
+
+        <div class="patient-chip is-empty" id="patientChip">
+          <span class="patient-avatar" id="patientInitials" aria-hidden="true">—</span>
+          <span class="patient-text">
+            <strong id="patientName">Sin llamada activa</strong>
+            <small id="patientMeta">loop-demo-patient-001</small>
+          </span>
+        </div>
+
+        <div class="topbar-right">
+          <div
+            class="latency-card"
+            id="latencyCard"
+            title="Fin de habla del paciente hasta el primer chunk de audio del agente"
+          >
+            <span class="latency-label">Latencia de turno</span>
+            <span class="latency-value"><b id="latencyValue">—</b><i>ms</i></span>
+            <span class="latency-sub" id="latencySub">objetivo &lt; 800 ms</span>
+          </div>
+
+          <div class="conn-chip" id="connChip" data-conn="offline">
+            <span class="conn-dot" aria-hidden="true"></span>
+            <span id="connText">Desconectado</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===================================================================
+           Banner de escalacion — oculto salvo que dispare una regla
+           =================================================================== -->
+      <section class="escalation" id="escalationBanner" hidden aria-live="assertive">
+        <span class="esc-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.4 2.4 20.2h19.2L12 3.4Z" />
+            <path d="M12 9.6v4.6" />
+            <path d="M12 17.3h.01" />
+          </svg>
+        </span>
+
+        <div class="esc-left">
+          <span class="esc-kicker">Escalacion determinista</span>
+          <span class="esc-rule" id="escRule">RF-00</span>
+          <span class="esc-note">Regla en codigo · el LLM no vio este turno</span>
+        </div>
+
+        <div class="esc-body">
+          <div class="esc-action" id="escAction">911</div>
+          <div class="esc-lines">
+            <p class="esc-script" id="escScript"></p>
+            <p class="esc-evidence" id="escEvidence" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           Cuerpo
+           =================================================================== -->
+      <main class="main">
+        <!-- ---------- Transcripcion (el heroe de la pantalla) ---------- -->
+        <section class="panel transcript-panel">
+          <header class="panel-head">
+            <span class="live-dot" aria-hidden="true"></span>
+            <h2>Transcripcion en vivo</h2>
+            <span class="panel-meta" id="turnCount">0 turnos</span>
+          </header>
+
+          <div class="transcript" id="transcript" aria-live="polite">
+            <div class="empty-state" id="transcriptEmpty">
+              <span class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="2.6" width="6" height="11" rx="3" />
+                  <path d="M5.4 11.2a6.6 6.6 0 0 0 13.2 0" />
+                  <path d="M12 17.8V21" />
+                </svg>
+              </span>
+              <p class="empty-title">Listo para escuchar</p>
+              <p class="empty-sub">
+                Pulsa <b>Iniciar llamada</b> y manten presionada la
+                <kbd>barra espaciadora</kbd> para hablar.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- Panel lateral: una sola superficie, secciones dentro ---------- -->
+        <aside class="side">
+          <!-- Estado del agente -->
+          <section class="side-sec state-sec">
+            <span class="state-dot" id="stateDot" data-state="idle" aria-hidden="true"></span>
+            <div class="state-text">
+              <strong id="stateLabel">En espera</strong>
+              <small id="stateHint">Llamada no iniciada</small>
+            </div>
+          </section>
+
+          <!-- Biometria -->
+          <section class="side-sec bio-sec">
+            <header class="panel-head">
+              <h2>Biometria</h2>
+              <span class="panel-meta" id="bioMeta">sin datos</span>
+            </header>
+            <div class="bio-grid">
+              <div class="bio-tile">
+                <span class="bio-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20.1s-7.3-4.4-7.3-9.4a4.2 4.2 0 0 1 7.3-2.8 4.2 4.2 0 0 1 7.3 2.8c0 5-7.3 9.4-7.3 9.4Z" />
+                  </svg>
+                  FC
+                </span>
+                <span class="bio-value" id="bioHr">—</span>
+                <span class="bio-base" id="bioHrBase">baseline —</span>
+              </div>
+
+              <div class="bio-tile">
+                <span class="bio-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2.6 12.5h3.6l1.9-5.4 3.6 10.8 2.5-7.2 1.7 1.8h5.5" />
+                  </svg>
+                  HRV
+                </span>
+                <span class="bio-value" id="bioHrv">—</span>
+                <span class="bio-base" id="bioHrvBase">baseline —</span>
+              </div>
+
+              <div class="bio-tile">
+                <span class="bio-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 8.2h8.6a2.8 2.8 0 1 0-2.8-2.8" />
+                    <path d="M3 12.3h11.8a2.8 2.8 0 1 1-2.8 2.8" />
+                    <path d="M3 16.4h6.4" />
+                  </svg>
+                  FR
+                </span>
+                <span class="bio-value" id="bioRr">—</span>
+                <span class="bio-base" id="bioRrBase">baseline —</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Motor de red-flags -->
+          <section class="side-sec rules-sec">
+            <header class="panel-head">
+              <h2>Motor de red-flags</h2>
+              <span class="badge badge-armed" id="rulesBadge">ARMADO</span>
+            </header>
+            <p class="rules-note">9 reglas deterministas · se evaluan <b>antes</b> del LLM</p>
+            <ul class="rules-list" id="rulesList">
+              <li data-rule="RF-01-CHEST-PAIN-RADIATING"><code>RF-01</code><span>Dolor toracico irradiado</span><em>911</em></li>
+              <li data-rule="RF-02-SYNCOPE"><code>RF-02</code><span>Sincope / desmayo</span><em>911</em></li>
+              <li data-rule="RF-03-UNILATERAL-WEAKNESS"><code>RF-03</code><span>Debilidad unilateral</span><em>911</em></li>
+              <li data-rule="RF-04-SPEECH-FACIAL"><code>RF-04</code><span>Habla / cara caida</span><em>911</em></li>
+              <li data-rule="RF-05-THUNDERCLAP-HEADACHE"><code>RF-05</code><span>Cefalea en trueno</span><em>911</em></li>
+              <li data-rule="RF-06-DYSPNEA-AT-REST"><code>RF-06</code><span>Disnea en reposo</span><em>911</em></li>
+              <li data-rule="RF-07-SELF-HARM"><code>RF-07</code><span>Ideacion suicida</span><em>988</em></li>
+              <li data-rule="RF-08-BIOMETRIC-ENVELOPE"><code>RF-08</code><span>Fuera de envelope</span><em>911</em></li>
+              <li data-rule="RF-09-COMBINED"><code>RF-09</code><span>Toracico + biometria</span><em>911</em></li>
+            </ul>
+          </section>
+
+          <!-- Resultado final (aparece al colgar) -->
+          <section class="side-sec result-sec" id="resultPanel" hidden>
+            <header class="panel-head"><h2>Resultado del episodio</h2></header>
+            <div class="result-body">
+              <span class="result-outcome" id="resultOutcome">—</span>
+              <span class="result-encounter" id="resultEncounter">Sin encounterId</span>
+              <a class="result-link" id="resultLink" href="#" target="_blank" rel="noopener" hidden>Ver en Medplum</a>
+            </div>
+          </section>
+
+          <!-- Postura del producto: visible siempre, es parte del pitch -->
+          <p class="disclosure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2.8 4.6 6v5.6c0 4.6 3.1 8.1 7.4 9.6 4.3-1.5 7.4-5 7.4-9.6V6L12 2.8Z" />
+              <path d="m9 12 2.2 2.2L15.4 10" />
+            </svg>
+            <span>Contextualiza, no diagnostica. No sustituye atencion de emergencia.</span>
+          </p>
+        </aside>
+      </main>
+
+      <!-- ===================================================================
+           Controles
+           =================================================================== -->
+      <footer class="controls">
+        <div class="ptt-zone">
+          <button
+            type="button"
+            class="ptt"
+            id="pttBtn"
+            disabled
+            aria-label="Mantener presionado para hablar"
+          >
+            <span class="ptt-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2.6" width="6" height="11" rx="3" />
+                <path d="M5.4 11.2a6.6 6.6 0 0 0 13.2 0" />
+                <path d="M12 17.8V21" />
+              </svg>
+            </span>
+            <span class="ptt-text">
+              <b id="pttLabel">Manten para hablar</b>
+              <small id="pttHint">o la barra espaciadora</small>
+            </span>
+          </button>
+          <div class="level" id="levelMeter" aria-hidden="true"></div>
+        </div>
+
+        <form class="text-fallback" id="textForm" autocomplete="off">
+          <label class="sr-only" for="textInput">Modo respaldo por texto</label>
+          <input
+            type="text"
+            id="textInput"
+            placeholder="Respaldo por texto — escribe y pulsa Enter"
+            disabled
+            maxlength="500"
+          />
+          <button type="submit" id="textSend" disabled>Enviar</button>
+        </form>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="startBtn">Iniciar llamada</button>
+          <button type="button" class="btn btn-danger" id="endBtn" disabled>Colgar</button>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Tira de avisos efimeros -->
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

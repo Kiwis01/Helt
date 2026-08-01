@@ -1,0 +1,14 @@
+{
+  "checkId": "cov-unknown-0000",
+  "checkedAt": "2026-08-01T18:29:40Z",
+  "status": "unknown",
+  "payerName": null,
+  "planName": null,
+  "copayCents": null,
+  "coinsurancePercent": null,
+  "deductible": null,
+  "priorAuthRequired": false,
+  "raw271Id": null,
+  "voiceSummary": "No pude verificar tu cobertura en este momento. No quiero darte un número que no sea real, así que tu equipo de cuidado te lo puede confirmar cuando agendes.",
+  "latencyMs": 3000
+}

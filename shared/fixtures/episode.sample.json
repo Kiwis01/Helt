@@ -1,0 +1,43 @@
+{
+  "patientId": "loop-demo-patient-001",
+  "callId": "call-8f2a",
+  "startedAt": "2026-08-01T18:20:02Z",
+  "endedAt": "2026-08-01T18:34:50Z",
+  "outcome": "resolved-with-intervention",
+  "escalation": {
+    "triggered": false,
+    "rule": null,
+    "triggeredAt": null,
+    "action": null
+  },
+  "severitySelfReported": 7,
+  "interventionsAttempted": [
+    {
+      "carePlanActivityId": "cp-act-1",
+      "startedAt": "2026-08-01T18:23:10Z",
+      "completed": true,
+      "patientReportedRelief": 6
+    }
+  ],
+  "biometricsSnapshot": { "peakHeartRate": 126, "minHrv": 18, "peakRespiratoryRate": 27 },
+  "transcript": {
+    "redacted": true,
+    "turns": [
+      { "speaker": "patient", "at": "2026-08-01T18:20:05Z", "text": "No puedo respirar bien, el corazón se me va a salir." },
+      { "speaker": "agent", "at": "2026-08-01T18:20:11Z", "text": "Estoy aquí contigo. Antes de nada: no sustituyo a la atención de emergencia. Tu ritmo cardiaco está en 118 y tu promedio es 68, así que tu cuerpo está muy activado ahora mismo." },
+      { "speaker": "patient", "at": "2026-08-01T18:22:48Z", "text": "Sí, es lo mismo de la otra vez." },
+      { "speaker": "agent", "at": "2026-08-01T18:22:55Z", "text": "Tu plan de cuidado, el que escribió la doctora Chen, empieza con respiración de caja. ¿Lo hacemos juntos?" },
+      { "speaker": "patient", "at": "2026-08-01T18:23:08Z", "text": "Ok, vamos." },
+      { "speaker": "agent", "at": "2026-08-01T18:27:30Z", "text": "Tu ritmo bajó a 96. ¿Del cero al diez, cuánto alivio sientes?" },
+      { "speaker": "patient", "at": "2026-08-01T18:27:44Z", "text": "Como un seis." }
+    ]
+  },
+  "coverageChecks": [
+    {
+      "checkId": "cov-1a2b",
+      "serviceType": "telehealth-mental-health",
+      "result": "covered",
+      "copayCents": 2500
+    }
+  ]
+}
