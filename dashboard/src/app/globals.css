@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================================================================
+   Paleta — herramienta clínica, no dashboard de startup.
+
+   Oscuro por defecto y sin modo claro: los proyectores lavan los tonos
+   claros y el demo se ve a 1280x720 en una sala iluminada. Se evita el
+   negro puro (#000) porque los proyectores lo rinden como gris sucio.
+   ================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --bg: #090d12;
+  --surface: #111820;
+  --surface-2: #16202b;
+  --line: #1e2a36;
+  --line-strong: #2c3d4e;
+
+  --ink: #e9eff5;
+  --ink-2: #a2b3c3;
+  --ink-3: #6c8093;
+
+  /* Una sola familia de acento. Todo lo demás es estado semántico. */
+  --accent: #4fc3e8;
+  --accent-dim: #1d5d75;
+
+  --danger: #ff6b6b;
+  --warn: #f5a524;
+  --ok: #4ade80;
+
+  /* Series de los gráficos. El siguiente agente las usa como
+     `stroke="var(--chart-hr)"` — funcionan directas en atributos SVG. */
+  --chart-hr: #4fc3e8;
+  --chart-hrv: #8fa6d8;
+  --chart-rr: #e0b252;
+  --chart-episode: #ff6b6b;
+  --chart-grid: #1e2a36;
+  --chart-band: rgba(79, 195, 232, 0.1);
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    /* Cifras alineadas en columna: es un tablero de datos, no un blog. */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    /* Requisito duro del brief: nunca scroll horizontal. */
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--accent-dim);
+    color: var(--ink);
+  }
+
+  /* Barras de scroll discretas: un scrollbar nativo gordo sobre fondo
+     oscuro es lo que hace que un panel se vea "roto" en el proyector. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--line-strong);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Transparencias explícitas: los colores del tema son `var()`, así que
+     los modificadores de opacidad de Tailwind (`bg-danger/10`) no aplican. */
+  .tint-accent {
+    background-color: rgba(79, 195, 232, 0.1);
+  }
+
+  .tint-danger {
+    background-color: rgba(255, 107, 107, 0.12);
+  }
+
+  .tint-warn {
+    background-color: rgba(245, 165, 36, 0.12);
+  }
+
+  .tint-ok {
+    background-color: rgba(74, 222, 128, 0.12);
+  }
+
+  /* Rejilla diagonal de los placeholders. Comunica "aquí va algo" en vez
+     de "esto se rompió". */
+  .placeholder-hatch {
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 9px,
+      rgba(108, 128, 147, 0.07) 9px,
+      rgba(108, 128, 147, 0.07) 10px
+    );
+  }
+}

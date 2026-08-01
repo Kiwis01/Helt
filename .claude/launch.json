@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "loop-dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "@loop/dashboard"],
+      "port": 3000
+    },
+    {
+      "name": "loop-coverage",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "@loop/coverage"],
+      "port": 3003
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "loop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Loop — closed-loop voice companion for chronic anxiety. YC x Medplum hackathon.",
+  "workspaces": [
+    "shared",
+    "coverage",
+    "dashboard"
+  ],
+  "scripts": {
+    "fixtures:generate": "node shared/fixtures/generate.mjs",
+    "fixtures:validate": "npm run validate --workspace @loop/shared",
+    "dev": "concurrently -n coverage,dashboard -c cyan,magenta \"npm:dev:coverage\" \"npm:dev:dashboard\"",
+    "dev:coverage": "npm run dev --workspace @loop/coverage",
+    "dev:dashboard": "npm run dev --workspace @loop/dashboard",
+    "build": "npm run build --workspace @loop/coverage && npm run build --workspace @loop/dashboard",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "smoke": "npm run smoke --workspace @loop/coverage"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

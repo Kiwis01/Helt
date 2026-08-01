@@ -1,0 +1,27 @@
+{
+  "name": "@loop/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Contratos de integración de Loop. Fuente única de verdad — congelado en T0.",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./contracts": "./contracts.ts",
+    "./constants": "./constants.ts",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "generate": "node fixtures/generate.mjs",
+    "validate": "tsx validate-fixtures.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

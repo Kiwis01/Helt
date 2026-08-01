@@ -1,0 +1,18 @@
+{
+  "checkId": "cov-9d8e7f",
+  "checkedAt": "2026-08-01T18:30:12Z",
+  "status": "needs-auth",
+  "payerName": "Test Payer Inc",
+  "planName": "PPO Silver",
+  "copayCents": 4000,
+  "coinsurancePercent": 20,
+  "deductible": {
+    "individualCents": 150000,
+    "metCents": 142000,
+    "remainingCents": 8000
+  },
+  "priorAuthRequired": true,
+  "raw271Id": "stedi-271-9d8e7f",
+  "voiceSummary": "Este servicio está en tu plan, pero necesita autorización previa antes de la cita. Tu equipo de cuidado puede tramitarla.",
+  "latencyMs": 934
+}

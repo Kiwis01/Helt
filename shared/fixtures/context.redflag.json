@@ -1,0 +1,163 @@
+{
+  "patientId": "loop-demo-patient-001",
+  "displayName": "Alex Rivera",
+  "age": 34,
+  "generatedAt": "2026-08-01T18:41:03Z",
+  "baseline": {
+    "heartRate": {
+      "mean": 68,
+      "sd": 6,
+      "unit": "bpm"
+    },
+    "hrv": {
+      "mean": 54,
+      "sd": 11,
+      "unit": "ms"
+    },
+    "respiratoryRate": {
+      "mean": 14,
+      "sd": 2,
+      "unit": "breaths/min"
+    },
+    "sleepHours": {
+      "mean": 6.8,
+      "sd": 1.1,
+      "unit": "h"
+    }
+  },
+  "current": {
+    "windowMinutes": 30,
+    "heartRate": {
+      "latest": 158,
+      "max": 163,
+      "trend": "rising",
+      "unit": "bpm"
+    },
+    "hrv": {
+      "latest": 12,
+      "min": 9,
+      "trend": "falling",
+      "unit": "ms"
+    },
+    "respiratoryRate": {
+      "latest": 34,
+      "max": 36,
+      "trend": "rising",
+      "unit": "breaths/min"
+    },
+    "spo2": {
+      "latest": 90,
+      "min": 89,
+      "trend": "falling",
+      "unit": "%"
+    },
+    "lastSampleAt": "2026-08-01T18:40:52Z"
+  },
+  "deltas": {
+    "heartRate": {
+      "absolute": 90,
+      "sdFromBaseline": 15
+    },
+    "hrv": {
+      "absolute": -42,
+      "sdFromBaseline": -3.82
+    },
+    "respiratoryRate": {
+      "absolute": 20,
+      "sdFromBaseline": 10
+    }
+  },
+  "conditions": [
+    {
+      "code": "197480006",
+      "system": "http://snomed.info/sct",
+      "display": "Anxiety disorder",
+      "onsetDate": "2023-04-12",
+      "clinicalStatus": "active"
+    }
+  ],
+  "carePlan": {
+    "id": "loop-demo-careplan-001",
+    "authoredBy": "Dr. Maya Chen",
+    "lastUpdated": "2026-07-02",
+    "activities": [
+      {
+        "id": "cp-act-1",
+        "order": 1,
+        "type": "breathing",
+        "title": "Box breathing",
+        "instruction": "4 in, 4 hold, 4 out, 4 hold — 5 cycles",
+        "durationMinutes": 4,
+        "voiceScript": "Vamos a hacerlo juntos. Inhala conmigo durante cuatro tiempos. Sostén cuatro. Exhala cuatro. Sostén cuatro. Seguimos, no tienes que hablar."
+      },
+      {
+        "id": "cp-act-2",
+        "order": 2,
+        "type": "grounding",
+        "title": "5-4-3-2-1 grounding",
+        "instruction": "Name 5 things you see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste",
+        "durationMinutes": 3,
+        "voiceScript": "Dime cinco cosas que puedas ver ahora mismo. Tómate tu tiempo, te escucho."
+      },
+      {
+        "id": "cp-act-3",
+        "order": 3,
+        "type": "escalation-soft",
+        "title": "Message care team",
+        "instruction": "Reach out to your clinician for a same-week telehealth visit",
+        "costItem": {
+          "serviceType": "telehealth-mental-health",
+          "cptCode": "90834"
+        }
+      }
+    ]
+  },
+  "recentEpisodes": [
+    {
+      "encounterId": "enc-0012",
+      "startedAt": "2026-07-31T20:05:00.000Z",
+      "durationMinutes": 24,
+      "peakHeartRate": 121,
+      "interventions": [
+        "cp-act-2"
+      ],
+      "resolution": "resolved-with-intervention",
+      "severitySelfReported": 6
+    },
+    {
+      "encounterId": "enc-0011",
+      "startedAt": "2026-07-28T02:14:00.000Z",
+      "durationMinutes": 14,
+      "peakHeartRate": 121,
+      "interventions": [
+        "cp-act-1"
+      ],
+      "resolution": "resolved-with-intervention",
+      "severitySelfReported": 7
+    },
+    {
+      "encounterId": "enc-0010",
+      "startedAt": "2026-07-25T03:20:00.000Z",
+      "durationMinutes": 29,
+      "peakHeartRate": 124,
+      "interventions": [],
+      "resolution": "self-resolved",
+      "severitySelfReported": 8
+    }
+  ],
+  "medications": [
+    {
+      "display": "Sertraline 50mg",
+      "status": "active",
+      "rxnorm": "312938",
+      "coverageCheckable": true
+    }
+  ],
+  "safetyEnvelope": {
+    "heartRateMax": 150,
+    "heartRateMin": 40,
+    "respiratoryRateMax": 32,
+    "spo2Min": 92,
+    "note": "Valores fuera del envelope DEBEN disparar escalacion determinista ANTES de cualquier llamada al LLM. Este contexto viola heartRateMax, respiratoryRateMax y spo2Min: RF-08-BIOMETRIC-ENVELOPE debe disparar."
+  }
+}

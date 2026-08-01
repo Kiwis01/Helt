@@ -1,0 +1,272 @@
+{
+  "patientId": "loop-demo-patient-001",
+  "episodes": [
+    {
+      "encounterId": "enc-0001",
+      "startedAt": "2026-07-02T21:50:00.000Z",
+      "endedAt": "2026-07-02T22:23:00.000Z",
+      "durationMinutes": 33,
+      "outcome": "self-resolved",
+      "peakHeartRate": 119,
+      "minHrv": 19,
+      "severitySelfReported": 8,
+      "interventions": [],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0002",
+      "startedAt": "2026-07-03T07:20:00.000Z",
+      "endedAt": "2026-07-03T07:49:00.000Z",
+      "durationMinutes": 29,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 122,
+      "minHrv": 19,
+      "severitySelfReported": 7,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-2",
+          "title": "5-4-3-2-1 grounding",
+          "completed": true,
+          "patientReportedRelief": 3
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0003",
+      "startedAt": "2026-07-05T23:40:00.000Z",
+      "endedAt": "2026-07-06T00:11:00.000Z",
+      "durationMinutes": 31,
+      "outcome": "self-resolved",
+      "peakHeartRate": 124,
+      "minHrv": 18,
+      "severitySelfReported": 8,
+      "interventions": [],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0004",
+      "startedAt": "2026-07-07T14:15:00.000Z",
+      "endedAt": "2026-07-07T14:31:00.000Z",
+      "durationMinutes": 16,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 119,
+      "minHrv": 20,
+      "severitySelfReported": 7,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-1",
+          "title": "Box breathing",
+          "completed": true,
+          "patientReportedRelief": 6
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0005",
+      "startedAt": "2026-07-09T02:05:00.000Z",
+      "endedAt": "2026-07-09T02:32:00.000Z",
+      "durationMinutes": 27,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 124,
+      "minHrv": 20,
+      "severitySelfReported": 7,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-2",
+          "title": "5-4-3-2-1 grounding",
+          "completed": true,
+          "patientReportedRelief": 4
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0006",
+      "startedAt": "2026-07-11T19:30:00.000Z",
+      "endedAt": "2026-07-11T19:45:00.000Z",
+      "durationMinutes": 15,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 117,
+      "minHrv": 21,
+      "severitySelfReported": 6,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-1",
+          "title": "Box breathing",
+          "completed": true,
+          "patientReportedRelief": 6
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0007",
+      "startedAt": "2026-07-15T09:35:00.000Z",
+      "endedAt": "2026-07-15T09:48:00.000Z",
+      "durationMinutes": 13,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 113,
+      "minHrv": 27,
+      "severitySelfReported": 5,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-1",
+          "title": "Box breathing",
+          "completed": true,
+          "patientReportedRelief": 7
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0008",
+      "startedAt": "2026-07-18T22:10:00.000Z",
+      "endedAt": "2026-07-18T22:34:00.000Z",
+      "durationMinutes": 24,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 124,
+      "minHrv": 18,
+      "severitySelfReported": 7,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-2",
+          "title": "5-4-3-2-1 grounding",
+          "completed": true,
+          "patientReportedRelief": 2
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0009",
+      "startedAt": "2026-07-22T16:45:00.000Z",
+      "endedAt": "2026-07-22T16:57:00.000Z",
+      "durationMinutes": 12,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 114,
+      "minHrv": 21,
+      "severitySelfReported": 6,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-1",
+          "title": "Box breathing",
+          "completed": true,
+          "patientReportedRelief": 7
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0010",
+      "startedAt": "2026-07-25T03:20:00.000Z",
+      "endedAt": "2026-07-25T03:49:00.000Z",
+      "durationMinutes": 29,
+      "outcome": "self-resolved",
+      "peakHeartRate": 124,
+      "minHrv": 16,
+      "severitySelfReported": 8,
+      "interventions": [],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0011",
+      "startedAt": "2026-07-28T02:14:00.000Z",
+      "endedAt": "2026-07-28T02:28:00.000Z",
+      "durationMinutes": 14,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 121,
+      "minHrv": 24,
+      "severitySelfReported": 7,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-1",
+          "title": "Box breathing",
+          "completed": true,
+          "patientReportedRelief": 6
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    },
+    {
+      "encounterId": "enc-0012",
+      "startedAt": "2026-07-31T20:05:00.000Z",
+      "endedAt": "2026-07-31T20:29:00.000Z",
+      "durationMinutes": 24,
+      "outcome": "resolved-with-intervention",
+      "peakHeartRate": 121,
+      "minHrv": 19,
+      "severitySelfReported": 6,
+      "interventions": [
+        {
+          "carePlanActivityId": "cp-act-2",
+          "title": "5-4-3-2-1 grounding",
+          "completed": true,
+          "patientReportedRelief": 3
+        }
+      ],
+      "escalation": {
+        "triggered": false,
+        "rule": null,
+        "triggeredAt": null,
+        "action": null
+      }
+    }
+  ]
+}

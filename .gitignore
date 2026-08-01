@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+# Respuestas 271 crudas capturadas de Stedi. Datos de sandbox, pero no hay
+# razón para versionarlas — salvo el fixture de respaldo, que sí va en el repo.
+coverage/captures/*.json
+!coverage/captures/.gitkeep
+
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/
+.idea/
