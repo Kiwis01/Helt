@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 
 import { DocumentsPanel } from '@/components/chart/DocumentsPanel';
-import { ImagingPanel } from '@/components/chart/ImagingPanel';
 import { LabsPanel } from '@/components/chart/LabsPanel';
 import { MedicationsPanel } from '@/components/chart/MedicationsPanel';
 import { PatientBanner } from '@/components/chart/PatientBanner';
@@ -95,14 +94,6 @@ export default async function PatientChartPage({
             index={4}
           />
         </div>
-
-        {/* A todo el ancho, no como celda de la rejilla: el visor de imagen es lo
-            único de esta pantalla que mejora de verdad con más píxeles. */}
-        <ImagingPanel
-          patientId={chart.patient.id}
-          patientName={chart.patient.displayName}
-          index={5}
-        />
       </div>
     </main>
   );

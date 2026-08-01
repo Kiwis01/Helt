@@ -67,11 +67,7 @@ export function AppNav({ actions }: AppNavProps) {
         // Sube un nivel en vez de `router.back()`: el historial puede venir de
         // cualquier sitio y "atrás" desde el expediente podría sacarte de la
         // aplicación en mitad del demo. Subir es predecible siempre.
-        //
-        // Las dos rutas que cuelgan de la agenda comparten la regla: el
-        // expediente de un paciente e Imaging se alcanzan desde ella y vuelven
-        // a ella.
-        if (pathname.startsWith('/paciente/') || pathname.startsWith('/imaging')) {
+        if (pathname.startsWith('/paciente/')) {
           event.preventDefault();
           router.push('/');
         }

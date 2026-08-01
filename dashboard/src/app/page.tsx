@@ -41,9 +41,6 @@ export default async function RosterPage() {
           <>
             <SourceBadge status={roster.source} />
             <NewPatientDialog canWrite={medplumConfigured} usingFallback={usingFallback} />
-            <Link href="/imaging" className="ghostbtn">
-              Imaging
-            </Link>
           </>
         }
       />
