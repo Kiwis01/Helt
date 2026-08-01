@@ -16,6 +16,11 @@ final class FakeConversationService: ConversationService {
     func interrupt() async { interruptions += 1 }
     func disconnect() async {}
 
+    private(set) var answered: [(AgentTools.Call, [String: Any])] = []
+    func answer(_ call: AgentTools.Call, with content: [String: Any]) async {
+        answered.append((call, content))
+    }
+
     func yieldEvent(_ event: ConversationEvent) { continuation?.yield(event) }
 }
 
@@ -115,6 +120,71 @@ struct CallModelTests {
         service.yieldEvent(.transcript(Turn(speaker: .you, text: "My chest feels tight and I can't breathe.", isFinal: true)))
         try await until { model.state == .thinking }
         #expect(model.escalation == nil)
+    }
+
+    /// The agentic loop: the model asks for an instrument, the app presents it,
+    /// and the score goes back so the model can respond to it.
+    @Test func toolCallSurfacesTheQuestionnaireAndReturnsTheScore() async throws {
+        let (model, service) = try await connected()
+        service.yieldEvent(.toolCall(.init(
+            id: "toolu_1",
+            name: "administer_questionnaire",
+            arguments: ["instrument": "GAD-7", "reason": "three weeks"]
+        )))
+        try await until { model.pendingQuestionnaire != nil }
+        #expect(model.pendingQuestionnaire?.instrument.key == "GAD-7")
+
+        let answers = (1...7).map { Answer(itemID: $0, value: 1) }
+        await model.finishQuestionnaire(score: 7, answers: answers, flag: nil, recorder: nil)
+
+        #expect(model.pendingQuestionnaire == nil)
+        let (call, content) = try #require(service.answered.last)
+        #expect(call.id == "toolu_1")
+        #expect(content["score"] as? Int == 7)
+        #expect(content["severity"] as? String == "Mild")
+    }
+
+    /// A PHQ-9 item-9 hit outranks the score: it escalates like a spoken red flag.
+    @Test func questionnaireSafetyItemEscalates() async throws {
+        let (model, service) = try await connected()
+        service.yieldEvent(.toolCall(.init(
+            id: "toolu_2", name: "administer_questionnaire", arguments: ["instrument": "PHQ-9"]
+        )))
+        try await until { model.pendingQuestionnaire != nil }
+
+        let answers = (1...9).map { Answer(itemID: $0, value: $0 == 9 ? 2 : 0) }
+        let flag = try #require(Instruments.phq9.safetyEvent(in: answers))
+        await model.finishQuestionnaire(score: 2, answers: answers, flag: flag, recorder: nil)
+
+        #expect(model.escalation?.action == .call988)
+        #expect(model.state == .escalated)
+        // The model is told it escalated, but never gets the score to talk about.
+        #expect(service.answered.last?.1["escalated"] as? Bool == true)
+        #expect(service.answered.last?.1["score"] == nil)
+    }
+
+    /// Declining must release the model, or it waits on a reply that never comes.
+    @Test func decliningAnswersTheToolCall() async throws {
+        let (model, service) = try await connected()
+        service.yieldEvent(.toolCall(.init(
+            id: "toolu_3", name: "administer_questionnaire", arguments: ["instrument": "GAD-7"]
+        )))
+        try await until { model.pendingQuestionnaire != nil }
+
+        await model.declineQuestionnaire()
+        #expect(model.pendingQuestionnaire == nil)
+        #expect(service.answered.last?.1["completed"] as? Bool == false)
+    }
+
+    /// An instrument we don't have must get a reply too, not silence.
+    @Test func unknownInstrumentIsRefusedNotIgnored() async throws {
+        let (model, service) = try await connected()
+        service.yieldEvent(.toolCall(.init(
+            id: "toolu_4", name: "administer_questionnaire", arguments: ["instrument": "BDI-II"]
+        )))
+        try await until { service.answered.isEmpty == false }
+        #expect(model.pendingQuestionnaire == nil)
+        #expect(service.answered.last?.1["error"] != nil)
     }
 
     @Test func closingEndsTheCall() async throws {

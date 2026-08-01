@@ -4,6 +4,7 @@ import SwiftUI
 /// two controls, and a disclosure that never leaves the screen.
 struct VoiceView: View {
     @State var model: CallModel
+    @Environment(MedplumAuth.self) private var auth
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -39,6 +40,28 @@ struct VoiceView: View {
                 EmergencyView(flag: flag) { dismiss() }
                     .transition(.opacity)
             }
+        }
+        // The call stays open underneath: the model asked for this and is
+        // waiting on the score so it can respond to it.
+        // Presented by identity, not a constant binding: SwiftUI has to be able
+        // to take it down when the model's request is answered.
+        .sheet(item: Binding(
+            get: { model.pendingQuestionnaire },
+            set: { if $0 == nil { Task { await model.declineQuestionnaire() } } }
+        )) { pending in
+            QuestionnaireView(
+                instrument: pending.instrument,
+                onFinish: { score, answers, flag in
+                    Task {
+                        await model.finishQuestionnaire(
+                            score: score, answers: answers, flag: flag,
+                            recorder: InstrumentRecorder(medplum: MedplumClient(auth: auth))
+                        )
+                    }
+                },
+                onCancel: { Task { await model.declineQuestionnaire() } }
+            )
+            .interactiveDismissDisabled()
         }
         .animation(.smooth(duration: 0.2), value: model.escalation)
         .preferredColorScheme(.dark)

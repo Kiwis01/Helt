@@ -31,6 +31,17 @@ final class CallModel {
     private(set) var transcript: [Turn] = []
     /// Non-nil once a red flag has fired. The call is over at that point.
     private(set) var escalation: RedFlag?
+    /// Set when the agent asks for a questionnaire. The call stays open — the
+    /// model is waiting for the score and will speak about it afterwards.
+    private(set) var pendingQuestionnaire: PendingQuestionnaire?
+
+    struct PendingQuestionnaire: Identifiable, Equatable {
+        let call: AgentTools.Call
+        let instrument: Instrument
+        var id: String { call.id }
+
+        static func == (a: Self, b: Self) -> Bool { a.call == b.call }
+    }
     /// 0–1, drives the orb.
     private(set) var level: Double = 0
     var isMuted = false {
@@ -109,11 +120,57 @@ final class CallModel {
         case .agentAudio:
             break // real playback lands with the audio engine
 
+        case .toolCall(let call):
+            guard let instrument = call.instrument else {
+                // Asked for something we don't have. Tell the model plainly
+                // rather than leaving it waiting on a reply that never comes.
+                await service.answer(call, with: [
+                    "error": "unknown instrument",
+                    "available": Instruments.all.map(\.key).joined(separator: ", "),
+                ])
+                return
+            }
+            pendingQuestionnaire = PendingQuestionnaire(call: call, instrument: instrument)
+
         case .closed:
             levels?.cancel()
             level = 0
             state = .ended
         }
+    }
+
+    /// The questionnaire came back. Hand the score to the model so it can
+    /// respond to it, and record it to Medplum. A safety item outranks both:
+    /// it escalates exactly like a spoken red flag.
+    func finishQuestionnaire(score: Int, answers: [Answer], flag: RedFlag?, recorder: InstrumentRecorder?) async {
+        guard let pending = pendingQuestionnaire else { return }
+        pendingQuestionnaire = nil
+
+        await recorder?.record(pending.instrument, score: score, answers: answers)
+
+        if let flag {
+            await service.answer(pending.call, with: ["completed": true, "escalated": true])
+            await escalate(flag)
+            return
+        }
+
+        await service.answer(pending.call, with: [
+            "completed": true,
+            "instrument": pending.instrument.key,
+            "score": score,
+            "maximum": pending.instrument.maximumScore,
+            "severity": pending.instrument.severity(for: score) ?? "unclassified",
+        ])
+        state = .thinking
+    }
+
+    /// The person declined. The model needs to know so it can move on instead
+    /// of waiting forever.
+    func declineQuestionnaire() async {
+        guard let pending = pendingQuestionnaire else { return }
+        pendingQuestionnaire = nil
+        await service.answer(pending.call, with: ["completed": false, "reason": "declined"])
+        state = .thinking
     }
 
     /// Stop everything, in this order: silence the agent, then cut the stream.

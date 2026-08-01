@@ -68,6 +68,8 @@ enum ConversationEvent: Sendable {
     case transcript(Turn)
     case agentAudio(Data)
     case agentSpeechEnded
+    /// The model wants the app to do something and is waiting for the result.
+    case toolCall(AgentTools.Call)
     case closed
 }
 
@@ -80,6 +82,8 @@ protocol ConversationService {
     func send(audio: Data) async throws
     /// Stop the agent mid-sentence — used on barge-in and on red flags.
     func interrupt() async
+    /// Return a tool result so the model can reason about it and reply.
+    func answer(_ call: AgentTools.Call, with content: [String: Any]) async
     func disconnect() async
 }
 

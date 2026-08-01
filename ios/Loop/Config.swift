@@ -52,6 +52,18 @@ nonisolated enum Config {
     
     
 
+    // MARK: - Medplum
+
+    /// Medplum is the backend. There is no proxy service — the app authenticates
+    /// as the patient and writes FHIR directly.
+    static let medplumBaseURL = URL(string: "https://api.medplum.com/")!
+
+    /// Public client: authorization code + PKCE, no secret. Safe to ship.
+    static let medplumClientID = "643cb471-dcf4-48b4-a57c-514ce17684b4"
+
+    static let medplumRedirectScheme = "loop"
+    static let medplumRedirectURI = "loop://auth-callback"
+
     // MARK: - Voice
 
     /// Injected at build time from `Secrets.xcconfig`, which is gitignored.

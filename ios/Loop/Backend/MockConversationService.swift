@@ -87,6 +87,7 @@ struct MockConversationService: ConversationService {
 
     func send(audio: Data) async throws {}
     func interrupt() async {}
+    func answer(_ call: AgentTools.Call, with content: [String: Any]) async {}
     func disconnect() async {}
 
     /// Roughly 165 words a minute, the pace of someone talking calmly.

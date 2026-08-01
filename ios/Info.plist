@@ -28,6 +28,17 @@
 	<array>
 		<string>workout-processing</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.helt.loop.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>loop</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>

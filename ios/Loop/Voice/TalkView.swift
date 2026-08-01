@@ -6,6 +6,7 @@ import SwiftUI
 ///
 /// The full-screen conversation view attaches to the button here next.
 struct TalkView: View {
+    @Environment(MedplumAuth.self) private var auth
     @State private var inCall = false
 
     var body: some View {
@@ -29,13 +30,13 @@ struct TalkView: View {
                     .buttonStyle(SolidButton())
 
                 EmergencyDisclosure()
-                    .padding(.top, 28)
+                    .padding(.top, 24)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 12)
         }
         .fullScreenCover(isPresented: $inCall) {
-            VoiceView(model: CallFactory.make())
+            VoiceView(model: CallFactory.make(auth: auth))
         }
     }
 }

@@ -1,13 +1,40 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(MedplumAuth.self) private var auth
     @State private var times: [ReminderTime] = []
     @State private var notificationsDenied = false
+    @State private var pendingWrites = 0
     @AppStorage(DemoSettings.redFlagScriptKey) private var useRedFlagScript = false
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    if auth.isSignedIn {
+                        LabeledContent("Signed in as", value: auth.displayName ?? "—")
+                        if let id = auth.patientID {
+                            LabeledContent("Patient") {
+                                Text(id.prefix(8) + "…").font(.footnote.monospaced())
+                            }
+                        }
+                        Button("Sign out", role: .destructive) { auth.signOut() }
+                    } else {
+                        Button("Sign in to Medplum") { Task { await auth.signIn() } }
+                    }
+                    if pendingWrites > 0 {
+                        LabeledContent("Waiting to sync", value: "\(pendingWrites)")
+                    }
+                } header: {
+                    Text("Record")
+                } footer: {
+                    if let error = auth.error {
+                        Text(error)
+                    } else {
+                        Text("Your readings, questionnaires and episodes are written to your own record in Medplum.")
+                    }
+                }
+
                 Section {
                     ForEach($times) { $time in
                         DatePicker(
@@ -87,7 +114,10 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .toolbar { EditButton() }
-            .task { times = Reminders.times }
+            .task {
+                times = Reminders.times
+                pendingWrites = WriteQueue().count
+            }
         }
     }
 }
