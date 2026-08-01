@@ -2,7 +2,7 @@
   {
     "resourceType": "Appointment",
     "status": "booked",
-    "description": "Control de presión y colesterol + revisión de calambres",
+    "description": "BP and cholesterol check + cramp review",
     "start": "2026-08-07T12:00:00-07:00",
     "end": "2026-08-07T12:30:00-07:00",
     "participant": [
@@ -14,7 +14,7 @@
       },
       {
         "actor": {
-          "display": "Dra. Rivera"
+          "display": "Dr. Rivera"
         },
         "status": "accepted"
       }
@@ -28,7 +28,7 @@
   {
     "resourceType": "Appointment",
     "status": "booked",
-    "description": "Control de asma + técnica de inhalador",
+    "description": "Asthma check + inhaler technique",
     "start": "2026-08-08T09:00:00-07:00",
     "end": "2026-08-08T09:30:00-07:00",
     "participant": [
@@ -40,7 +40,7 @@
       },
       {
         "actor": {
-          "display": "Dra. Rivera"
+          "display": "Dr. Rivera"
         },
         "status": "accepted"
       }
@@ -54,7 +54,7 @@
   {
     "resourceType": "Appointment",
     "status": "booked",
-    "description": "Seguimiento diabetes + revisión de salpullido",
+    "description": "Diabetes follow-up + rash review",
     "start": "2026-08-07T10:30:00-07:00",
     "end": "2026-08-07T11:00:00-07:00",
     "participant": [
@@ -66,7 +66,7 @@
       },
       {
         "actor": {
-          "display": "Dra. Rivera"
+          "display": "Dr. Rivera"
         },
         "status": "accepted"
       }

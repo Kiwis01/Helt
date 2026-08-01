@@ -29,7 +29,7 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
     high: 7,
     criticalHigh: 9,
     criticalLow: null,
-    source: 'ADA Standards of Care in Diabetes — objetivo <7 % en adultos con diabetes',
+    source: 'ADA Standards of Care in Diabetes — target <7% in adults with diabetes',
     lowerIsWorse: false,
   },
 
@@ -40,7 +40,7 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
     high: 100,
     criticalHigh: 190,
     criticalLow: null,
-    source: 'NCEP ATP III — LDL óptimo <100 mg/dL, muy alto ≥190 mg/dL',
+    source: 'NCEP ATP III — LDL optimal <100 mg/dL, very high ≥190 mg/dL',
     lowerIsWorse: false,
   },
 
@@ -51,7 +51,7 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
     high: null,
     criticalHigh: null,
     criticalLow: 50,
-    source: 'ATS/ERS — FEV1 ≥80 % del predicho es normal; <50 % obstrucción grave',
+    source: 'ATS/ERS — FEV1 ≥80% predicted is normal; <50% severe obstruction',
     lowerIsWorse: true,
   },
 
@@ -62,7 +62,7 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
     high: 130,
     criticalHigh: 180,
     criticalLow: null,
-    source: 'ACC/AHA 2017 — sistólica <120 normal, ≥130 hipertensión, ≥180 crisis',
+    source: 'ACC/AHA 2017 — systolic <120 normal, ≥130 hypertension, ≥180 crisis',
     lowerIsWorse: false,
   },
 
@@ -72,7 +72,7 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
     high: 80,
     criticalHigh: 120,
     criticalLow: null,
-    source: 'ACC/AHA 2017 — diastólica <80 normal, ≥80 hipertensión, ≥120 crisis',
+    source: 'ACC/AHA 2017 — diastolic <80 normal, ≥80 hypertension, ≥120 crisis',
     lowerIsWorse: false,
   },
 
@@ -82,7 +82,7 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
     high: 100,
     criticalHigh: 130,
     criticalLow: 40,
-    source: 'Frecuencia cardiaca en reposo del adulto, 60–100 lpm',
+    source: 'Adult resting heart rate, 60–100 bpm',
     lowerIsWorse: false,
   },
 
@@ -91,16 +91,16 @@ export const REFERENCE_RANGES: Record<string, ReferenceRange> = {
   // correcto; inventar un umbral sería peor que no marcar nada.
 };
 
-/** Etiquetas en español por código LOINC, para no depender del display de FHIR. */
+/** Etiquetas en inglés por código LOINC, para no depender del display de FHIR. */
 export const METRIC_LABELS: Record<string, string> = {
-  '4548-4': 'Hemoglobina A1c',
-  '2089-1': 'Colesterol LDL',
+  '4548-4': 'Hemoglobin A1c',
+  '2089-1': 'LDL cholesterol',
   '20150-9': 'FEV1',
-  '8480-6': 'Presión sistólica',
-  '8462-4': 'Presión diastólica',
-  '8867-4': 'Frecuencia cardiaca',
-  '29463-7': 'Peso',
-  '85354-9': 'Presión arterial',
+  '8480-6': 'Systolic BP',
+  '8462-4': 'Diastolic BP',
+  '8867-4': 'Heart rate',
+  '29463-7': 'Weight',
+  '85354-9': 'Blood pressure',
 };
 
 /**

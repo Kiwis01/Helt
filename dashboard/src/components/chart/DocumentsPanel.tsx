@@ -28,13 +28,21 @@ export function DocumentsPanel({
   careTeam: readonly ChartCareTeamMember[];
   index?: number;
 }) {
+  // El ingles concuerda el sustantivo con el numero; el español no lo hacia y
+  // el subtitulo decia "1 documentos". Aqui hay que ramificar.
+  const documentCount = notes.length + orders.length;
+
   return (
-    <Card title="Notas, órdenes y equipo" subtitle={`${notes.length + orders.length} documentos`} index={index}>
+    <Card
+      title="Notes, orders & care team"
+      subtitle={`${documentCount} document${documentCount === 1 ? '' : 's'}`}
+      index={index}
+    >
       <div className="flex flex-col gap-4">
         <section>
-          <h3 className="label pb-1">Notas y documentos</h3>
+          <h3 className="label pb-1">Notes &amp; documents</h3>
           {notes.length === 0 ? (
-            <MissingData>Sin DocumentReference para este paciente.</MissingData>
+            <MissingData>No DocumentReference for this patient.</MissingData>
           ) : (
             <ul className="flex flex-col divide-y divide-[var(--hair)]">
               {notes.map((note) => (
@@ -56,13 +64,13 @@ export function DocumentsPanel({
                         rel="noopener noreferrer"
                         className="text-2xs text-accent underline-offset-2 hover:underline"
                       >
-                        Abrir adjunto
+                        Open attachment
                       </a>
                     ) : (
                       <p className="pt-0.5 text-2xs text-ink-3">
-                        Adjunto no disponible —{' '}
-                        <span className="font-mono">{note.attachmentUrl}</span> es una ruta relativa
-                        que no resuelve.
+                        Attachment unavailable —{' '}
+                        <span className="font-mono">{note.attachmentUrl}</span> is a relative path
+                        that does not resolve.
                       </p>
                     )
                   ) : null}
@@ -73,9 +81,9 @@ export function DocumentsPanel({
         </section>
 
         <section>
-          <h3 className="label pb-1">Órdenes</h3>
+          <h3 className="label pb-1">Orders</h3>
           {orders.length === 0 ? (
-            <MissingData>Sin ServiceRequest. No hay laboratorios ni referencias pedidas.</MissingData>
+            <MissingData>No ServiceRequest. No labs or referrals have been ordered.</MissingData>
           ) : (
             <ul className="flex flex-col divide-y divide-[var(--hair)]">
               {orders.map((order) => (
@@ -90,9 +98,9 @@ export function DocumentsPanel({
         </section>
 
         <section>
-          <h3 className="label pb-1">Equipo de cuidado</h3>
+          <h3 className="label pb-1">Care team</h3>
           {careTeam.length === 0 ? (
-            <MissingData>Sin CareTeam registrado en Medplum.</MissingData>
+            <MissingData>No CareTeam recorded in Medplum.</MissingData>
           ) : (
             <ul className="flex flex-col gap-1">
               {careTeam.map((member) => (

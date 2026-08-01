@@ -9,7 +9,7 @@
  * 1. **El ahorro es el titular.** "−17 min" es la conclusión; las barras son la
  *    prueba. Antes el titular no existía: había dos barras verdes iguales y
  *    había que restar mentalmente contra una línea roja para sacar el dato.
- * 2. **La línea de "sin intervención" es un umbral, no otra serie.** Discontinua
+ * 2. **La línea de "no intervention" es un umbral, no otra serie.** Discontinua
  *    y sin relleno: lo que se mide es la distancia hasta ella, y ese hueco es
  *    literalmente el tiempo que la intervención le quitó al episodio.
  * 3. **El color lo decide el dato.** Verde si bate al umbral, ámbar si no. Con
@@ -33,7 +33,7 @@ import { useLiveCall } from '@/components/LiveCallProvider';
 import { DATA, STAT } from '@/components/tokens';
 import { formatDuration, formatSeverity } from '@/lib/format';
 
-/** Cuánto se queda el aviso de "actualizado" tras un `episode.written`. */
+/** Cuánto se queda el aviso de "updated" tras un `episode.written`. */
 const REFRESH_FLASH_MS = 8_000;
 
 /**
@@ -78,7 +78,7 @@ function WeeklyTile({ weeks }: { weeks: OutcomesSummary['episodeCountByWeek'] })
       title={weeks.map((w) => `${w.weekStart}: ${w.count}`).join(' · ')}
     >
       <div>
-        <p className="label">episodios/semana</p>
+        <p className="label">episodes/week</p>
         <p className={`mt-1 ${STAT} text-ink`}>
           {first}
           <span className="mx-1.5 text-2xs font-medium text-ink-3">→</span>
@@ -158,8 +158,8 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
 
   if (rows.length === 0) {
     return (
-      <Card title="Outcomes por intervención" subtitle="min por episodio" index={3}>
-        <EmptyState>Sin intervenciones medidas todavía</EmptyState>
+      <Card title="Outcomes by intervention" subtitle="min per episode" index={3}>
+        <EmptyState>No interventions measured yet</EmptyState>
       </Card>
     );
   }
@@ -170,15 +170,15 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
 
   return (
     <Card
-      title="Outcomes por intervención"
-      subtitle="min por episodio"
+      title="Outcomes by intervention"
+      subtitle="min per episode"
       index={3}
       bodyClassName="flex min-h-0 flex-col gap-3 px-5 pb-4"
       actions={
         flash ? (
           <span className="pill pill-ok">
             <span aria-hidden className="dot dot-live" />
-            actualizado
+            updated
           </span>
         ) : null
       }
@@ -187,7 +187,7 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
       <div className="flex shrink-0 items-end justify-between gap-4">
         <div className="min-w-0">
           <p className="label truncate">
-            {best.saved > 0 ? 'ahorro' : 'exceso'} · {best.title}
+            {best.saved > 0 ? 'saved' : 'over'} · {best.title}
           </p>
           <p className="hero mt-1.5">
             {best.saved > 0 ? '−' : '+'}
@@ -206,7 +206,7 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
             className="absolute bottom-0 whitespace-nowrap pr-2 text-2xs text-ink-2"
             style={{ right: `${100 - thresholdPct}%` }}
           >
-            sin intervención · {formatDuration(baseline)}
+            no intervention · {formatDuration(baseline)}
           </p>
         </div>
       </div>
@@ -253,7 +253,7 @@ export function OutcomesChart({ outcomes }: { outcomes: OutcomesSummary }) {
                 {/* La n va pegada al nombre: un promedio de 4 intentos y uno de
                     5 no valen lo mismo y el gráfico no puede disimularlo. */}
                 <p className="mt-1 truncate text-2xs text-ink-3">
-                  n = {row.attempts} · alivio {formatSeverity(row.relief)}
+                  n = {row.attempts} · relief {formatSeverity(row.relief)}
                 </p>
               </div>
 

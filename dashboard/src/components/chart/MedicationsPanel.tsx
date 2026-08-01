@@ -33,13 +33,13 @@ export function MedicationsPanel({
 
   return (
     <Card
-      title="Medicación"
-      subtitle={`${active.length} activa${active.length === 1 ? '' : 's'}`}
+      title="Medications"
+      subtitle={`${active.length} active`}
       actions={action}
       index={index}
     >
       {medications.length === 0 ? (
-        <MissingData>Medplum no tiene ninguna MedicationRequest para este paciente.</MissingData>
+        <MissingData>Medplum has no MedicationRequest for this patient.</MissingData>
       ) : (
         <div className="flex flex-col gap-3">
           <ul className="flex flex-col divide-y divide-[var(--hair)]">
@@ -52,7 +52,7 @@ export function MedicationsPanel({
 
           {past.length > 0 ? (
             <section>
-              <h3 className="label pb-1">Suspendidos y completados</h3>
+              <h3 className="label pb-1">Stopped and completed</h3>
               <ul className="flex flex-col divide-y divide-[var(--hair)]">
                 {past.map((med) => (
                   <li key={med.id} className="py-2 first:pt-0">
@@ -71,14 +71,14 @@ export function MedicationsPanel({
 /* ================================================================== */
 
 const STATUS_LABELS: Record<string, string> = {
-  active: 'Activo',
-  'on-hold': 'En pausa',
-  cancelled: 'Cancelado',
-  completed: 'Completado',
-  stopped: 'Suspendido',
-  draft: 'Borrador',
-  'entered-in-error': 'Error de captura',
-  unknown: 'Estado desconocido',
+  active: 'Active',
+  'on-hold': 'On hold',
+  cancelled: 'Canceled',
+  completed: 'Completed',
+  stopped: 'Stopped',
+  draft: 'Draft',
+  'entered-in-error': 'Entered in error',
+  unknown: 'Unknown status',
 };
 
 function MedicationRow({
@@ -95,7 +95,7 @@ function MedicationRow({
           {medication.display}
         </span>
 
-        {medication.asNeeded ? <span className="pill pill-quiet shrink-0">A demanda</span> : null}
+        {medication.asNeeded ? <span className="pill pill-quiet shrink-0">As needed</span> : null}
 
         {medication.status !== 'active' ? (
           <span className="pill pill-quiet shrink-0">
@@ -108,29 +108,29 @@ function MedicationRow({
       {medication.dosage ? (
         <p className="pt-0.5 text-2xs leading-snug text-ink-2">{medication.dosage}</p>
       ) : (
-        <p className="pt-0.5 text-2xs text-warn">Sin pauta de dosis registrada</p>
+        <p className="pt-0.5 text-2xs text-warn">No dosage instructions recorded</p>
       )}
 
       <p className="flex flex-wrap items-baseline gap-x-3 pt-0.5 text-2xs text-ink-3">
         {medication.rxnorm ? (
-          <span className="font-mono" title={medication.rxnormDisplay ?? 'Código RxNorm'}>
+          <span className="font-mono" title={medication.rxnormDisplay ?? 'RxNorm code'}>
             RxNorm {medication.rxnorm}
           </span>
         ) : (
-          <span className="text-warn">Sin RxNorm</span>
+          <span className="text-warn">No RxNorm</span>
         )}
 
-        <span>{medication.authoredOn ? formatDate(medication.authoredOn) : 'sin fecha'}</span>
+        <span>{medication.authoredOn ? formatDate(medication.authoredOn) : 'no date'}</span>
 
         {medication.prescriber ? (
           <span>{medication.prescriber}</span>
         ) : (
-          <span className="text-warn">sin prescriptor</span>
+          <span className="text-warn">no prescriber</span>
         )}
       </p>
 
       {medication.statusReason ? (
-        <p className="pt-0.5 text-2xs text-ink-3">Motivo: {medication.statusReason}</p>
+        <p className="pt-0.5 text-2xs text-ink-3">Reason: {medication.statusReason}</p>
       ) : null}
     </div>
   );

@@ -128,21 +128,21 @@ export interface ChartResult<T> {
   detail: string | null;
 }
 
-/** Texto en español para el badge de origen. */
+/** Texto en inglés para el badge de origen. */
 export function describeChartReason(reason: ChartFallbackReason): string {
   switch (reason) {
     case 'not-configured':
-      return 'Medplum sin credenciales';
+      return 'Medplum has no credentials';
     case 'auth-failed':
-      return 'no se pudo autenticar con Medplum';
+      return 'could not authenticate with Medplum';
     case 'timeout':
-      return `Medplum no respondió en ${MEDPLUM_TIMEOUT_MS} ms`;
+      return `Medplum did not respond in ${MEDPLUM_TIMEOUT_MS} ms`;
     case 'network':
-      return 'Medplum no está disponible';
+      return 'Medplum is unavailable';
     case 'empty':
-      return 'Medplum no tiene este dato';
+      return 'Medplum does not have this data';
     default:
-      return 'datos de Medplum';
+      return 'Medplum data';
   }
 }
 
@@ -243,7 +243,7 @@ export function aggregateChartSource(
  */
 export async function medplumWriteClient(): Promise<MedplumClient> {
   if (!medplumConfigured) {
-    throw new Error('Medplum no está configurado: faltan MEDPLUM_CLIENT_ID o MEDPLUM_CLIENT_SECRET.');
+    throw new Error('Medplum is not configured: MEDPLUM_CLIENT_ID or MEDPLUM_CLIENT_SECRET is missing.');
   }
   return authenticated();
 }

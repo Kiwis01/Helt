@@ -134,6 +134,125 @@ function isAsleep(date) {
   return h >= 23 || h < 7;
 }
 
+const DAY_MS = 24 * HOUR_MS;
+
+/**
+ * Cuánto duerme, de 0 (despierto) a 1 (dormido profundo), con transiciones
+ * suaves de 45 min en lugar del escalón de `isAsleep`.
+ *
+ * `isAsleep` sigue existiendo para el resumen de sueño, donde un booleano por
+ * noche es exactamente lo que hace falta. Pero aplicado a una serie de 15 min
+ * producía un salto instantáneo de 5 bpm a las 23:00 y otro a las 07:00: dos
+ * escalones verticales perfectos, treinta veces, que es justo lo que delata a
+ * una curva sintética. Nadie se duerme en un instante.
+ */
+function sleepFactor(date) {
+  const h = hourOf(date);
+  const ramp = 0.75; // 45 min de transición
+  // Distancia en horas hacia dentro de la ventana de sueño (23:00–07:00).
+  const intoNight = h >= 23 ? h - 23 : h < 7 ? h + 1 : -1;
+  if (intoNight < 0) return 0;
+  const untilWake = 8 - intoNight; // la ventana dura 8 h
+  const rise = Math.min(1, intoNight / ramp);
+  const fall = Math.min(1, untilWake / ramp);
+  const x = Math.max(0, Math.min(rise, fall));
+  return x * x * (3 - 2 * x); // smoothstep
+}
+
+/**
+ * Deriva día a día del reposo, como un AR(1) con semilla.
+ *
+ * Un cuerpo real no repite el mismo día treinta veces: una mala noche, un
+ * catarro, alcohol o deshidratación suben la frecuencia en reposo varios bpm
+ * durante TODO el día siguiente, y el efecto se arrastra al día de después.
+ * Sin esto, la curva de 30 días es literalmente el mismo día pegado 30 veces,
+ * y a un clínico eso le canta a la primera.
+ *
+ * El coeficiente 0.72 es lo que hace que un día malo se note también al
+ * siguiente en vez de desaparecer de golpe.
+ */
+const DAY_COUNT = Math.ceil((WINDOW_END.getTime() - WINDOW_START.getTime()) / DAY_MS) + 2;
+
+const DAY_DRIFT = (() => {
+  const out = [];
+  let v = 0;
+  for (let i = 0; i < DAY_COUNT; i++) {
+    v = v * 0.72 + gauss(0, 2.5);
+    out.push(v);
+  }
+  return out;
+})();
+
+/** Amplitud circadiana propia de cada día: unos días se vive más plano. */
+const DAY_AMPLITUDE = Array.from({ length: DAY_COUNT }, () =>
+  Math.max(0.55, 1 + gauss(0, 0.22)),
+);
+
+/** Índice de día (fraccionario) desde el inicio de la ventana. */
+function dayPos(tMs) {
+  return (tMs - WINDOW_START.getTime()) / DAY_MS;
+}
+
+/** Interpolación coseno entre el valor de un día y el siguiente. */
+function smoothDaily(table, tMs) {
+  const p = dayPos(tMs);
+  const i = Math.max(0, Math.min(table.length - 2, Math.floor(p)));
+  const f = Math.max(0, Math.min(1, p - i));
+  const w = (1 - Math.cos(Math.PI * f)) / 2;
+  return table[i] * (1 - w) + table[i + 1] * w;
+}
+
+/* ================================================================== */
+/* Ráfagas de actividad                                                */
+/* ================================================================== */
+
+/**
+ * Caminar, escaleras, prisa por llegar. Son la textura irregular que
+ * distingue una curva humana de una sinusoide: aparecen solo en vigilia, no
+ * caen a la misma hora dos días seguidos, y duran de 10 a 40 minutos.
+ *
+ * El techo es deliberadamente modesto (~+34 bpm sobre reposo, es decir ~105
+ * bpm) y NO representa ejercicio intenso. Un 34 años corriendo llegaría a
+ * 150+, que sería más realista pero taparía los episodios: en el gráfico de
+ * apertura los picos de pánico tienen que seguir siendo lo más alto, porque el
+ * público tiene diez segundos para leerlo. Es una concesión consciente a la
+ * legibilidad, no un descuido del modelo.
+ */
+const ACTIVITY_BURSTS = (() => {
+  const out = [];
+  for (let day = 0; day < DAY_COUNT; day++) {
+    const n = 2 + Math.floor(rand() * 3); // 2–4 al día
+    for (let k = 0; k < n; k++) {
+      const hour = 7.5 + rand() * 14.5; // entre las 07:30 y las 22:00
+      const startMs = WINDOW_START.getTime() + day * DAY_MS + hour * HOUR_MS;
+      out.push({
+        startMs,
+        durMs: (10 + rand() * 30) * MIN_MS,
+        peak: 14 + rand() * 20,
+      });
+    }
+  }
+  return out;
+})();
+
+/**
+ * Por encima de aquí, la actividad cotidiana se comprime. Se elige por debajo
+ * del pico de episodio MÁS BAJO de `EPISODES` (112 bpm, enc-0007) para que
+ * ningún paseo pueda parecer un ataque de pánico en el gráfico.
+ */
+const ACTIVITY_CEILING = 100;
+
+/** Sobreelevación por actividad en un instante, con forma de campana. */
+function activityBoost(tMs) {
+  let total = 0;
+  for (const b of ACTIVITY_BURSTS) {
+    if (tMs < b.startMs || tMs > b.startMs + b.durMs) continue;
+    const p = (tMs - b.startMs) / b.durMs;
+    total += b.peak * Math.sin(Math.PI * p) ** 1.5;
+  }
+  return total;
+}
+
 /* ================================================================== */
 /* Influencia de los episodios sobre las series                        */
 /* ================================================================== */
@@ -211,28 +330,52 @@ function generateSeries() {
   for (const t of sampleTimestamps()) {
     const d = new Date(t);
     const c = circadian(d);
-    const asleep = isAsleep(d);
     const { intensity, ep } = episodeIntensity(t);
 
+    /* Estado del día y del momento. `s` va de 0 a 1 en vez de ser un booleano,
+       `drift` desplaza el reposo del día entero y `amp` ensancha o aplana su
+       oscilación: entre los tres, ningún día de los treinta sale igual a otro. */
+    const s = sleepFactor(d);
+    const drift = smoothDaily(DAY_DRIFT, t);
+    const amp = smoothDaily(DAY_AMPLITUDE, t);
+
+    /* Durante un episodio no se suma actividad: quien está teniendo un ataque
+       de pánico no está subiendo escaleras, y sumar las dos cosas inventaría
+       picos por encima del máximo declarado en `EPISODES`. */
+    const act = ep ? 0 : activityBoost(t);
+
     // ---- heart rate ----
-    let hr = BASELINE.heartRate.mean + 8 * c + gauss(0, 2.4);
-    if (asleep) hr -= 5;
+    const restingHr = BASELINE.heartRate.mean + 8 * amp * c - 5 * s + drift;
+    let hr = restingHr + act + gauss(0, 2.4);
     if (ep) {
-      const restingHr = BASELINE.heartRate.mean + 8 * c;
       hr = restingHr + (ep.peakHr - restingHr) * intensity + gauss(0, 2.0);
+    } else if (hr > ACTIVITY_CEILING) {
+      /* Techo blando, no recorte: comprimir el exceso conserva la forma de
+         campana de la ráfaga, mientras que un `Math.min` le dejaría la punta
+         plana y se vería el artefacto.
+
+         Existe porque un día de deriva alta más una ráfaga larga llegaba a
+         129 bpm, por encima del pico de episodio más bajo (112). Eso invierte
+         la lectura del gráfico de apertura: el "pico del periodo" dejaría de
+         ser un ataque de pánico y pasaría a ser una caminata, sin nada que lo
+         explique. La invariante que se protege aquí es que TODO pico de
+         pánico esté por encima de CUALQUIER actividad cotidiana. */
+      hr = ACTIVITY_CEILING + (hr - ACTIVITY_CEILING) * 0.25;
     }
 
     // ---- HRV (se mueve al revés que HR) ----
-    let v = BASELINE.hrv.mean + (asleep ? 12 : -4) - 6 * c + gauss(0, 5.5);
+    const restingHrv =
+      BASELINE.hrv.mean + 12 * s - 4 * (1 - s) - 6 * amp * c - drift * 0.9;
+    let v = restingHrv - act * 0.45 + gauss(0, 5.5);
     if (ep) {
-      const restingHrv = BASELINE.hrv.mean + (asleep ? 12 : -4) - 6 * c;
       v = restingHrv + (ep.minHrv - restingHrv) * intensity + gauss(0, 2.0);
     }
 
     // ---- respiratory rate ----
-    let rr = BASELINE.respiratoryRate.mean + (asleep ? -1.5 : 1.0) + 0.8 * c + gauss(0, 1.0);
+    const restingRr =
+      BASELINE.respiratoryRate.mean + (1.0 - 2.5 * s) + 0.8 * amp * c;
+    let rr = restingRr + act * 0.1 + gauss(0, 1.0);
     if (ep) {
-      const restingRr = BASELINE.respiratoryRate.mean + (asleep ? -1.5 : 1.0);
       const peakRr = 24 + (ep.sev - 6) * 1.5;
       rr = restingRr + (peakRr - restingRr) * intensity + gauss(0, 0.9);
     }

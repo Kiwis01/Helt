@@ -40,10 +40,10 @@ import { checkCoverage, describeCoverageReason } from '@/lib/coverage-client';
 import { formatCents, formatDateTime, formatPercent } from '@/lib/format';
 
 const STATUS_LABEL: Record<CoverageStatus, string> = {
-  covered: 'Cubierto',
-  'not-covered': 'No cubierto',
-  'needs-auth': 'Con autorización',
-  unknown: 'Sin verificar',
+  covered: 'Covered',
+  'not-covered': 'Not covered',
+  'needs-auth': 'Prior auth required',
+  unknown: 'Unknown',
 };
 
 /** Una píldora por estado. El color vive aquí y no se repite en los números. */
@@ -68,7 +68,7 @@ interface CoverageView {
   latencyMs: number | null;
   checkId: string;
   checkedAt: string | null;
-  origin: 'llamada en curso' | 'consulta del dashboard';
+  origin: 'call in progress' | 'dashboard check';
   detailSource: DataSource | null;
 }
 
@@ -135,7 +135,7 @@ export function CoverageCard() {
         latencyMs: trusted?.latencyMs ?? null,
         checkId: event.checkId,
         checkedAt: event.at,
-        origin: 'llamada en curso',
+        origin: 'call in progress',
         detailSource: detail?.source ?? null,
       };
     }
@@ -154,7 +154,7 @@ export function CoverageCard() {
       latencyMs: full.latencyMs,
       checkId: full.checkId,
       checkedAt: full.checkedAt,
-      origin: 'consulta del dashboard',
+      origin: 'dashboard check',
       detailSource: detail?.source ?? null,
     };
   }, [event, detail]);
@@ -170,15 +170,15 @@ export function CoverageCard() {
         disabled={pending}
         className="ghostbtn px-2.5 py-1.5"
       >
-        {pending ? 'Consultando…' : 'Verificar'}
+        {pending ? 'Checking…' : 'Check'}
       </button>
     </>
   );
 
   if (!view) {
     return (
-      <Card title="Cobertura" subtitle="Stedi" actions={actions} index={3}>
-        <EmptyState>Sin verificación en esta llamada</EmptyState>
+      <Card title="Coverage" subtitle="Stedi" actions={actions} index={3}>
+        <EmptyState>No check on this call</EmptyState>
       </Card>
     );
   }
@@ -209,7 +209,7 @@ export function CoverageCard() {
 
   return (
     <Card
-      title="Cobertura"
+      title="Coverage"
       subtitle="Stedi"
       actions={actions}
       index={3}
@@ -247,7 +247,7 @@ export function CoverageCard() {
         */}
         <div className="tile flex shrink-0 items-start gap-4 px-4 py-2.5">
           <div className="min-w-0">
-            <p className="label">Copago</p>
+            <p className="label">Copay</p>
             <p
               className="hero mt-1.5"
               style={view.copayCents === null ? { color: 'var(--ink-3)' } : undefined}
@@ -258,15 +258,15 @@ export function CoverageCard() {
 
           {hasDeductible ? (
             <div className="min-w-0 flex-1 border-l border-hair pl-4">
-              <p className="label">Deducible</p>
+              <p className="label">Deductible</p>
               <p className={`mt-1.5 truncate ${DATA} font-medium text-ink-2`}>
                 {view.deductibleRemainingCents !== null ? (
                   <>
                     {formatCents(view.deductibleRemainingCents)}{' '}
-                    <span className="text-ink-3">restante</span>
+                    <span className="text-ink-3">remaining</span>
                   </>
                 ) : (
-                  `${formatCents(met)} de ${formatCents(total)}`
+                  `${formatCents(met)} of ${formatCents(total)}`
                 )}
               </p>
               {progress !== null ? (
@@ -290,9 +290,9 @@ export function CoverageCard() {
         {view.voiceSummary && !standDown ? (
           <figure className="shrink-0 border-l pl-3" style={{ borderColor: 'var(--accent-line)' }}>
             <blockquote className={`${DATA} italic leading-snug text-ink-2`}>
-              «{view.voiceSummary}»
+              “{view.voiceSummary}”
             </blockquote>
-            <figcaption className="label mt-1.5">leído al paciente</figcaption>
+            <figcaption className="label mt-1.5">read to the patient</figcaption>
           </figure>
         ) : null}
 
@@ -301,21 +301,21 @@ export function CoverageCard() {
         <div className="flex min-h-0 flex-1 flex-wrap content-start gap-x-5 gap-y-2.5 overflow-hidden">
           {standDown ? null : (
             <>
-              <Fact label="Pagador" value={view.payerName} />
+              <Fact label="Payer" value={view.payerName} />
               <Fact label="Plan" value={view.planName} />
               <Fact
-                label="Coaseguro"
+                label="Coinsurance"
                 value={
                   view.coinsurancePercent === null ? null : formatPercent(view.coinsurancePercent)
                 }
               />
               <Fact
-                label="Autorización"
+                label="Prior auth"
                 value={
                   view.priorAuthRequired === null
                     ? null
                     : view.priorAuthRequired
-                      ? 'Requerida'
+                      ? 'Required'
                       : 'No'
                 }
                 tone={view.priorAuthRequired ? 'var(--warn)' : undefined}

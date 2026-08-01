@@ -4,6 +4,7 @@ import { DataSourceBadge } from '@/components/DataSourceBadge';
 import { DemoControls } from '@/components/DemoControls';
 import { LiveCallPanel } from '@/components/LiveCallPanel';
 import { LiveCallProvider } from '@/components/LiveCallProvider';
+import { AppNav } from '@/components/nav/AppNav';
 import { OutcomesChart } from '@/components/OutcomesChart';
 import { PatientHeader } from '@/components/PatientHeader';
 import {
@@ -66,20 +67,21 @@ export default async function DashboardPage() {
         superficie de vidrio aquí solo competiría con los cuatro paneles.
         ----------------------------------------------------------------
       */}
-      <div className="flex h-14 shrink-0 items-center gap-4 border-b border-hair px-5">
-        {/*
-          La única mayúscula con tracking abierto de la pantalla, y se lo gana
-          por ser un wordmark: la regla prohíbe micro-etiquetas en versalitas
-          repartidas por la interfaz, no una marca. En blanco y no en acento —
-          el acento se reserva para estado y para la voz del paciente.
-        */}
-        <span className="shrink-0 text-[15px] font-semibold tracking-[0.2em] text-ink">LOOP</span>
-
-        <div className="ml-auto flex shrink-0 items-center gap-3">
-          <DataSourceBadge status={source} />
-          <DemoControls />
-        </div>
-      </div>
+      {/*
+        Antes esta franja llevaba solo el wordmark y los controles de demo: no
+        tenía UN SOLO enlace, así que desde aquí no se podía volver al
+        expediente sin el botón atrás del navegador. Ahora es la misma barra
+        que las otras dos vistas —wordmark, control segmentado de mundo— con
+        las acciones propias de esta pantalla a la derecha.
+      */}
+      <AppNav
+        actions={
+          <>
+            <DataSourceBadge status={source} />
+            <DemoControls />
+          </>
+        }
+      />
 
       <PatientHeader summary={summary.data} />
 

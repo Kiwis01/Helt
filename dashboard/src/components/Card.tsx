@@ -8,7 +8,7 @@ import type { CSSProperties, ReactNode } from 'react';
  * - El título es una ETIQUETA, no un titular: pequeño y callado, en el
  *   peldaño más bajo de la escalera de texto. Lo que debe destacar es el
  *   dato, no el nombre del panel.
- * - `subtitle` es para una unidad o una ventana ("30 días", "bpm"). No para
+ * - `subtitle` es para una unidad o una ventana ("30 days", "bpm"). No para
  *   explicar el panel. Si necesita explicación, está mal diseñado.
  * - El cuerpo lleva `min-h-0` y hace scroll propio: el layout es una rejilla
  *   de altura fija (1280x720, sin scroll de página), así que un panel que

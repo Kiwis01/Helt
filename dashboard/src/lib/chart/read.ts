@@ -211,7 +211,7 @@ function severityRank(entry: RosterEntry): number {
 function sortMetrics(metrics: ChartMetric[]): ChartMetric[] {
   return [...metrics].sort((a, b) => {
     const byPriority = priorityFor(a.loinc) - priorityFor(b.loinc);
-    return byPriority !== 0 ? byPriority : a.label.localeCompare(b.label, 'es');
+    return byPriority !== 0 ? byPriority : a.label.localeCompare(b.label, 'en');
   });
 }
 

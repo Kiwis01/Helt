@@ -27,9 +27,9 @@ const manrope = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Loop — Vista clínica',
+  title: 'Loop — Clinical view',
   description:
-    'Dashboard clínico de Loop: baseline de 30 días, episodios, outcomes por intervención y llamada en vivo.',
+    'Loop clinical dashboard: 30-day baseline, episodes, outcomes by intervention and live call.',
 };
 
 export const viewport: Viewport = {
@@ -40,7 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" className={manrope.variable}>
+    <html lang="en" className={manrope.variable}>
       {/* `overflow-x-hidden` en el body es la última red contra el scroll
           horizontal: aunque un panel se pase de ancho, la página no se
           desplaza y el proyector nunca recorta por el lado. */}

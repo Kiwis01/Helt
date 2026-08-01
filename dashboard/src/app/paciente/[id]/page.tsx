@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { DocumentsPanel } from '@/components/chart/DocumentsPanel';
@@ -7,6 +6,8 @@ import { MedicationsPanel } from '@/components/chart/MedicationsPanel';
 import { PatientBanner } from '@/components/chart/PatientBanner';
 import { ProblemsPanel } from '@/components/chart/ProblemsPanel';
 import { SourceBadge } from '@/components/chart/SourceBadge';
+import { AppNav } from '@/components/nav/AppNav';
+import { BackLink } from '@/components/nav/BackLink';
 import { chartFlags, readPatientChart } from '@/lib/chart/read';
 
 /**
@@ -44,32 +45,34 @@ export default async function PatientChartPage({
     null;
 
   return (
-    <main className="mx-auto flex w-full max-w-[1400px] flex-col gap-3 px-6 pb-10 pt-3">
-      <div className="flex items-center justify-end gap-3">
-        <SourceBadge status={source} />
-        <Link href="/loop" className="ghostbtn">
-          Loop · ansiedad
-        </Link>
-      </div>
+    <main className="flex w-full flex-col">
+      <AppNav actions={<SourceBadge status={source} />} />
 
-      <PatientBanner
-        patient={chart.patient}
-        flags={flags}
-        allergyLabels={chart.allergies.map((a) => a.display)}
-        appointment={nextAppointment}
-        now={now}
-      />
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-3 px-6 pb-10 pt-4">
+        {/* El retroceso va SOBRE el banner y no en la barra: pertenece al
+            contenido —vuelve a la lista de la que salió este paciente—, no al
+            chrome de la aplicación, que es el mismo en las tres vistas. */}
+        <BackLink href="/" label="Schedule" shortcut="Esc" />
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <MedicationsPanel medications={chart.medications} index={1} />
-        <LabsPanel metrics={chart.metrics} index={2} />
-        <ProblemsPanel conditions={chart.conditions} allergies={chart.allergies} index={3} />
-        <DocumentsPanel
-          notes={chart.notes}
-          orders={chart.orders}
-          careTeam={chart.careTeam}
-          index={4}
+        <PatientBanner
+          patient={chart.patient}
+          flags={flags}
+          allergyLabels={chart.allergies.map((a) => a.display)}
+          appointment={nextAppointment}
+          now={now}
         />
+
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <MedicationsPanel medications={chart.medications} index={1} />
+          <LabsPanel metrics={chart.metrics} index={2} />
+          <ProblemsPanel conditions={chart.conditions} allergies={chart.allergies} index={3} />
+          <DocumentsPanel
+            notes={chart.notes}
+            orders={chart.orders}
+            careTeam={chart.careTeam}
+            index={4}
+          />
+        </div>
       </div>
     </main>
   );

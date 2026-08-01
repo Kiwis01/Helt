@@ -22,7 +22,7 @@ export function SourceBadge({ status }: { status: ChartResult<null> }) {
       title={status.detail ? `${reason} · ${status.detail}` : reason}
     >
       <span className={`dot ${live ? 'dot-live' : ''}`} aria-hidden />
-      {live ? 'Medplum en vivo' : 'Respaldo local'}
+      {live ? 'Medplum live' : 'Local fallback'}
     </span>
   );
 }

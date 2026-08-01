@@ -27,11 +27,11 @@ export function ProblemsPanel({
   const inactive = conditions.filter((c) => c.clinicalStatus !== 'active');
 
   return (
-    <Card title="Problemas y alergias" subtitle={`${active.length} activos`} index={index}>
+    <Card title="Problems & allergies" subtitle={`${active.length} active`} index={index}>
       <div className="flex flex-col gap-4">
         <section>
           {conditions.length === 0 ? (
-            <MissingData>Medplum no tiene ninguna Condition para este paciente.</MissingData>
+            <MissingData>Medplum has no Condition for this patient.</MissingData>
           ) : (
             <ul className="flex flex-col divide-y divide-[var(--hair)]">
               {[...active, ...inactive].map((condition) => (
@@ -56,7 +56,7 @@ export function ProblemsPanel({
                   <span className="w-24 shrink-0 text-right text-2xs text-ink-3">
                     {/* Ninguna Condition de este proyecto trae fecha de inicio.
                         Se dice en vez de dejar un hueco que parece un bug. */}
-                    {condition.onsetDate ? `desde ${formatDate(condition.onsetDate)}` : 'sin fecha'}
+                    {condition.onsetDate ? `since ${formatDate(condition.onsetDate)}` : 'no date'}
                   </span>
                 </li>
               ))}
@@ -65,11 +65,11 @@ export function ProblemsPanel({
         </section>
 
         <section>
-          <h3 className="label pb-1">Alergias</h3>
+          <h3 className="label pb-1">Allergies</h3>
           {allergies.length === 0 ? (
             <MissingData>
-              Sin AllergyIntolerance registradas. No equivale a &laquo;sin alergias conocidas&raquo;:
-              es un hueco del expediente, y hay que preguntarlo antes de recetar.
+              No AllergyIntolerance resources on file. That is not the same as &ldquo;no known
+              allergies&rdquo; — it is a gap in the chart, and it must be asked before prescribing.
             </MissingData>
           ) : (
             <ul className="flex flex-col divide-y divide-[var(--hair)]">
@@ -84,10 +84,10 @@ export function ProblemsPanel({
                         className={`pill ${allergy.criticality === 'high' ? 'pill-danger' : 'pill-quiet'}`}
                       >
                         {allergy.criticality === 'high'
-                          ? 'Alta'
+                          ? 'High'
                           : allergy.criticality === 'low'
-                            ? 'Baja'
-                            : 'Sin evaluar'}
+                            ? 'Low'
+                            : 'Not assessed'}
                       </span>
                     ) : null}
                   </div>

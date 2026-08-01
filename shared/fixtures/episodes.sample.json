@@ -8,7 +8,7 @@
       "durationMinutes": 33,
       "outcome": "self-resolved",
       "peakHeartRate": 119,
-      "minHrv": 19,
+      "minHrv": 18,
       "severitySelfReported": 8,
       "interventions": [],
       "escalation": {
@@ -24,8 +24,8 @@
       "endedAt": "2026-07-03T07:49:00.000Z",
       "durationMinutes": 29,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 122,
-      "minHrv": 19,
+      "peakHeartRate": 121,
+      "minHrv": 17,
       "severitySelfReported": 7,
       "interventions": [
         {
@@ -65,7 +65,7 @@
       "endedAt": "2026-07-07T14:31:00.000Z",
       "durationMinutes": 16,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 119,
+      "peakHeartRate": 121,
       "minHrv": 20,
       "severitySelfReported": 7,
       "interventions": [
@@ -89,8 +89,8 @@
       "endedAt": "2026-07-09T02:32:00.000Z",
       "durationMinutes": 27,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 124,
-      "minHrv": 20,
+      "peakHeartRate": 121,
+      "minHrv": 21,
       "severitySelfReported": 7,
       "interventions": [
         {
@@ -114,7 +114,7 @@
       "durationMinutes": 15,
       "outcome": "resolved-with-intervention",
       "peakHeartRate": 117,
-      "minHrv": 21,
+      "minHrv": 22,
       "severitySelfReported": 6,
       "interventions": [
         {
@@ -137,8 +137,8 @@
       "endedAt": "2026-07-15T09:48:00.000Z",
       "durationMinutes": 13,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 113,
-      "minHrv": 27,
+      "peakHeartRate": 111,
+      "minHrv": 22,
       "severitySelfReported": 5,
       "interventions": [
         {
@@ -161,8 +161,8 @@
       "endedAt": "2026-07-18T22:34:00.000Z",
       "durationMinutes": 24,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 124,
-      "minHrv": 18,
+      "peakHeartRate": 121,
+      "minHrv": 16,
       "severitySelfReported": 7,
       "interventions": [
         {
@@ -185,8 +185,8 @@
       "endedAt": "2026-07-22T16:57:00.000Z",
       "durationMinutes": 12,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 114,
-      "minHrv": 21,
+      "peakHeartRate": 117,
+      "minHrv": 24,
       "severitySelfReported": 6,
       "interventions": [
         {
@@ -210,7 +210,7 @@
       "durationMinutes": 29,
       "outcome": "self-resolved",
       "peakHeartRate": 124,
-      "minHrv": 16,
+      "minHrv": 13,
       "severitySelfReported": 8,
       "interventions": [],
       "escalation": {
@@ -226,8 +226,8 @@
       "endedAt": "2026-07-28T02:28:00.000Z",
       "durationMinutes": 14,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 121,
-      "minHrv": 24,
+      "peakHeartRate": 125,
+      "minHrv": 22,
       "severitySelfReported": 7,
       "interventions": [
         {
@@ -250,7 +250,7 @@
       "endedAt": "2026-07-31T20:29:00.000Z",
       "durationMinutes": 24,
       "outcome": "resolved-with-intervention",
-      "peakHeartRate": 121,
+      "peakHeartRate": 120,
       "minHrv": 19,
       "severitySelfReported": 6,
       "interventions": [

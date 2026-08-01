@@ -18,7 +18,7 @@ export function DataSourceBadge({ status }: { status: DataResult<unknown> }) {
   const live = status.source === 'live';
 
   const hint = live
-    ? `Datos en vivo desde ${config.coreUrl}`
+    ? `Live data from ${config.coreUrl}`
     : [`shared/fixtures · ${describeReason(status.reason)}`, status.detail]
         .filter(Boolean)
         .join(' — ');
@@ -32,7 +32,7 @@ export function DataSourceBadge({ status }: { status: DataResult<unknown> }) {
         // escribirlo: solo la ruta en vivo respira.
         style={live ? undefined : { background: 'var(--warn)' }}
       />
-      {live ? 'En vivo' : 'Fixtures'}
+      {live ? 'Live' : 'Fixtures'}
     </span>
   );
 }

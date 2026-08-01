@@ -91,7 +91,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'system',
-      text: 'Esta llamada no sustituye la atención de emergencia. Si crees que es una emergencia, cuelga y llama al 911.',
+      text: 'This call is not a substitute for emergency care. If you think this is an emergency, hang up and call 911.',
     },
   },
   {
@@ -100,7 +100,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'patient',
-      text: 'Me está costando respirar y siento el corazón muy acelerado, creo que está pasando otra vez.',
+      text: "I'm having trouble breathing and my heart is racing. I think it's happening again.",
     },
   },
   {
@@ -114,7 +114,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'agent',
-      text: 'Estoy contigo. Tu frecuencia cardiaca está en 118 y tu promedio de los últimos 30 días es 68. Tu variabilidad también bajó. Esto se parece a los últimos cuatro episodios que registraste.',
+      text: "I'm here with you. Your heart rate is 118 and your average over the last 30 days is 68. Your variability is down too. This looks like the last four episodes you logged.",
     },
   },
   // Pico de la llamada. Coincide con `biometricsSnapshot` del fixture.
@@ -129,13 +129,13 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'agent',
-      text: 'Tu plan de cuidado, el que escribió la doctora Chen, dice empezar con respiración de caja. ¿Lo hacemos juntos?',
+      text: 'Your care plan, the one Dr. Chen wrote, says to start with box breathing. Should we do it together?',
     },
   },
   {
     atMs: 16_500,
     event: 'transcript.turn',
-    data: { callId: HAPPY_CALL_ID, speaker: 'patient', text: 'Sí, está bien.' },
+    data: { callId: HAPPY_CALL_ID, speaker: 'patient', text: 'Yes, okay.' },
   },
   {
     atMs: 18_000,
@@ -148,7 +148,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'agent',
-      text: 'Inhala conmigo durante cuatro tiempos. Sostén cuatro. Exhala cuatro. Sostén cuatro. No tienes que hablar.',
+      text: "Breathe in with me for four counts. Hold for four. Out for four. Hold for four. You don't have to talk.",
     },
   },
   {
@@ -169,7 +169,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
   {
     atMs: 41_000,
     event: 'transcript.turn',
-    data: { callId: HAPPY_CALL_ID, speaker: 'patient', text: 'Ya respiro mejor. Como un seis de diez.' },
+    data: { callId: HAPPY_CALL_ID, speaker: 'patient', text: "I'm breathing better now. Like a six out of ten." },
   },
   {
     atMs: 44_000,
@@ -182,7 +182,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'agent',
-      text: 'Tu frecuencia bajó a 94 desde que empezamos. Tu plan también menciona agendar una sesión con tu equipo de cuidado. Déjame revisar tu cobertura.',
+      text: 'Your heart rate is down to 94 since we started. Your plan also mentions scheduling a session with your care team. Let me check your coverage.',
     },
   },
   // El coverage check llega ANTES de que el agente lo lea en voz alta: es el
@@ -199,7 +199,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
       deductibleRemainingCents: 8000,
       payerName: 'Test Payer Inc',
       voiceSummary:
-        'Tu sesión de telesalud sí está cubierta. Tu copago es de 25 dólares, y te quedan 80 dólares por cubrir de tu deducible.',
+        'Your telehealth session is covered. Your copay is 25 dollars, and you have 80 dollars left on your deductible.',
     },
   },
   {
@@ -208,7 +208,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
     data: {
       callId: HAPPY_CALL_ID,
       speaker: 'agent',
-      text: 'Tu sesión de telesalud sí está cubierta. Tu copago es de 25 dólares, y te quedan 80 dólares por cubrir de tu deducible.',
+      text: 'Your telehealth session is covered. Your copay is 25 dollars, and you have 80 dollars left on your deductible.',
     },
   },
   {
@@ -219,7 +219,7 @@ const HAPPY_STEPS: readonly DemoStep[] = [
   {
     atMs: 60_000,
     event: 'transcript.turn',
-    data: { callId: HAPPY_CALL_ID, speaker: 'patient', text: 'Gracias. Creo que ya estoy mejor.' },
+    data: { callId: HAPPY_CALL_ID, speaker: 'patient', text: "Thanks. I think I'm okay now." },
   },
   {
     atMs: 63_000,
@@ -262,7 +262,7 @@ const REDFLAG_STEPS: readonly DemoStep[] = [
     data: {
       callId: REDFLAG_CALL_ID,
       speaker: 'system',
-      text: 'Esta llamada no sustituye la atención de emergencia. Si crees que es una emergencia, cuelga y llama al 911.',
+      text: 'This call is not a substitute for emergency care. If you think this is an emergency, hang up and call 911.',
     },
   },
   {
@@ -271,7 +271,7 @@ const REDFLAG_STEPS: readonly DemoStep[] = [
     data: {
       callId: REDFLAG_CALL_ID,
       speaker: 'patient',
-      text: 'Me duele el pecho y el dolor se me está yendo al brazo izquierdo.',
+      text: 'My chest hurts and the pain is moving into my left arm.',
     },
   },
   {
@@ -293,13 +293,13 @@ const REDFLAG_STEPS: readonly DemoStep[] = [
     data: {
       callId: REDFLAG_CALL_ID,
       speaker: 'agent',
-      text: 'Voy a parar aquí. Lo que describes puede ser una emergencia médica y no es algo que yo pueda evaluar. Cuelga y llama al 911 ahora mismo.',
+      text: "I'm going to stop here. What you're describing could be a medical emergency and it's not something I can assess. Hang up and call 911 right now.",
     },
   },
   {
     atMs: 12_500,
     event: 'transcript.turn',
-    data: { callId: REDFLAG_CALL_ID, speaker: 'patient', text: 'Ok, voy a llamar.' },
+    data: { callId: REDFLAG_CALL_ID, speaker: 'patient', text: "Okay, I'm calling." },
   },
   {
     atMs: 14_000,
@@ -312,7 +312,7 @@ const REDFLAG_STEPS: readonly DemoStep[] = [
     data: {
       callId: REDFLAG_CALL_ID,
       speaker: 'agent',
-      text: 'Me quedo contigo hasta que hables con ellos. No estás solo.',
+      text: "I'll stay with you until you're talking to them. You're not alone.",
     },
   },
   {
@@ -338,13 +338,13 @@ export const DEMO_CALLS: Record<DemoCallId, DemoCall> = {
   happy: {
     id: 'happy',
     label: 'Replay',
-    description: 'Llamada de ejemplo: episodio resuelto con respiración de caja y coverage check.',
+    description: 'Sample call: episode resolved with box breathing and a coverage check.',
     steps: HAPPY_STEPS,
   },
   redflag: {
     id: 'redflag',
     label: 'Red-flag',
-    description: 'Llamada de ensayo: dolor torácico irradiado, escalación determinista RF-01.',
+    description: 'Rehearsal call: radiating chest pain, deterministic RF-01 escalation.',
     steps: REDFLAG_STEPS,
   },
 };

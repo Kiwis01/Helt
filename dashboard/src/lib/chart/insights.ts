@@ -185,7 +185,7 @@ export function computePatientFlags(input: {
       flags.push({
         id: `critical:${metric.key}`,
         severity: 'danger',
-        title: `${metric.label} en rango crítico`,
+        title: `${metric.label} critically out of range`,
         basis: `${formatValue(latest.value, metric.unit)} · ${describeRange(metric.referenceRange)}`,
       });
       continue; // Ya está señalado como crítico; no se repite como "alto".
@@ -197,8 +197,8 @@ export function computePatientFlags(input: {
       flags.push({
         id: `worsening:${metric.key}`,
         severity: 'danger',
-        title: `${metric.label} fuera de rango y empeorando`,
-        basis: `${formatValue(latest.value, metric.unit)}, antes ${formatValue(
+        title: `${metric.label} out of range and worsening`,
+        basis: `${formatValue(latest.value, metric.unit)}, previously ${formatValue(
           latest.value - metric.trend.delta,
           metric.unit,
         )} · ${describeRange(metric.referenceRange)}`,
@@ -210,7 +210,7 @@ export function computePatientFlags(input: {
       flags.push({
         id: `out-of-range:${metric.key}`,
         severity: 'warn',
-        title: `${metric.label} fuera de rango`,
+        title: `${metric.label} out of range`,
         basis: `${formatValue(latest.value, metric.unit)} · ${describeRange(metric.referenceRange)}`,
       });
       continue;
@@ -222,11 +222,11 @@ export function computePatientFlags(input: {
       flags.push({
         id: `improving:${metric.key}`,
         severity: 'info',
-        title: `${metric.label} mejorando`,
-        basis: `${formatValue(latest.value, metric.unit)}, desde ${formatValue(
+        title: `${metric.label} improving`,
+        basis: `${formatValue(latest.value, metric.unit)}, from ${formatValue(
           latest.value - metric.trend.deltaFromFirst,
           metric.unit,
-        )}${metric.trend.spanDays ? ` en ${metric.trend.spanDays} días` : ''}`,
+        )}${metric.trend.spanDays ? ` in ${metric.trend.spanDays} days` : ''}`,
       });
     }
   }
@@ -257,11 +257,11 @@ export function computePatientFlags(input: {
       flags.push({
         id: `ineffective:${metric.key}:${med.id}`,
         severity: 'danger',
-        title: `${metric.label} empeoró tras ajustar ${med.display}`,
-        basis: `${med.display} el ${formatDate(med.authoredOn)} · ${metric.label} ${formatValue(
+        title: `${metric.label} worsened after adjusting ${med.display}`,
+        basis: `${med.display} on ${formatDate(med.authoredOn)} · ${metric.label} ${formatValue(
           metric.latest.value,
           metric.unit,
-        )} el ${formatDate(metric.latest.at)}`,
+        )} on ${formatDate(metric.latest.at)}`,
       });
     }
   }
@@ -273,8 +273,8 @@ export function computePatientFlags(input: {
     flags.push({
       id: 'no-allergies-recorded',
       severity: 'warn',
-      title: 'Sin alergias registradas',
-      basis: 'No hay ningún AllergyIntolerance. No equivale a "sin alergias conocidas".',
+      title: 'No allergies recorded',
+      basis: 'No AllergyIntolerance resource. Not the same as "no known allergies".',
     });
   }
 
@@ -283,8 +283,8 @@ export function computePatientFlags(input: {
     flags.push({
       id: 'unsigned-medications',
       severity: 'warn',
-      title: `${unsigned.length} receta${unsigned.length === 1 ? '' : 's'} sin prescriptor`,
-      basis: `Sin campo requester: ${unsigned.map((m) => m.display).join(', ')}`,
+      title: `${unsigned.length} prescription${unsigned.length === 1 ? '' : 's'} with no prescriber`,
+      basis: `No requester field: ${unsigned.map((m) => m.display).join(', ')}`,
     });
   }
 
@@ -293,7 +293,7 @@ export function computePatientFlags(input: {
     flags.push({
       id: 'undated-conditions',
       severity: 'info',
-      title: `${undated.length} diagnóstico${undated.length === 1 ? '' : 's'} sin fecha de inicio`,
+      title: `${undated.length} ${undated.length === 1 ? 'diagnosis' : 'diagnoses'} with no onset date`,
       basis: undated.map((c) => c.display).join(', '),
     });
   }
@@ -303,11 +303,11 @@ export function computePatientFlags(input: {
 }
 
 function describeRange(range: ReferenceRange | null): string {
-  if (!range) return 'sin rango de referencia';
-  if (range.high !== null && range.low !== null) return `referencia ${range.low}–${range.high}`;
-  if (range.high !== null) return `referencia <${range.high}`;
-  if (range.low !== null) return `referencia ≥${range.low}`;
-  return 'sin rango de referencia';
+  if (!range) return 'no reference range';
+  if (range.high !== null && range.low !== null) return `reference ${range.low}–${range.high}`;
+  if (range.high !== null) return `reference <${range.high}`;
+  if (range.low !== null) return `reference ≥${range.low}`;
+  return 'no reference range';
 }
 
 function formatDate(iso: string | null): string {
@@ -316,7 +316,7 @@ function formatDate(iso: string | null): string {
   if (Number.isNaN(parsed)) return '—';
   // Zona fija: el expediente se pinta en servidor y se rehidrata en cliente, y
   // sin fijarla la misma fecha saldría distinta en cada sitio.
-  return new Intl.DateTimeFormat('es-MX', {
+  return new Intl.DateTimeFormat('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -356,13 +356,13 @@ const INTERACTION_PAIRS: readonly {
     b: '979467', // losartán
     severity: 'block',
     detail:
-      'IECA y ARA-II juntos duplican el bloqueo del eje renina-angiotensina: más hiperpotasemia y daño renal sin beneficio demostrado.',
+      'An ACE inhibitor and an ARB together double the renin-angiotensin blockade: more hyperkalemia and kidney injury with no proven benefit.',
   },
   {
     a: '860975', // metformina
     b: '435', // salbutamol — ejemplo benigno, se documenta como informativo
     severity: 'info',
-    detail: 'Sin interacción clínicamente relevante descrita.',
+    detail: 'No clinically relevant interaction described.',
   },
 ];
 
@@ -412,11 +412,11 @@ export function checkPrescription(input: {
       checks.push({
         id: `allergy:${allergy.id}`,
         severity: 'block',
-        title: `Alergia registrada a ${allergy.display}`,
+        title: `Recorded allergy to ${allergy.display}`,
         detail:
           allergy.reactions.length > 0
-            ? `Reacción: ${allergy.reactions.join(', ')}.`
-            : 'Sin reacción documentada.',
+            ? `Reaction: ${allergy.reactions.join(', ')}.`
+            : 'No documented reaction.',
       });
     }
   }
@@ -432,10 +432,10 @@ export function checkPrescription(input: {
       checks.push({
         id: `duplicate:${med.id}`,
         severity: 'warn',
-        title: `Ya tiene ${med.display} activo`,
+        title: `Already taking ${med.display}`,
         detail: med.dosage
-          ? `Dosis actual: ${med.dosage}. Si es un ajuste, suspende la anterior en vez de duplicar.`
-          : 'Si es un ajuste, suspende la anterior en vez de duplicar.',
+          ? `Current dose: ${med.dosage}. If this is an adjustment, stop the previous one instead of duplicating it.`
+          : 'If this is an adjustment, stop the previous one instead of duplicating it.',
       });
     }
   }
@@ -454,7 +454,7 @@ export function checkPrescription(input: {
         checks.push({
           id: `interaction:${med.id}`,
           severity: pair.severity,
-          title: `Interacción con ${med.display}`,
+          title: `Interaction with ${med.display}`,
           detail: pair.detail,
         });
       }
@@ -467,9 +467,9 @@ export function checkPrescription(input: {
     checks.push({
       id: 'no-rxnorm',
       severity: 'warn',
-      title: 'Sin código RxNorm',
+      title: 'No RxNorm code',
       detail:
-        'La verificación de duplicidad e interacción solo comparó nombres. Elige un medicamento del catálogo para que sea fiable.',
+        'The duplicate and interaction checks only compared names. Pick a medication from the catalog to make them reliable.',
     });
   }
 
