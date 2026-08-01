@@ -14,9 +14,24 @@ final class DeepgramConversationService: ConversationService {
     private var socket: URLSessionWebSocketTask?
     private var continuation: AsyncThrowingStream<ConversationEvent, Error>.Continuation?
 
-    init(key: String = Config.deepgramKey, audio: VoiceAudio) {
+    /// Clinical context, fetched at connect time so turn one already knows who
+    /// it's talking to without paying for a tool round trip.
+    private let loadContext: @MainActor () async -> String?
+    private var context: String?
+
+    init(
+        key: String = Config.deepgramKey,
+        audio: VoiceAudio,
+        context: @escaping @MainActor () async -> String? = { nil }
+    ) {
         self.key = key
         self.audio = audio
+        self.loadContext = context
+    }
+
+    private var prompt: String {
+        guard let context else { return Config.agentPrompt }
+        return Config.agentPrompt + "\n\nWhat you know about this person:\n" + context
     }
 
     // MARK: - ConversationService
@@ -24,6 +39,11 @@ final class DeepgramConversationService: ConversationService {
     func connect() async throws -> AsyncThrowingStream<ConversationEvent, Error> {
         guard !key.isEmpty else { throw DeepgramError.missingKey }
         guard await VoiceAudio.requestPermission() else { throw VoiceAudioError.microphoneDenied }
+
+        // The loader keeps its own deadline: a slow record must not hold up a
+        // conversation someone may badly need. No context is a worse agent,
+        // not a broken one.
+        context = await loadContext()
 
         var request = URLRequest(url: URL(string: "wss://agent.deepgram.com/v1/agent/converse")!)
         request.setValue("Token \(key)", forHTTPHeaderField: "Authorization")
@@ -61,6 +81,11 @@ final class DeepgramConversationService: ConversationService {
     /// wrong outcome when someone has just said something urgent.
     func interrupt() async {
         audio.stopPlayback()
+    }
+
+    /// Hands a tool result back so the model can reason about it and reply.
+    func answer(_ call: AgentTools.Call, with content: [String: Any]) async {
+        try? await send(AgentTools.response(for: call, content: content))
     }
 
     func disconnect() async {
@@ -118,6 +143,13 @@ final class DeepgramConversationService: ConversationService {
         case "AgentAudioDone":
             continuation?.yield(.agentSpeechEnded)
 
+        case "FunctionCallRequest":
+            guard let payload = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any]
+            else { return }
+            for call in AgentTools.calls(in: payload) {
+                continuation?.yield(.toolCall(call))
+            }
+
         case "Error":
             let detail = message.description ?? message.message ?? "Deepgram rejected the session."
             continuation?.finish(throwing: DeepgramError.server(detail))
@@ -143,9 +175,12 @@ final class DeepgramConversationService: ConversationService {
             "agent": [
                 "language": "en",
                 "listen": ["provider": ["type": "deepgram", "model": "nova-3-medical"]],
+                // Claude does the reasoning, routed through Deepgram on the one
+                // socket — no Anthropic or Bedrock credential needed here.
                 "think": [
-                    "provider": ["type": "open_ai", "model": "gpt-4o-mini"],
-                    "prompt": Config.agentPrompt,
+                    "provider": ["type": "anthropic", "model": "claude-sonnet-4-5"],
+                    "prompt": prompt,
+                    "functions": AgentTools.definitions,
                 ],
                 "speak": ["provider": ["type": "deepgram", "model": "aura-2-thalia-en"]],
                 "greeting": Config.agentGreeting,

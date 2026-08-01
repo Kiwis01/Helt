@@ -2,6 +2,8 @@ import SwiftUI
 
 @main
 struct LoopApp: App {
+    @State private var auth = MedplumAuth()
+
     var body: some Scene {
         WindowGroup {
             TabView {
@@ -21,6 +23,12 @@ struct LoopApp: App {
             // Liquid Glass tab bar is the iOS 26 default; this lets it shrink
             // out of the way while reading the trend.
             .tabBarMinimizeBehavior(.onScrollDown)
+            .environment(auth)
+            .task {
+                await auth.restore()
+                // Anything stranded by a bad network last time goes now.
+                await MedplumClient(auth: auth).flush()
+            }
         }
     }
 
