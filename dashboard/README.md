@@ -27,9 +27,32 @@ npm run dev                               # coverage :3003 + dashboard :3000
 
 ## Variables de entorno
 
-Se copian de `ops/.env.example` a un `.env.local` en `dashboard/` (o a un
-`.env` en la raíz). Todas llevan prefijo `NEXT_PUBLIC_` porque el dashboard
-corre en el navegador.
+Se copian de `ops/.env.example` al `.env` de la **raíz del repo** —el mismo
+archivo que leen los cuatro servicios—. Todas llevan prefijo `NEXT_PUBLIC_`
+porque el dashboard corre en el navegador.
+
+Next solo lee archivos `.env` que estén dentro de `dashboard/`, así que el de la
+raíz lo aplica `next.config.ts` a mano. De más fuerte a más débil:
+
+1. el entorno del shell — `NEXT_PUBLIC_USE_FIXTURES=true npm run build` gana
+   siempre;
+2. `dashboard/.env.local` y `dashboard/.env`, si existen (los carga Next);
+3. `<raíz>/.env` — el compartido, y el que documenta `ops/.env.example`.
+
+Del `.env` de la raíz solo se aplican las variables `NEXT_PUBLIC_*`: el
+dashboard no lee ninguna otra, y no tiene por qué tener en su proceso el
+`STEDI_API_KEY` ni el `MEDPLUM_CLIENT_SECRET` de los servicios vecinos.
+
+Al arrancar, `next dev`, `next build` y `next start` imprimen qué archivo
+mandó:
+
+```
+[loop-dashboard] .env → /ruta/al/repo/.env · 5 variables NEXT_PUBLIC_
+```
+
+Si ahí pone `ninguno`, el `.env` no existe o `DASHBOARD_ENV_FILE=none` lo
+desactivó, y la app corre con los valores por defecto de
+`@loop/shared/constants`.
 
 | Variable | Por defecto | Para qué |
 |---|---|---|
@@ -43,9 +66,17 @@ Los valores por defecto salen de `@loop/shared/constants`, así que la app
 arranca sin `.env` y apunta a los puertos correctos.
 
 > **Ojo con `npm run build`:** Next sustituye las `NEXT_PUBLIC_*` por su valor
-> en tiempo de build. En `npm run dev` basta con editar el `.env.local` y el
-> servidor recarga solo; si el demo corre sobre `build` + `start`, cambiar el
-> modo respaldo exige **volver a construir**.
+> en tiempo de build. En `npm run dev` basta con editar el `.env` y el servidor
+> recarga solo; si el demo corre sobre `build` + `start`, cambiar el modo
+> respaldo exige **volver a construir**:
+>
+> ```bash
+> # plan B, desde la raíz: se edita el .env y se reconstruye
+> npm run build --workspace @loop/dashboard && npm run start --workspace @loop/dashboard
+>
+> # o sin tocar el .env, forzándolo desde el shell (el shell siempre gana)
+> NEXT_PUBLIC_USE_FIXTURES=true npm run build --workspace @loop/dashboard
+> ```
 
 ---
 

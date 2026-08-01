@@ -6,150 +6,155 @@
  * Consume el estado que `LiveCallProvider` alimenta desde el SSE de loop-voice
  * (Contrato 5) o desde el guion de replay. Aquí no hay lógica de red ni de
  * seguridad: este componente solo PINTA. En concreto, no calcula ninguna
- * red-flag — el badge de escalación se dibuja únicamente cuando llega el evento
- * `safety.escalation`, porque quien decide es una regla determinista de
+ * red-flag — la barrera de escalación se dibuja únicamente cuando llega el
+ * evento `safety.escalation`, porque quien decide es una regla determinista de
  * loop-voice y el dashboard no puede dar la impresión de opinar sobre eso.
  *
- * El estado por defecto es "sin llamada activa" y tiene que verse deliberado:
- * hoy loop-voice todavía no existe y este panel está en pantalla desde el
- * primer segundo del pitch. Un panel vacío que parece roto cuesta más que uno
- * que dice con calma que está esperando.
+ * EL HÉROE DEL PANEL CAMBIA, y ese es el diseño entero:
+ *
+ * - En una llamada normal el dato grande es la FRECUENCIA CARDIACA con su
+ *   distancia al baseline personal. Es lo único que se mueve solo en pantalla,
+ *   así que es lo que hace que el panel se sienta en directo.
+ * - En cuanto dispara una regla, `.hero` se muda al ID DE LA REGLA. Los jueces
+ *   necesitan leer `RF-01-CHEST-PAIN-RADIATING` desde el fondo de la sala: es
+ *   la prueba de que escaló un umbral determinista y no un modelo. La biometría
+ *   se encoge a una fila de dato terciario para no competir; dos héroes a la
+ *   vez son cero héroes.
+ *
+ * Sin llamada, el panel enseña una línea y dos botones. Ni un párrafo: loop-voice
+ * todavía no existe y este hueco está en pantalla desde el primer segundo del
+ * pitch, así que tiene que verse deliberado, no a medio construir.
  */
 
 import { useEffect, useRef } from 'react';
 
 import type { PatientSummary } from '@loop/shared/contracts';
 
-import { Card } from '@/components/Card';
+import { Card, EmptyState } from '@/components/Card';
 import { useLiveCall, type ConnectionStatus } from '@/components/LiveCallProvider';
+import { DATA, FOOT, STAT, STAT_UNIT } from '@/components/tokens';
 import { config } from '@/lib/config';
 import { DEMO_CALLS, DEMO_CALL_IDS } from '@/lib/demo-call';
-import { formatTime, labelOutcome } from '@/lib/format';
+import { formatSd, formatTime, labelOutcome } from '@/lib/format';
 
+/** Solo para el `title` y el lector de pantalla: en pantalla lo dice el punto. */
 const CONNECTION_LABEL: Record<ConnectionStatus, string> = {
   disabled: 'modo respaldo · stream desactivado',
-  connecting: 'conectando con loop-voice…',
+  connecting: 'conectando con loop-voice',
   open: 'stream conectado',
   retrying: 'esperando a loop-voice',
 };
 
-const CONNECTION_COLOR: Record<ConnectionStatus, string> = {
-  disabled: 'var(--ink-3)',
-  connecting: 'var(--warn)',
-  open: 'var(--ok)',
-  retrying: 'var(--ink-3)',
-};
-
-/** `EscalationAction` del contrato → lo que hay que leer en pantalla. */
+/** `EscalationAction` del contrato → la instrucción, en tres palabras. */
 const ACTION_LABEL: Record<string, string> = {
-  'advise-911': 'Indicar al paciente que llame al 911',
-  'advise-988': 'Indicar al paciente que llame al 988',
-  'connect-human': 'Conectar con un clínico humano',
+  'advise-911': 'Llamar al 911 ahora',
+  'advise-988': 'Llamar al 988',
+  'connect-human': 'Conectar con un clínico',
 };
 
 /* ------------------------------------------------------------------ */
-/* Badge de escalación                                                 */
+/* Barrera de escalación                                               */
 /* ------------------------------------------------------------------ */
 
 /**
- * El ID de la regla es el elemento más grande del badge a propósito.
+ * Coral, no rojo puro: sobre casi-negro el rojo saturado vibra y se lee como
+ * error de render. El coral se lee como alarma clínica.
  *
- * Los jueces necesitan ver que la escalación la disparó una REGLA con nombre y
- * no la decisión de un modelo. Si lo más prominente fuese el texto de la
- * acción, el badge contaría lo que pasó pero no lo que importa: que fue
- * determinista y auditable.
+ * Relleno plano, nunca otra capa de vidrio dentro del panel de vidrio.
  */
-function EscalationBadge({ rule, action, at }: { rule: string; action: string; at: string }) {
+function EscalationBarrier({ rule, action, at }: { rule: string; action: string; at: string }) {
   return (
     <div
-      className="tint-danger shrink-0 rounded-md border px-3 py-2"
-      style={{ borderColor: 'var(--danger)' }}
       role="alert"
+      className="bloom shrink-0 rounded-tile px-4 py-3"
+      style={{ background: 'var(--danger-soft)', border: '1px solid var(--danger-line)' }}
     >
       <div className="flex items-center gap-2">
-        <span
-          aria-hidden
-          className="size-1.5 shrink-0 animate-pulse rounded-full"
-          style={{ backgroundColor: 'var(--danger)' }}
-        />
-        <p className="text-2xs font-semibold uppercase tracking-[0.14em] text-danger">
-          Escalación determinista
-        </p>
+        <span aria-hidden className="dot dot-alert" />
+        <span className="label" style={{ color: 'var(--danger)' }}>
+          Regla determinista
+        </span>
+        <span className="label ml-auto">{formatTime(at)}</span>
       </div>
 
-      <p className="mt-1 break-all font-mono text-base font-bold leading-tight tracking-tight text-danger">
+      {/*
+        El ID de la regla ES el héroe del panel mientras esté en pantalla: la
+        misma clase `.hero` que usa la frecuencia cardiaca cuando no hay
+        escalación, no un tamaño intermedio. Antes se pintaba a 17px mientras
+        las tres constantes vitales iban a 19px —el panel prometía encogerlas
+        para no competir y hacía justo lo contrario—, y a ese tamaño
+        `RF-01-CHEST-PAIN-RADIATING` no se lee desde el fondo de la sala.
+
+        Monoespaciado porque es un identificador de máquina, y esa es la
+        prueba: escaló un umbral determinista, no la opinión de un modelo.
+        `tracking` y `leading` sobreescriben los de `.hero`, que están
+        calibrados para cifras cortas y aquí dejarían las dos líneas pegadas.
+        `anywhere` porque el ID no cabe en 24rem y una palabra partida se lee
+        mejor que una que se sale de la tarjeta.
+      */}
+      <p
+        className="hero mt-2 font-mono leading-[1.06] tracking-[-0.02em]"
+        style={{ color: 'var(--danger)', overflowWrap: 'anywhere' }}
+      >
         {rule}
       </p>
 
-      <p className="mt-1 text-xs font-medium leading-snug text-ink">
+      <p className={`mt-2 ${DATA} font-medium leading-snug text-ink`}>
         {ACTION_LABEL[action] ?? action}
-      </p>
-      <p className="mt-0.5 text-2xs leading-snug text-ink-3">
-        regla evaluada antes de invocar al modelo · {formatTime(at)}
       </p>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Biometría en vivo                                                   */
+/* Biometría                                                           */
 /* ------------------------------------------------------------------ */
 
 type Baseline = PatientSummary['baseline'];
 
-function trendMark(current: number, previous: number | undefined): string {
-  if (previous === undefined || current === previous) return '·';
-  return current > previous ? '▲' : '▼';
-}
-
 /**
  * Color por distancia al baseline personal, no por umbrales absolutos: 118 bpm
- * es una cifra distinta según de quién sea el corazón.
+ * es una cifra distinta según de quién sea el corazón. Es el único color de
+ * texto del panel que no es la escalera de blancos, y se lo gana porque es
+ * estado clínico real.
  */
-function toneFor(value: number, mean: number, sd: number): string {
-  if (sd <= 0) return 'var(--ink)';
+function toneFor(value: number, mean: number, sd: number): string | undefined {
+  if (sd <= 0) return undefined;
   const distance = Math.abs((value - mean) / sd);
   if (distance >= 3) return 'var(--danger)';
   if (distance >= 1.5) return 'var(--warn)';
-  return 'var(--ink)';
+  return undefined;
 }
 
-function Vital({
-  label,
-  value,
-  unit,
-  previous,
-  mean,
-  sd,
-}: {
-  label: string;
-  value: number;
-  unit: string;
-  previous: number | undefined;
-  mean: number;
-  sd: number;
-}) {
-  const mark = trendMark(value, previous);
-  const tone = toneFor(value, mean, sd);
-  const sdFrom = sd > 0 ? (value - mean) / sd : 0;
+function trendMark(current: number, previous: number | undefined): string {
+  if (previous === undefined || current === previous) return '';
+  return current > previous ? '▲' : '▼';
+}
 
+/** Métrica secundaria: mismo dato, un peldaño por debajo del héroe. */
+function MicroVital({ label, value, unit }: { label: string; value: number; unit: string }) {
   return (
-    <div className="min-w-0 flex-1">
-      <p className="text-2xs uppercase tracking-[0.1em] text-ink-3">{label}</p>
-      <p className="mt-0.5 flex items-baseline gap-1">
-        <span className="text-xl font-semibold leading-none" style={{ color: tone }}>
-          {Math.round(value)}
-        </span>
-        <span className="text-2xs text-ink-3">{unit}</span>
-        <span className="ml-auto text-2xs" style={{ color: tone }} aria-hidden>
-          {mark}
-        </span>
-      </p>
-      <p className="mt-0.5 truncate text-2xs text-ink-3">
-        {sdFrom > 0 ? '+' : ''}
-        {sdFrom.toFixed(1)} SD
+    <div className="min-w-0">
+      <p className="label truncate">{label}</p>
+      <p className={`mt-1 ${STAT} text-ink-2`}>
+        {Math.round(value)}
+        <span className={STAT_UNIT}>{unit}</span>
       </p>
     </div>
+  );
+}
+
+/**
+ * Constante vital en modo escalación: una fila, tamaño de dato terciario y sin
+ * etiqueta —la unidad ya dice cuál es—. Con una regla en pantalla la biometría
+ * no puede pesar lo mismo que el ID que la disparó.
+ */
+function TinyVital({ value, unit, tone }: { value: number; unit: string; tone?: string }) {
+  return (
+    <span className={`${DATA} font-semibold text-ink-2`} style={tone ? { color: tone } : undefined}>
+      {Math.round(value)}
+      <span className="ml-1 text-2xs font-medium text-ink-3">{unit}</span>
+    </span>
   );
 }
 
@@ -168,126 +173,142 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
     if (element) element.scrollTop = element.scrollHeight;
   }, [state.turns.length]);
 
-  const hasCall = state.callId !== null;
   const vitals = state.biometrics;
+  const escalated = state.escalation !== null;
+  const hasCall = state.callId !== null;
+
+  const heartTone = vitals
+    ? toneFor(vitals.heartRate, baseline.heartRate.mean, baseline.heartRate.sd)
+    : undefined;
+  const heartSd =
+    vitals && baseline.heartRate.sd > 0
+      ? (vitals.heartRate - baseline.heartRate.mean) / baseline.heartRate.sd
+      : null;
+
+  // El pie solo aparece cuando tiene algo que decir. Un panel esperando no
+  // necesita una línea que repita lo que ya dice el estado vacío.
+  const showFoot = hasCall || state.ended !== null || state.dropped > 0;
 
   return (
     <Card
       title="Llamada en vivo"
-      // Se queda con el alto que la tarjeta de cobertura no use, pero nunca
-      // baja de lo que necesitan badge + biometría + una burbuja legible.
-      className="min-h-[17rem] flex-1"
-      bodyClassName="flex min-h-0 flex-col"
+      index={2}
+      // Reparto de alto de la columna derecha. La columna mide 564px a 1280x720
+      // y las dos tarjetas juntas piden más, así que quién cede está decidido
+      // aquí y no lo improvisa el navegador:
+      //
+      // - `flex-[1_0_0%]`: este panel crece hasta llenar lo que la cobertura no
+      //   use, pero NUNCA encoge. Antes era `flex-auto` con suelo de 16rem, y
+      //   con el transcript lleno su base de contenido llegaba a 388px dejando
+      //   158px a una cobertura que pedía 256: el héroe del copago salía
+      //   partido por la mitad.
+      // - Los dos suelos son medidos, no redondeados a ojo. 17rem = 272px es lo
+      //   que ocupan cabecera + biometría + una burbuja + pie. 19rem = 304px
+      //   añade la barrera de escalación, que es `shrink-0` y no admite quedarse
+      //   a medias. Por debajo de eso el contenido se saldría de la tarjeta.
+      // - `!` porque `Card` trae `min-h-0` en su clase base y las dos reglas
+      //   pesan lo mismo; el orden en la hoja no es algo que se deba suponer.
+      className={`flex-[1_0_0%] ${escalated ? '!min-h-[19rem]' : '!min-h-[17rem]'}`}
+      bodyClassName="flex min-h-0 flex-col gap-2.5 px-5 pb-4"
       actions={
-        <>
-          <span
-            className="flex items-center gap-1.5"
-            title={`${CONNECTION_LABEL[connection]} · ${config.voiceUrl}`}
-          >
-            <span
-              aria-hidden
-              className={`size-2 shrink-0 rounded-full ${connection === 'open' ? 'animate-pulse' : ''}`}
-              style={{ backgroundColor: CONNECTION_COLOR[connection] }}
-            />
-            <span className="sr-only">{CONNECTION_LABEL[connection]}</span>
-          </span>
-
-          {replay ? (
-            <button
-              type="button"
-              onClick={stopReplay}
-              className="rounded-md border border-line-strong px-2 py-1 text-2xs font-medium text-warn transition-colors hover:tint-warn"
-            >
+        replay ? (
+          <>
+            {/* Una llamada de ejemplo no se puede confundir nunca con una real. */}
+            <span className="pill pill-warn">Reproducción</span>
+            <button type="button" onClick={stopReplay} className="ghostbtn px-2.5 py-1.5">
               Detener
             </button>
-          ) : (
-            DEMO_CALL_IDS.map((id) => (
+          </>
+        ) : (
+          <>
+            <span
+              className="flex items-center"
+              title={`${CONNECTION_LABEL[connection]} · ${config.voiceUrl}`}
+            >
+              <span aria-hidden className={`dot ${connection === 'open' ? 'dot-live' : ''}`} />
+              <span className="sr-only">{CONNECTION_LABEL[connection]}</span>
+            </span>
+            {DEMO_CALL_IDS.map((id) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => startReplay(id)}
-                title={DEMO_CALLS[id].description}
-                className="rounded-md border border-line-strong px-2 py-1 text-2xs font-medium text-ink-2 transition-colors hover:bg-surface-2"
+                className="ghostbtn px-2.5 py-1.5"
               >
                 {DEMO_CALLS[id].label}
               </button>
-            ))
-          )}
-        </>
+            ))}
+          </>
+        )
       }
     >
-      {/* Aviso de reproducción. Va arriba del todo y en ámbar porque una
-          llamada de ejemplo no se puede confundir nunca con una real. Una sola
-          línea: el detalle va en el `title`, porque en este panel cada píxel de
-          alto se lo quita al transcript. */}
-      {replay ? (
-        <p
-          className="tint-warn shrink-0 truncate border-b border-line px-3 py-1 text-2xs text-warn"
-          title={DEMO_CALLS[replay].description}
-        >
-          <span className="font-semibold uppercase tracking-[0.12em]">Reproducción</span> · llamada
-          grabada, no es una llamada real
-        </p>
-      ) : null}
-
       {state.escalation ? (
-        <div className="shrink-0 p-2.5 pb-0">
-          <EscalationBadge
-            rule={state.escalation.rule}
-            action={state.escalation.action}
-            at={state.escalation.at}
-          />
-        </div>
+        <EscalationBarrier
+          rule={state.escalation.rule}
+          action={state.escalation.action}
+          at={state.escalation.at}
+        />
       ) : null}
 
       {vitals ? (
-        <div className="flex shrink-0 items-start gap-3 border-b border-line px-3 py-2">
-          <Vital
-            label="HR"
-            value={vitals.heartRate}
-            unit={baseline.heartRate.unit}
-            previous={state.previousBiometrics?.heartRate}
-            mean={baseline.heartRate.mean}
-            sd={baseline.heartRate.sd}
-          />
-          <Vital
-            label="HRV"
-            value={vitals.hrv}
-            unit={baseline.hrv.unit}
-            previous={state.previousBiometrics?.hrv}
-            mean={baseline.hrv.mean}
-            sd={baseline.hrv.sd}
-          />
-          <Vital
-            label="RR"
-            value={vitals.respiratoryRate}
-            unit={baseline.respiratoryRate.unit}
-            previous={state.previousBiometrics?.respiratoryRate}
-            mean={baseline.respiratoryRate.mean}
-            sd={baseline.respiratoryRate.sd}
-          />
+        <div
+          className={`tile flex shrink-0 gap-4 px-4 ${escalated ? 'items-baseline py-2' : 'items-end py-3'}`}
+        >
+          {escalated ? (
+            // Con una regla disparada la biometría se encoge a una sola fila:
+            // el héroe es el ID de arriba y aquí no puede haber un segundo.
+            <>
+              <TinyVital
+                value={vitals.heartRate}
+                unit={baseline.heartRate.unit}
+                tone={heartTone}
+              />
+              <TinyVital value={vitals.hrv} unit={baseline.hrv.unit} />
+              <TinyVital
+                value={vitals.respiratoryRate}
+                unit={baseline.respiratoryRate.unit}
+              />
+            </>
+          ) : (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="label">Frecuencia cardiaca</p>
+                <p className="hero mt-1.5" style={{ color: heartTone }}>
+                  {Math.round(vitals.heartRate)}
+                  <small>{baseline.heartRate.unit}</small>
+                </p>
+                <p className="mt-1.5 flex items-baseline gap-1.5 text-2xs text-ink-3">
+                  <span aria-hidden style={{ color: heartTone }}>
+                    {trendMark(vitals.heartRate, state.previousBiometrics?.heartRate)}
+                  </span>
+                  <span style={{ color: heartTone }}>{formatSd(heartSd)}</span>
+                  <span>basal {Math.round(baseline.heartRate.mean)}</span>
+                </p>
+              </div>
+
+              <div className="flex shrink-0 gap-4">
+                <MicroVital label="HRV" value={vitals.hrv} unit={baseline.hrv.unit} />
+                <MicroVital
+                  label="Resp."
+                  value={vitals.respiratoryRate}
+                  unit={baseline.respiratoryRate.unit}
+                />
+              </div>
+            </>
+          )}
         </div>
       ) : null}
 
-      {/* Transcript. El `min-h` evita que el badge de escalación y la biometría
-          —ambos `shrink-0`— lo aplasten a cero cuando coinciden en pantalla:
-          una burbuja cortada por la mitad se lee como un panel roto. */}
-      <div ref={scroller} className="min-h-[5.5rem] flex-1 space-y-2 overflow-y-auto p-3">
+      {/* Transcript. Es el único hijo elástico del panel, y su suelo desaparece
+          cuando hay una regla disparada: con la barrera en pantalla lo que hay
+          que leer es el ID, no la conversación, y reservarle 3.5rem al
+          transcript era empujar a la cobertura hasta recortarle la cita. */}
+      <div
+        ref={scroller}
+        className={`flex-1 space-y-2 overflow-y-auto ${escalated ? 'min-h-0' : 'min-h-[3.5rem]'}`}
+      >
         {state.turns.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
-            <span
-              aria-hidden
-              className="size-2.5 rounded-full"
-              style={{ backgroundColor: CONNECTION_COLOR[connection] }}
-            />
-            <p className="text-sm font-medium text-ink-2">
-              {hasCall ? 'Llamada abierta, sin turnos todavía' : 'Sin llamada activa'}
-            </p>
-            <p className="max-w-[17rem] text-xs leading-relaxed text-ink-3">
-              El transcript, la biometría y las alertas aparecen aquí en cuanto loop-voice abra el
-              stream. Mientras tanto, «Replay» reproduce una llamada de ejemplo.
-            </p>
-          </div>
+          <EmptyState>{hasCall ? 'Llamada abierta, sin turnos' : 'Sin llamada activa'}</EmptyState>
         ) : (
           state.turns.map((turn, index) => {
             const key = `${turn.at}-${index}`;
@@ -296,46 +317,54 @@ export function LiveCallPanel({ baseline }: { baseline: Baseline }) {
               return (
                 <p
                   key={key}
-                  className="mx-auto max-w-[92%] text-center text-2xs italic leading-relaxed text-ink-3"
+                  className="mx-auto max-w-[92%] text-center text-2xs leading-relaxed text-ink-3"
                 >
                   {turn.text}
                 </p>
               );
             }
 
+            // Sin etiquetas de hablante: el acento es el paciente y el blanco
+            // apagado es el agente. Poner "PACIENTE:" encima sería decir dos
+            // veces lo mismo, y en mayúsculas.
             const isAgent = turn.speaker === 'agent';
             return (
               <div key={key} className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[88%] rounded-lg px-2.5 py-1.5 ${
-                    isAgent ? 'tint-accent rounded-br-sm' : 'rounded-bl-sm bg-surface-2'
+                <p
+                  className={`tile max-w-[88%] px-3 py-2 ${DATA} leading-[1.5] ${
+                    isAgent ? 'rounded-br-[6px] text-ink-2' : 'rounded-bl-[6px]'
                   }`}
+                  style={isAgent ? undefined : { color: 'var(--accent)' }}
                 >
-                  <p className="text-xs leading-relaxed text-ink">{turn.text}</p>
-                  <p className="mt-1 text-2xs text-ink-3">
-                    {isAgent ? 'Loop' : 'Paciente'} · {formatTime(turn.at)}
-                  </p>
-                </div>
+                  <span className="sr-only">{isAgent ? 'Loop: ' : 'Paciente: '}</span>
+                  {turn.text}
+                </p>
               </div>
             );
           })
         )}
       </div>
 
-      {/* Pie: estado técnico honesto. El contador de descartados sube solo si
-          loop-voice emite algo fuera del Contrato 5 — es un aviso de
-          integración, no decoración. */}
-      <div className="flex shrink-0 items-center gap-2 border-t border-line px-3 py-1.5 text-2xs text-ink-3">
-        <span className="truncate">
-          {state.ended
-            ? `${labelOutcome(state.ended.outcome)} · ${Math.round(state.ended.durationSeconds / 60)} min`
-            : CONNECTION_LABEL[connection]}
-        </span>
-        <span className="ml-auto shrink-0 truncate font-mono">
-          {state.callId ?? config.voiceUrl.replace(/^https?:\/\//, '')}
-          {state.dropped > 0 ? ` · ${state.dropped} descartados` : ''}
-        </span>
-      </div>
+      {/* Pie técnico. El contador de descartados sube solo si loop-voice emite
+          algo fuera del Contrato 5 — es un aviso de integración, no adorno. */}
+      {showFoot ? (
+        <div className={`flex shrink-0 items-baseline gap-2 ${FOOT}`}>
+          {/* Durante un replay el estado del stream no viene a cuento: lo que
+              está pasando en pantalla no sale de él, y decir "esperando a
+              loop-voice" mientras corre una llamada se contradice solo. */}
+          <span className="truncate">
+            {state.ended
+              ? `${labelOutcome(state.ended.outcome)} · ${Math.round(state.ended.durationSeconds / 60)} min`
+              : replay
+                ? ''
+                : CONNECTION_LABEL[connection]}
+          </span>
+          <span className="ml-auto shrink-0 truncate">
+            {state.callId ?? config.voiceUrl.replace(/^https?:\/\//, '')}
+            {state.dropped > 0 ? ` · ${state.dropped} descartados` : ''}
+          </span>
+        </div>
+      ) : null}
     </Card>
   );
 }

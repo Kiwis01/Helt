@@ -2,36 +2,37 @@ import { describeReason, type DataResult } from '@/lib/core-client';
 import { config } from '@/lib/config';
 
 /**
- * Indicador de origen de los datos.
+ * Origen de los datos.
  *
- * Es información honesta, no decoración: si el dashboard puede caer a
- * fixtures sin decirlo, tarde o temprano alguien enseña datos inventados
- * creyéndolos reales delante de un jurado. Por eso está en la barra
- * superior, no escondido en un pie de página.
+ * Es información honesta, no decoración: si el dashboard puede caer a fixtures
+ * en silencio, tarde o temprano alguien enseña datos inventados creyéndolos
+ * reales delante de un jurado.
+ *
+ * Pero honesto no es lo mismo que ruidoso. En pantalla van dos palabras y un
+ * color de estado; el host, el motivo del fallback y el detalle técnico viven
+ * en el `title`, disponibles al pasar el mouse. Un rectángulo grande aquí
+ * competía con el título de la página por una información que, cuando todo va
+ * bien, nadie necesita leer.
  */
 export function DataSourceBadge({ status }: { status: DataResult<unknown> }) {
   const live = status.source === 'live';
 
+  const hint = live
+    ? `Datos en vivo desde ${config.coreUrl}`
+    : [`shared/fixtures · ${describeReason(status.reason)}`, status.detail]
+        .filter(Boolean)
+        .join(' — ');
+
   return (
-    <div
-      className={`flex items-center gap-2 rounded-md border px-2.5 py-1.5 ${
-        live ? 'tint-ok border-line-strong' : 'tint-warn border-line-strong'
-      }`}
-      title={status.detail ?? undefined}
-    >
+    <span className={`pill ${live ? 'pill-ok' : 'pill-warn'}`} title={hint}>
       <span
         aria-hidden
-        className="size-2 shrink-0 rounded-full"
-        style={{ backgroundColor: live ? 'var(--ok)' : 'var(--warn)' }}
+        className={`dot ${live ? 'dot-live' : ''}`}
+        // El ámbar estático dice "esto no está latiendo" sin necesidad de
+        // escribirlo: solo la ruta en vivo respira.
+        style={live ? undefined : { background: 'var(--warn)' }}
       />
-      <div className="leading-none">
-        <p className="text-2xs font-semibold uppercase tracking-[0.12em] text-ink">
-          {live ? 'Datos en vivo' : 'Fixtures'}
-        </p>
-        <p className="mt-1 font-mono text-2xs normal-case tracking-normal text-ink-3">
-          {live ? config.coreUrl : `shared/fixtures · ${describeReason(status.reason)}`}
-        </p>
-      </div>
-    </div>
+      {live ? 'En vivo' : 'Fixtures'}
+    </span>
   );
 }

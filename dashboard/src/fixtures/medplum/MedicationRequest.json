@@ -1,0 +1,269 @@
+[
+  {
+    "resourceType": "MedicationRequest",
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "860975",
+          "display": "metformin hydrochloride 500 MG"
+        }
+      ],
+      "text": "Metformina 500 mg"
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "authoredOn": "2026-07-28",
+    "dosageInstruction": [
+      {
+        "text": "1 tableta con el desayuno y 1 tableta con la cena — dosis aumentada de 1x/día el 28-jul-2026",
+        "timing": {
+          "repeat": {
+            "frequency": 2,
+            "period": 1,
+            "periodUnit": "d",
+            "when": [
+              "MORN",
+              "EVE"
+            ]
+          }
+        },
+        "doseAndRate": [
+          {
+            "doseQuantity": {
+              "value": 500,
+              "unit": "mg"
+            }
+          }
+        ]
+      }
+    ],
+    "id": "b039ef03-f54c-4daf-8a3a-0a801832e4df",
+    "meta": {
+      "versionId": "e2f58942-8068-46d8-99d9-f3dc79d370d4",
+      "lastUpdated": "2026-07-31T02:41:35.040Z"
+    }
+  },
+  {
+    "resourceType": "MedicationRequest",
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "314076",
+          "display": "lisinopril 10 MG"
+        }
+      ],
+      "text": "Lisinopril 10 mg"
+    },
+    "subject": {
+      "reference": "Patient/0699daac-e93c-42dc-8ff7-0657e120e634"
+    },
+    "authoredOn": "2026-07-09",
+    "dosageInstruction": [
+      {
+        "text": "1 tableta diaria en la mañana",
+        "timing": {
+          "repeat": {
+            "frequency": 1,
+            "period": 1,
+            "periodUnit": "d",
+            "when": [
+              "MORN"
+            ]
+          }
+        },
+        "doseAndRate": [
+          {
+            "doseQuantity": {
+              "value": 10,
+              "unit": "mg"
+            }
+          }
+        ]
+      }
+    ],
+    "id": "ca797c2c-4b81-4d78-87c8-66aedf07e2d0",
+    "meta": {
+      "versionId": "fe2feb48-851a-424d-a43b-348b6b480e68",
+      "lastUpdated": "2026-07-31T02:41:35.176Z"
+    }
+  },
+  {
+    "resourceType": "MedicationRequest",
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "979467",
+          "display": "losartan 50 MG"
+        }
+      ],
+      "text": "Losartán 50 mg"
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "authoredOn": "2026-07-25",
+    "dosageInstruction": [
+      {
+        "text": "1 tableta en la mañana y 1 en la noche — dosis dividida desde el 25-jul-2026",
+        "timing": {
+          "repeat": {
+            "frequency": 2,
+            "period": 1,
+            "periodUnit": "d",
+            "when": [
+              "MORN",
+              "EVE"
+            ]
+          }
+        },
+        "doseAndRate": [
+          {
+            "doseQuantity": {
+              "value": 50,
+              "unit": "mg"
+            }
+          }
+        ]
+      }
+    ],
+    "id": "49510dbc-0f3b-4565-9472-536188809883",
+    "meta": {
+      "versionId": "7e9ec2d3-9620-4244-af36-f09bb638a0b0",
+      "lastUpdated": "2026-07-31T02:51:07.595Z"
+    }
+  },
+  {
+    "resourceType": "MedicationRequest",
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "617312",
+          "display": "atorvastatin 20 MG"
+        }
+      ],
+      "text": "Atorvastatina 20 mg"
+    },
+    "subject": {
+      "reference": "Patient/6ee9d98e-061f-4c2e-8681-3e233f299474"
+    },
+    "authoredOn": "2026-06-24",
+    "dosageInstruction": [
+      {
+        "text": "1 tableta en la noche",
+        "timing": {
+          "repeat": {
+            "frequency": 1,
+            "period": 1,
+            "periodUnit": "d",
+            "when": [
+              "NIGHT"
+            ]
+          }
+        },
+        "doseAndRate": [
+          {
+            "doseQuantity": {
+              "value": 20,
+              "unit": "mg"
+            }
+          }
+        ]
+      }
+    ],
+    "id": "c07c1213-db97-4780-9b28-ff5bf4cf05f2",
+    "meta": {
+      "versionId": "014e6185-f038-4d87-a846-20364a8435fd",
+      "lastUpdated": "2026-07-31T02:51:07.613Z"
+    }
+  },
+  {
+    "resourceType": "MedicationRequest",
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "896188",
+          "display": "budesonide / formoterol inhaler"
+        }
+      ],
+      "text": "Budesonida/Formoterol inhalador"
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "authoredOn": "2026-06-15",
+    "dosageInstruction": [
+      {
+        "text": "2 inhalaciones en la mañana y 2 en la noche, TODOS los días aunque se sienta bien",
+        "timing": {
+          "repeat": {
+            "frequency": 2,
+            "period": 1,
+            "periodUnit": "d",
+            "when": [
+              "MORN",
+              "EVE"
+            ]
+          }
+        },
+        "doseAndRate": [
+          {
+            "doseQuantity": {
+              "value": 2,
+              "unit": "inhalaciones"
+            }
+          }
+        ]
+      }
+    ],
+    "id": "962eea1c-12e5-423d-9811-05c4f053c47c",
+    "meta": {
+      "versionId": "a7de64a1-0b93-4221-84dd-fae37a322524",
+      "lastUpdated": "2026-07-31T02:51:07.780Z"
+    }
+  },
+  {
+    "resourceType": "MedicationRequest",
+    "status": "active",
+    "intent": "order",
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "435",
+          "display": "albuterol"
+        }
+      ],
+      "text": "Salbutamol (rescate)"
+    },
+    "subject": {
+      "reference": "Patient/5ede2b89-c368-4874-9b5c-5f32a21cf274"
+    },
+    "authoredOn": "2026-06-15",
+    "dosageInstruction": [
+      {
+        "text": "2 inhalaciones SOLO si hay falta de aire (rescate)"
+      }
+    ],
+    "id": "dcb02b7b-156e-44a0-a6a6-ee50517cacd0",
+    "meta": {
+      "versionId": "c1a09f48-2bea-4977-a833-c11279ba3782",
+      "lastUpdated": "2026-07-31T02:51:07.800Z"
+    }
+  }
+]

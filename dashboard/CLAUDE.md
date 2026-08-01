@@ -70,7 +70,10 @@ Si añades una lectura nueva, pásala también por `aggregateSource()` en
 - Los colores del tema son `var()`, así que los modificadores de opacidad de
   Tailwind (`bg-danger/10`) NO aplican. Usa `.tint-danger`, `.tint-warn`,
   `.tint-ok`, `.tint-accent` de `globals.css`.
-- Tipografía del sistema. Cero fuentes o assets externos: el wifi puede morir.
+- Manrope, versionada en `src/fonts/` y servida con `next/font/local`. Cero
+  assets externos **ni en runtime ni en build**: el wifi puede morir y un
+  `next build` con la caché limpia tiene que seguir saliendo. Nada de
+  `next/font/google`, que descarga en cada build.
 - El layout es una rejilla de altura fija. Cada nivel lleva `min-h-0` /
   `min-w-0`: si un panel crece, hace scroll dentro de sí mismo. Nunca añadas
   altura fija a un `ResponsiveContainer` de Recharts.
