@@ -104,6 +104,7 @@ function makeContext(overrides: Partial<PatientContext> = {}): PatientContext {
       heartRateMin: 40,
       respiratoryRateMax: 32,
       spo2Min: 92,
+      note: 'Envelope del care plan del demo.',
     },
   };
   return { ...base, ...overrides };

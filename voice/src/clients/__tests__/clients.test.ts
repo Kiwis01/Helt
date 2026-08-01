@@ -121,7 +121,13 @@ function liveContext(overrides: Partial<PatientContext> = {}): PatientContext {
     carePlan: { id: 'cp-live', authoredBy: 'Dr. Maya Chen', lastUpdated: '2026-07-02', activities: [] },
     recentEpisodes: [],
     medications: [],
-    safetyEnvelope: { heartRateMax: 150, heartRateMin: 40, respiratoryRateMax: 32, spo2Min: 92 },
+    safetyEnvelope: {
+      heartRateMax: 150,
+      heartRateMin: 40,
+      respiratoryRateMax: 32,
+      spo2Min: 92,
+      note: 'Envelope del care plan del demo.',
+    },
     ...overrides,
   };
 }
@@ -313,11 +319,15 @@ describe('coreClient.getPatientContext', () => {
 
     const context = await getPatientContext(PATIENT, { profile: 'cardiac-redflag' });
 
-    expect(context.current.heartRate.latest).toBe(163);
+    // Sin cifras literales: lo que este perfil promete es una PROPIEDAD —las
+    // tres constantes vitales fuera del envelope— y los valores concretos los
+    // regenera `shared/fixtures/generate.mjs`.
     expect(context.current.heartRate.latest).toBeGreaterThan(context.safetyEnvelope.heartRateMax);
     expect(context.current.respiratoryRate.latest).toBeGreaterThan(
       context.safetyEnvelope.respiratoryRateMax,
     );
+    expect(context.current.spo2).toBeDefined();
+    expect(context.current.spo2!.latest).toBeLessThan(context.safetyEnvelope.spo2Min);
   });
 
   it('live: valida contra el contrato, cachea y reporta fuente=live', async () => {

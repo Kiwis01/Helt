@@ -197,19 +197,40 @@ function planGrounding(activity: CarePlanActivity, speedFactor: number): Interve
 // -----------------------------------------------------------------------------
 
 /**
+ * Aviso al equipo de cuidado, cuando el clinico no dejo guion.
+ *
+ * El care plan del demo trae `instruction` y `title` en INGLES ("Reach out to
+ * your clinician for a same-week telehealth visit"), y el `voiceScript` de esta
+ * actividad desaparecio al regenerarse los fixtures compartidos. Locutar la
+ * indicacion tal cual pondria al agente hablandole en ingles, con voz espanola,
+ * a alguien en mitad de un episodio de ansiedad.
+ *
+ * Esto NO inventa contenido clinico: no dice que hacer, ni cuando, ni por que.
+ * Solo enuncia en espanol lo que el `type` del contrato ya declara —que el
+ * siguiente paso del plan es avisar al equipo de cuidado— y, si la actividad
+ * trae `costItem`, ofrece la verificacion de cobertura, que es la accion que
+ * loop-voice si sabe ejecutar. La cifra la sigue poniendo `:3003`, literal.
+ */
+const ESCALATION_SOFT_LINE = 'Tu plan dice que el siguiente paso es avisarle a tu equipo de cuidado.';
+const COVERAGE_OFFER_LINE =
+  'Puedo revisar ahora mismo qué cubre tu seguro, para que no te lleves una sorpresa. ¿Quieres que lo revise?';
+
+/**
  * Cualquier otro tipo (`escalation-soft`, etc.): se locuta el `voiceScript`
  * de una. Si no hay guion, se cae a la indicacion del clinico y, en ultimo
  * termino, al titulo. Nunca se inventa texto clinico.
  */
 function planSpoken(activity: CarePlanActivity): InterventionStep[] {
   const lines = scriptLines(activity);
-  const text =
-    lines.length > 0
-      ? lines.join(' ')
-      : activity.instruction.trim() !== ''
-        ? activity.instruction.trim()
-        : activity.title;
+  if (lines.length > 0) return [{ text: lines.join(' '), pauseMsAfter: 0 }];
 
+  if (activity.type === 'escalation-soft') {
+    const parts = [ESCALATION_SOFT_LINE];
+    if (activity.costItem !== undefined) parts.push(COVERAGE_OFFER_LINE);
+    return [{ text: parts.join(' '), pauseMsAfter: 0 }];
+  }
+
+  const text = activity.instruction.trim() !== '' ? activity.instruction.trim() : activity.title;
   return [{ text, pauseMsAfter: 0 }];
 }
 

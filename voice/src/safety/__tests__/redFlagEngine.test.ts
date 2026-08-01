@@ -31,6 +31,7 @@ const ENVELOPE: SafetyEnvelope = {
   heartRateMin: 40,
   respiratoryRateMax: 32,
   spo2Min: 92,
+  note: 'Valores fuera del envelope DEBEN disparar escalacion determinista ANTES de cualquier llamada al LLM.',
 };
 
 interface BioOverrides {

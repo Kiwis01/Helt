@@ -315,7 +315,9 @@ export function redactText(text: string): string {
  * (el agente necesita el original para conversar), lo redactado es la copia que
  * sale del proceso.
  */
-export function redactTurns<T extends { speaker: 'patient' | 'agent'; at: string; text: string }>(
+export function redactTurns<
+  T extends { speaker: 'patient' | 'agent' | 'system'; at: string; text: string },
+>(
   turns: readonly T[],
 ): T[] {
   if (!Array.isArray(turns)) return [];

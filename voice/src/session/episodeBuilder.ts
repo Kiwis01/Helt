@@ -125,6 +125,16 @@ function normalizeMetric(value: number | null): number | null {
   return value !== null && Number.isFinite(value) ? value : null;
 }
 
+/**
+ * Extremo de biometria para el Contrato 2, que los exige como numeros no nulos.
+ * Sin lectura sale 0 — el centinela de "no lo se" del resto de voice/. Mandar
+ * un episodio con un hueco declarado es mejor que no mandarlo: `buildEpisode`
+ * lanza si el payload no valida, y ahi el episodio se pierde entero.
+ */
+function sealMetric(value: number | null): number {
+  return normalizeMetric(value) ?? 0;
+}
+
 function normalizeEscalation(escalation: EscalationInfo, fallbackAt: string): EscalationInfo {
   // Los 4 campos SIEMPRE presentes. Nunca se omite ninguno.
   if (!escalation.triggered) {
@@ -168,9 +178,9 @@ export function buildEpisode(
       patientReportedRelief: normalizeSeverity(attempt.patientReportedRelief),
     })),
     biometricsSnapshot: {
-      peakHeartRate: normalizeMetric(session.biometrics.peakHeartRate),
-      minHrv: normalizeMetric(session.biometrics.minHrv),
-      peakRespiratoryRate: normalizeMetric(session.biometrics.peakRespiratoryRate),
+      peakHeartRate: sealMetric(session.biometrics.peakHeartRate),
+      minHrv: sealMetric(session.biometrics.minHrv),
+      peakRespiratoryRate: sealMetric(session.biometrics.peakRespiratoryRate),
     },
     transcript: {
       // Nunca se persiste un transcript sin redactar. Este `true` es literal a

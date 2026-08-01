@@ -149,12 +149,17 @@ const UNKNOWN_FALLBACK: CoverageCheckResponse = {
   checkId: 'cov-unknown-0000',
   checkedAt: '1970-01-01T00:00:00.000Z',
   status: 'unknown',
-  payerName: null,
+  // El Contrato 3 exige `payerName` como string. `'Unknown'` es literalmente lo
+  // que trae `shared/fixtures/coverage.unknown.json`: si no sabemos la
+  // aseguradora, se dice que no se sabe, no se pone una plausible.
+  payerName: 'Unknown',
   planName: null,
   copayCents: null,
   coinsurancePercent: null,
   deductible: null,
-  priorAuthRequired: false,
+  // null, no false: `false` afirmaria que NO hace falta autorizacion previa, y
+  // eso es un dato que en este camino no tenemos.
+  priorAuthRequired: null,
   raw271Id: null,
   voiceSummary:
     'No pude verificar tu cobertura en este momento. No quiero darte un número que no sea real, así que tu equipo de cuidado te lo puede confirmar cuando agendes.',

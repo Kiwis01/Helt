@@ -47,7 +47,13 @@ function makeContext(overrides: Partial<PatientContext> = {}): PatientContext {
     carePlan: { id: 'loop-demo-careplan-001', authoredBy: 'Dr. Maya Chen', lastUpdated: '2026-07-02', activities: [] },
     recentEpisodes: [],
     medications: [],
-    safetyEnvelope: { heartRateMax: 150, heartRateMin: 40, respiratoryRateMax: 32, spo2Min: 92 },
+    safetyEnvelope: {
+      heartRateMax: 150,
+      heartRateMin: 40,
+      respiratoryRateMax: 32,
+      spo2Min: 92,
+      note: 'Envelope del care plan del demo.',
+    },
     ...overrides,
   };
 }

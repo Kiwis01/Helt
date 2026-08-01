@@ -35,6 +35,7 @@ const DEFAULT_ENVELOPE: SafetyEnvelope = {
   heartRateMin: 40,
   respiratoryRateMax: 32,
   spo2Min: 92,
+  note: 'Envelope del care plan del demo, copiado para que el CLI no haga I/O.',
 };
 
 // -----------------------------------------------------------------------------

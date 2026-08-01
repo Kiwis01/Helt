@@ -75,6 +75,22 @@ function activityById(id: string): CarePlanActivity {
   return found;
 }
 
+/**
+ * Primera linea locutable del guion del clinico, leida del fixture.
+ *
+ * Los textos de `shared/fixtures/` los regenera `generate.mjs` y ya cambiaron
+ * una vez en la integracion. Lo que estos tests defienden es que el agente usa
+ * la VOZ DEL CLINICO, no una cadena concreta: se compara contra el fixture.
+ */
+function firstScriptLine(activity: CarePlanActivity): string {
+  const first = (activity.voiceScript ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .find((line) => line !== '');
+  if (first === undefined) throw new Error(`fixture sin voiceScript en ${activity.id}`);
+  return first;
+}
+
 async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
   const items: T[] = [];
   for await (const item of source) items.push(item);
@@ -127,7 +143,9 @@ describe('buildSystemPrompt', () => {
     expect(happyPrompt).toContain('3. Message care team (escalation-soft)');
 
     expect(happyPrompt).toContain('Indicación del clínico: 4 in, 4 hold, 4 out, 4 hold — 5 cycles');
-    expect(happyPrompt).toContain('Guion de voz: Vamos a hacerlo juntos, sin prisa.');
+    // `flattenScript` une las lineas con ' / ', asi que la primera linea del
+    // guion del clinico va siempre justo detras de la etiqueta.
+    expect(happyPrompt).toContain(`Guion de voz: ${firstScriptLine(activityById('cp-act-1'))}`);
 
     // El orden importa: el plan se sigue de arriba abajo.
     const first = happyPrompt.indexOf('1. Box breathing');
@@ -144,8 +162,15 @@ describe('buildSystemPrompt', () => {
 
   it('incluye condicion activa, episodios recientes y medicacion', () => {
     expect(happyPrompt).toContain('Anxiety disorder (SNOMED 197480006), desde 2023-04-12');
+
+    // El FORMATO de la linea es lo que se fija aqui; las cifras salen del
+    // fixture, que regenera `shared/fixtures/generate.mjs`.
+    const episode = happy.recentEpisodes[1];
+    expect(episode).toBeDefined();
     expect(happyPrompt).toContain(
-      '- 2026-07-28, duró 22 min, pico de 121 bpm, hizo cp-act-1, terminó self-resolved, severidad 7/10.',
+      `- ${episode.startedAt.slice(0, 10)}, duró ${episode.durationMinutes} min, ` +
+        `pico de ${episode.peakHeartRate} bpm, hizo ${episode.interventions.join(', ')}, ` +
+        `terminó ${episode.resolution}, severidad ${episode.severitySelfReported}/10.`,
     );
     expect(happyPrompt).toContain('Sertraline 50mg (active)');
     expect(happyPrompt).toContain('no sugieres cambios');
@@ -272,9 +297,8 @@ describe('runIntervention — respiracion de caja', () => {
 
     expect(steps).toHaveLength(1 + BREATHING_CYCLES * 4 + 1);
 
-    expect(steps[0]?.text).toBe(
-      'Vamos a hacerlo juntos, sin prisa. Si puedes, siéntate y suelta los hombros.',
-    );
+    // La intro es la voz del clinico, no una constante de loop-voice.
+    expect(steps[0]?.text).toBe(firstScriptLine(breathing));
     expect(steps[0]?.pauseMsAfter).toBe(INTRO_PAUSE_MS);
 
     const inhales = steps.filter((step) => step.text.includes('Inhala por la nariz'));
@@ -353,10 +377,13 @@ describe('runIntervention — grounding y resto de actividades', () => {
   });
 
   it('sin voiceScript cae a la indicacion del clinico, nunca a texto inventado', () => {
+    // `physical` es un tipo sin tratamiento propio: cae en la rama `default`,
+    // igual que cualquier tipo futuro. (`escalation-soft` ya no sirve para este
+    // caso: tiene su propio respaldo en espanol.)
     const activity: CarePlanActivity = {
       id: 'cp-act-x',
       order: 9,
-      type: 'journaling',
+      type: 'physical',
       title: 'Escribir dos lineas',
       instruction: 'Anota lo que estabas haciendo cuando empezó',
     };

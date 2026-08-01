@@ -90,6 +90,41 @@ function arr(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
+/**
+ * Valor de una union CERRADA del contrato, o `fallback` si no es ninguno.
+ *
+ * El contrato provisional declaraba `trend`, `carePlanActivity.type`,
+ * `clinicalStatus`, `medication.status` y `resolution` como `z.string()` a
+ * proposito: un valor inesperado de loop-core no podia tirar la llamada. El
+ * contrato oficial los cerro a `z.enum(...)`, asi que ahora **un solo valor
+ * inesperado invalida el contexto entero** y el agente vuelve a locutar cifras
+ * del fixture mientras el dashboard pinta las reales. La tolerancia se
+ * reconstruye aqui, que es donde toca: en el lado de voice/, sin tocar shared/.
+ */
+function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof value === 'string' && (allowed as readonly string[]).includes(value)
+    ? (value as T)
+    : fallback;
+}
+
+const TRENDS = ['rising', 'falling', 'stable'] as const;
+const CLINICAL_STATUSES = ['active', 'remission', 'resolved'] as const;
+const MEDICATION_STATUSES = ['active', 'stopped', 'on-hold'] as const;
+const RESOLUTIONS = [
+  'self-resolved',
+  'resolved-with-intervention',
+  'escalated-emergency',
+  'escalated-human',
+  'abandoned',
+] as const;
+const ACTIVITY_TYPES = [
+  'breathing',
+  'grounding',
+  'cognitive',
+  'physical',
+  'escalation-soft',
+] as const;
+
 // -----------------------------------------------------------------------------
 // Normalizadores por bloque
 // -----------------------------------------------------------------------------
@@ -116,7 +151,7 @@ function currentRising(raw: unknown, unit: string): Record<string, unknown> | nu
   return {
     latest,
     max: num(source['max']) ?? latest,
-    trend: str(source['trend'], 'stable'),
+    trend: oneOf(source['trend'], TRENDS, 'stable'),
     unit: str(source['unit'], unit),
   };
 }
@@ -129,7 +164,7 @@ function currentFalling(raw: unknown, unit: string): Record<string, unknown> | n
   return {
     latest,
     min: num(source['min']) ?? latest,
-    trend: str(source['trend'], 'stable'),
+    trend: oneOf(source['trend'], TRENDS, 'stable'),
     unit: str(source['unit'], unit),
   };
 }
@@ -163,7 +198,9 @@ function condition(raw: unknown): Record<string, unknown> {
     system: str(source['system']),
     display: str(source['display']),
     onsetDate: str(source['onsetDate']),
-    clinicalStatus: str(source['clinicalStatus'], 'unknown'),
+    // Sin estado conocido se asume `active`: es el unico valor del enum que no
+    // le quita peso clinico a una condicion que loop-core si nos mando.
+    clinicalStatus: oneOf(source['clinicalStatus'], CLINICAL_STATUSES, 'active'),
   };
 }
 
@@ -172,7 +209,10 @@ function activity(raw: unknown, index: number): Record<string, unknown> {
   const out: Record<string, unknown> = {
     id: str(source['id'], `cp-act-${index + 1}`),
     order: num(source['order']) ?? index + 1,
-    type: str(source['type'], 'other'),
+    // `cognitive` es el respaldo deliberado: cae en la rama `default` de
+    // `planIntervention` (se locuta el guion tal cual, sin timing propio), que
+    // es exactamente lo que hay que hacer con una actividad que no sabemos leer.
+    type: oneOf(source['type'], ACTIVITY_TYPES, 'cognitive'),
     title: str(source['title'], 'Actividad del plan'),
     instruction: str(source['instruction']),
   };
@@ -197,7 +237,10 @@ function recentEpisode(raw: unknown): Record<string, unknown> {
     durationMinutes: num(source['durationMinutes']) ?? 0,
     peakHeartRate: num(source['peakHeartRate']) ?? 0,
     interventions: arr(source['interventions']).filter((i): i is string => typeof i === 'string'),
-    resolution: str(source['resolution'], 'unknown'),
+    // Un episodio pasado cuyo desenlace no reconocemos se cuenta como
+    // `self-resolved`: es el desenlace que NO afirma que hubo intervencion ni
+    // escalacion. El prompt solo lo lista como historia.
+    resolution: oneOf(source['resolution'], RESOLUTIONS, 'self-resolved'),
     severitySelfReported: num(source['severitySelfReported']),
   };
 }
@@ -206,7 +249,7 @@ function medication(raw: unknown): Record<string, unknown> {
   const source = isRecord(raw) ? raw : {};
   return {
     display: str(source['display']),
-    status: str(source['status'], 'unknown'),
+    status: oneOf(source['status'], MEDICATION_STATUSES, 'active'),
     rxnorm: str(source['rxnorm']),
     // Ausente => false. loop-voice no verifica cobertura de medicacion (esta
     // fuera de alcance por diseño), asi que el valor conservador es el que no
@@ -221,17 +264,20 @@ function safetyEnvelope(raw: unknown): { value: Record<string, unknown>; complet
   const hrMin = num(source['heartRateMin']);
   const rrMax = num(source['respiratoryRateMax']);
   const spo2Min = num(source['spo2Min']);
+  // `complete` habla SOLO de los umbrales: son los cuatro numeros que evalua
+  // RF-08. `note` es prosa que no se locuta nunca, asi que su ausencia no
+  // convierte al envelope en incompleto — pero el contrato la exige, y sin
+  // rellenarla el payload live entero se caia a favor del fixture.
   const complete = hrMax !== null && hrMin !== null && rrMax !== null && spo2Min !== null;
 
+  const note = source['note'];
   const value: Record<string, unknown> = {
     heartRateMax: hrMax ?? DEFAULT_SAFETY_ENVELOPE.heartRateMax,
     heartRateMin: hrMin ?? DEFAULT_SAFETY_ENVELOPE.heartRateMin,
     respiratoryRateMax: rrMax ?? DEFAULT_SAFETY_ENVELOPE.respiratoryRateMax,
     spo2Min: spo2Min ?? DEFAULT_SAFETY_ENVELOPE.spo2Min,
+    note: typeof note === 'string' ? note : DEFAULT_SAFETY_ENVELOPE.note,
   };
-  const note = source['note'];
-  if (typeof note === 'string') value['note'] = note;
-  else if (!complete) value['note'] = DEFAULT_SAFETY_ENVELOPE.note;
 
   return { value, complete };
 }

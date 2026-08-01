@@ -137,6 +137,35 @@ function finiteOrNull(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
+/**
+ * Extremos de biometria MIENTRAS la llamada esta viva.
+ *
+ * El Contrato 2 declara los tres campos de `BiometricsSnapshot` como numeros no
+ * nulos, pero durante la llamada un extremo puede no existir todavia (llamada
+ * cortada antes del primer tick, contexto sin HRV). Aqui se representa esa
+ * ausencia con `null` — que es lo que `recordBiometricTick` necesita para
+ * distinguir "aun no hay minimo" de "el minimo es 0" — y se sella al salir.
+ */
+interface RunningBiometrics {
+  peakHeartRate: number | null;
+  minHrv: number | null;
+  peakRespiratoryRate: number | null;
+}
+
+/**
+ * `RunningBiometrics` -> `BiometricsSnapshot` del contrato. Un extremo sin
+ * lectura sale como 0, el mismo centinela de "no lo se" que usa el resto de
+ * voice/: perder el episodio por un hueco de biometria seria peor que
+ * declararlo vacio.
+ */
+function sealBiometrics(running: RunningBiometrics): BiometricsSnapshot {
+  return {
+    peakHeartRate: running.peakHeartRate ?? 0,
+    minHrv: running.minHrv ?? 0,
+    peakRespiratoryRate: running.peakRespiratoryRate ?? 0,
+  };
+}
+
 // -----------------------------------------------------------------------------
 // La clase
 // -----------------------------------------------------------------------------
@@ -157,7 +186,7 @@ export class CallSession {
   private readonly interventionsValue: InterventionAttempt[] = [];
   private readonly coverageChecksValue: CoverageCheckEcho[] = [];
 
-  private readonly biometricsValue: BiometricsSnapshot;
+  private readonly biometricsValue: RunningBiometrics;
   private escalationValue: EscalationInfo = {
     triggered: false,
     rule: null,
@@ -208,7 +237,7 @@ export class CallSession {
   }
 
   get biometrics(): BiometricsSnapshot {
-    return { ...this.biometricsValue };
+    return sealBiometrics(this.biometricsValue);
   }
 
   get escalation(): EscalationInfo {
@@ -390,7 +419,7 @@ export class CallSession {
       durationSeconds: this.durationSeconds(),
       severitySelfReported: this.severityValue,
       escalation: { ...this.escalationValue },
-      biometrics: { ...this.biometricsValue },
+      biometrics: sealBiometrics(this.biometricsValue),
       baseline: {
         heartRate: finiteOrNull(baseline?.heartRate?.mean),
         hrv: finiteOrNull(baseline?.hrv?.mean),
